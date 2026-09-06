@@ -12,8 +12,8 @@
   --color-accent: #22c55e;
   --color-accent-dark: #16a34a;
 
-  --color-info: #3b82f6;
-  --color-info-dark: #2563eb;
+  --color-info: #a855f7;
+  --color-info-dark: #9333ea;
 
   --color-background: #0f1219;
   --color-surface: #1a1f2e;
@@ -181,7 +181,7 @@ h1, h2, h3, h4, h5, h6 {
   &:hover {
     background-color: var(--color-info-dark);
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgb(59 130 246 / 0.3);
+    box-shadow: 0 4px 16px rgb(168 85 247 / 0.3);
   }
 
   &:active {
