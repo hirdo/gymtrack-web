@@ -101,18 +101,27 @@ export class WorkoutTrainComponent implements OnDestroy {
     const log = this.currentLog();
     if (!log) return;
 
-    const setRecord: SetRecord = log.trackingType === 'duration'
-      ? {
-          setNumber: log.sets.length + 1,
-          duration: this.durationInput(),
-          completedAt: new Date().toISOString()
-        }
-      : {
-          setNumber: log.sets.length + 1,
-          weight: this.weightInput(),
-          reps: this.repsInput(),
-          completedAt: new Date().toISOString()
-        };
+    let setRecord: SetRecord;
+    if (log.trackingType === 'duration') {
+      setRecord = {
+        setNumber: log.sets.length + 1,
+        duration: this.durationInput(),
+        completedAt: new Date().toISOString()
+      };
+    } else if (log.trackingType === 'reps_only') {
+      setRecord = {
+        setNumber: log.sets.length + 1,
+        reps: this.repsInput(),
+        completedAt: new Date().toISOString()
+      };
+    } else {
+      setRecord = {
+        setNumber: log.sets.length + 1,
+        weight: this.weightInput(),
+        reps: this.repsInput(),
+        completedAt: new Date().toISOString()
+      };
+    }
 
     await this.exerciseLogService.logSet(log.id, setRecord);
 

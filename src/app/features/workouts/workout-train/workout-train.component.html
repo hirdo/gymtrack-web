@@ -100,6 +100,13 @@
                        class="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors"
                        min="1" step="1">
               </div>
+            } @else if (log.trackingType === 'reps_only') {
+              <div class="mb-4">
+                <label class="block text-xs text-text-muted mb-1.5">Reps</label>
+                <input type="number" [ngModel]="repsInput()" (ngModelChange)="repsInput.set($event)"
+                       class="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors"
+                       min="1" step="1">
+              </div>
             } @else {
               <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
@@ -132,6 +139,8 @@
                     <span class="text-text-muted text-sm">Set {{ set.setNumber }}</span>
                     @if (log.trackingType === 'duration') {
                       <span class="font-heading font-bold text-accent">{{ set.duration }}<span class="text-text-muted text-xs ml-0.5">s</span></span>
+                    } @else if (log.trackingType === 'reps_only') {
+                      <span class="font-heading font-bold text-accent">{{ set.reps }}<span class="text-text-muted text-xs ml-0.5">reps</span></span>
                     } @else {
                       <div class="flex items-center gap-4">
                         <span class="font-heading font-bold">{{ set.weight }}<span class="text-text-muted text-xs ml-0.5">kg</span></span>
@@ -157,6 +166,8 @@
                       @for (set of entry.sets; track set.setNumber) {
                         @if (log.trackingType === 'duration') {
                           <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-surface-light">{{ set.duration }}s</span>
+                        } @else if (log.trackingType === 'reps_only') {
+                          <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-surface-light">{{ set.reps }} reps</span>
                         } @else {
                           <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-surface-light">{{ set.weight }}kg &times; {{ set.reps }}</span>
                         }

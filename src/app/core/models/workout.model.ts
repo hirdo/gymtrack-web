@@ -1,4 +1,5 @@
-export type ExerciseTrackingType = 'reps' | 'duration';
+// 'reps' = sets x reps x weight, 'reps_only' = sets x reps (no weight), 'duration' = sets x duration
+export type ExerciseTrackingType = 'reps' | 'reps_only' | 'duration';
 
 export interface Exercise {
   id: string;
@@ -52,7 +53,9 @@ export interface ExerciseTemplate {
   secondaryMuscles?: MuscleGroup[];
   equipment: Equipment;
   trackingType?: ExerciseTrackingType;
+  recommendedReps?: number;
   recommendedWeight?: number;
+  recommendedDuration?: number;
   imageUrl?: string;
   instructions?: string;
   isCustom?: boolean;

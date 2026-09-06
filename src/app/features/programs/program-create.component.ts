@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormArray, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ProgramService } from '../../core/services/program.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { ExercisePickerModalComponent } from '../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
@@ -9,7 +10,7 @@ import { ProgramDifficulty, ExerciseTemplate, ExerciseTrackingType, PROGRAM_DIFF
 @Component({
   selector: 'app-program-create',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, RouterLink, ExercisePickerModalComponent],
+  imports: [ReactiveFormsModule, FormsModule, RouterLink, ExercisePickerModalComponent, DragDropModule],
   templateUrl: './program-create.component.html',
   styleUrl: './program-create.component.scss'
 })
@@ -119,9 +120,40 @@ export class ProgramCreateComponent implements OnInit {
   removeDay(index: number): void {
     if (this.days.length > 1) {
       this.days.removeAt(index);
-      for (let i = 0; i < this.days.length; i++) {
-        this.days.at(i).get('dayNumber')?.setValue(i);
-      }
+      this.renumberDays();
+    }
+  }
+
+  duplicateDay(index: number): void {
+    const sourceValue = this.days.at(index).getRawValue();
+    const newDay = this.createDayGroup(index + 1);
+    newDay.patchValue({ name: sourceValue['name'] });
+    const exercises = newDay.get('exercises') as FormArray;
+    exercises.clear();
+    for (const ex of sourceValue['exercises'] as Record<string, unknown>[]) {
+      const exGroup = this.createExerciseGroup();
+      exGroup.patchValue(ex);
+      exercises.push(exGroup);
+    }
+    this.days.insert(index + 1, newDay);
+    this.renumberDays();
+  }
+
+  dropDay(event: CdkDragDrop<unknown>): void {
+    moveItemInArray(this.days.controls, event.previousIndex, event.currentIndex);
+    this.days.updateValueAndValidity();
+    this.renumberDays();
+  }
+
+  dropExercise(dayIndex: number, event: CdkDragDrop<unknown>): void {
+    const exercises = this.getDayExercises(dayIndex);
+    moveItemInArray(exercises.controls, event.previousIndex, event.currentIndex);
+    exercises.updateValueAndValidity();
+  }
+
+  private renumberDays(): void {
+    for (let i = 0; i < this.days.length; i++) {
+      this.days.at(i).get('dayNumber')?.setValue(i);
     }
   }
 
@@ -152,13 +184,24 @@ export class ProgramCreateComponent implements OnInit {
         trackingType,
         targetSets: 1,
         targetReps: null,
-        targetWeight: null
+        targetWeight: null,
+        targetDuration: exercise.recommendedDuration ?? group.get('targetDuration')?.value
+      });
+    } else if (trackingType === 'reps_only') {
+      group.patchValue({
+        exerciseId: exercise.id,
+        exerciseName: exercise.name,
+        trackingType,
+        targetReps: exercise.recommendedReps ?? group.get('targetReps')?.value,
+        targetWeight: null,
+        targetDuration: null
       });
     } else {
       group.patchValue({
         exerciseId: exercise.id,
         exerciseName: exercise.name,
         trackingType,
+        targetReps: exercise.recommendedReps ?? group.get('targetReps')?.value,
         targetWeight: exercise.recommendedWeight ?? group.get('targetWeight')?.value,
         targetDuration: null
       });
