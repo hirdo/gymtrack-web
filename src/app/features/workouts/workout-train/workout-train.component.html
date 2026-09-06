@@ -51,6 +51,9 @@
       <!-- Current Exercise -->
       @if (currentLog(); as log) {
         <div class="gym-card mb-6">
+          @if (currentExerciseImage(); as img) {
+            <img [src]="img" alt="{{ log.exerciseName }}" class="w-full h-48 object-cover rounded-xl mb-4">
+          }
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-heading font-bold uppercase tracking-wide">
               <span class="text-primary mr-2">{{ currentExerciseIndex() + 1 }}/{{ totalExercises() }}</span>

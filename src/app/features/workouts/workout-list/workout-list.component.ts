@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
 import { WorkoutCategory } from '../../../core/models/workout.model';
+import { parseLocalDate } from '../../../core/utils/date.util';
 
 @Component({
   selector: 'app-workout-list',
@@ -35,6 +36,10 @@ export class WorkoutListComponent {
 
   filterBy(category: WorkoutCategory | 'all'): void {
     this.selectedCategory.set(category);
+  }
+
+  formatDate(dateStr: string): string {
+    return parseLocalDate(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
   async deleteWorkout(id: string, event: Event): Promise<void> {

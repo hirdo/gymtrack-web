@@ -52,6 +52,12 @@
             </button>
           </div>
           <h3 class="text-lg font-heading font-bold uppercase tracking-wide group-hover:text-primary transition-colors">{{ workout.name }}</h3>
+          @if (workout.scheduledDate) {
+            <p class="text-text-muted text-xs mt-1 inline-flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              {{ formatDate(workout.scheduledDate) }}
+            </p>
+          }
           @if (workout.description) {
             <p class="text-text-muted text-sm mt-1.5 line-clamp-2 leading-relaxed">{{ workout.description }}</p>
           }

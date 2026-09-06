@@ -56,20 +56,6 @@
       <p class="text-text-muted mb-8 leading-relaxed">{{ p.description }}</p>
     }
 
-    <!-- Progress -->
-    <div class="gym-card mb-8">
-      <div class="flex items-center justify-between mb-2">
-        <p class="text-text-muted text-xs font-semibold uppercase tracking-wider">Progress</p>
-        <p class="text-primary font-heading font-bold text-sm">Day {{ (p.currentDay || 0) + 1 }}/{{ p.totalDays }}</p>
-      </div>
-      <div class="bg-background rounded-full h-2.5 overflow-hidden">
-        <div class="bg-primary h-full rounded-full transition-all" [style.width.%]="progressPercent()"></div>
-      </div>
-      @if (p.completedSessions) {
-        <p class="text-xs text-text-muted mt-2">{{ p.completedSessions }} sessions completed</p>
-      }
-    </div>
-
     <!-- Days -->
     <div class="space-y-4">
       <h2 class="text-lg font-heading font-bold uppercase tracking-wider">Training Days</h2>

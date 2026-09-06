@@ -1,7 +1,8 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
+import { ExerciseLog } from '../../../core/models/workout.model';
 
 @Component({
   selector: 'app-workout-detail',
@@ -26,11 +27,26 @@ export class WorkoutDetailComponent {
     return w ? this.exerciseLogService.logsForWorkout(w.id).length > 0 : false;
   });
 
+  readonly logsForWorkout = computed(() => {
+    const w = this.workout();
+    return w ? this.exerciseLogService.logsForWorkout(w.id) : [];
+  });
+
+  getLogForExercise(exerciseIndex: number): ExerciseLog | undefined {
+    return this.logsForWorkout().find(l => l.exerciseIndex === exerciseIndex);
+  }
+
+  readonly starting = signal(false);
+
   async startTraining(): Promise<void> {
     const w = this.workout();
-    if (w) {
+    if (!w || this.starting()) return;
+    this.starting.set(true);
+    try {
       await this.exerciseLogService.startWorkoutLogs(w);
-      this.router.navigate(['/workouts', w.id, 'train']);
+      await this.router.navigate(['/workouts', w.id, 'train']);
+    } finally {
+      this.starting.set(false);
     }
   }
 

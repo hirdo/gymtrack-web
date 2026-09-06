@@ -39,6 +39,12 @@ export class WorkoutTrainComponent implements OnDestroy {
 
   readonly currentLog = computed(() => this.logs()[this.currentExerciseIndex()]);
 
+  readonly currentExerciseImage = computed(() => {
+    const log = this.currentLog();
+    const w = this.workout();
+    return log && w ? w.exercises[log.exerciseIndex]?.imageUrl : undefined;
+  });
+
   readonly totalExercises = computed(() => this.logs().length);
 
   readonly hasLoggedAnySet = computed(() => this.logs().some(l => l.sets.length > 0));

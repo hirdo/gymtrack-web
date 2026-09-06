@@ -35,12 +35,6 @@ export class ProgramDetailComponent {
     return p;
   });
 
-  readonly progressPercent = computed(() => {
-    const p = this.program();
-    if (!p || p.totalDays === 0) return 0;
-    return Math.round(((p.currentDay || 0) / p.totalDays) * 100);
-  });
-
   async publish(): Promise<void> {
     const p = this.program();
     if (p) await this.programService.setActive(p.id, true);
