@@ -8,12 +8,13 @@ import {
   Validators
 } from '@angular/forms';
 import { WorkoutService } from '../../../core/services/workout.service';
-import { WorkoutCategory } from '../../../core/models/workout.model';
+import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate } from '../../../core/models/workout.model';
+import { ExercisePickerModalComponent } from '../../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
 
 @Component({
   selector: 'app-workout-create',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, ExercisePickerModalComponent],
   templateUrl: './workout-create.component.html',
   styleUrl: './workout-create.component.scss'
 })
@@ -25,6 +26,9 @@ export class WorkoutCreateComponent implements OnInit {
 
   readonly isEditMode = signal(false);
   private editId: string | null = null;
+
+  readonly pickerOpen = signal(false);
+  private pickerTarget: number | null = null;
 
   readonly categories: { value: WorkoutCategory; label: string }[] = [
     { value: 'strength', label: 'Strength' },
@@ -63,9 +67,11 @@ export class WorkoutCreateComponent implements OnInit {
         for (const ex of workout.exercises) {
           const group = this.createExerciseGroup();
           group.patchValue({
+            exerciseId: ex.templateId || null,
+            trackingType: ex.trackingType || 'reps',
             name: ex.name,
             sets: ex.sets,
-            reps: ex.reps,
+            reps: ex.reps ?? null,
             weight: ex.weight || null,
             duration: ex.duration || null,
             notes: ex.notes || ''
@@ -82,9 +88,11 @@ export class WorkoutCreateComponent implements OnInit {
 
   createExerciseGroup(): FormGroup {
     return this.fb.group({
+      exerciseId: [null as string | null],
+      trackingType: ['reps' as ExerciseTrackingType],
       name: ['', Validators.required],
       sets: [3, [Validators.required, Validators.min(1)]],
-      reps: [10, [Validators.required, Validators.min(1)]],
+      reps: [10 as number | null, [Validators.min(1)]],
       weight: [null as number | null],
       duration: [null as number | null],
       notes: ['']
@@ -101,15 +109,52 @@ export class WorkoutCreateComponent implements OnInit {
     }
   }
 
+  openExercisePicker(index: number): void {
+    this.pickerTarget = index;
+    this.pickerOpen.set(true);
+  }
+
+  onExercisePicked(exercise: ExerciseTemplate): void {
+    if (this.pickerTarget === null) return;
+    const group = this.exercises.at(this.pickerTarget);
+    const trackingType = exercise.trackingType ?? 'reps';
+    if (trackingType === 'duration') {
+      group.patchValue({
+        exerciseId: exercise.id,
+        trackingType,
+        name: exercise.name,
+        sets: 1,
+        reps: null,
+        weight: null
+      });
+    } else {
+      group.patchValue({
+        exerciseId: exercise.id,
+        trackingType,
+        name: exercise.name,
+        weight: exercise.recommendedWeight ?? group.get('weight')?.value,
+        duration: null
+      });
+    }
+    this.pickerTarget = null;
+  }
+
+  closeExercisePicker(): void {
+    this.pickerOpen.set(false);
+    this.pickerTarget = null;
+  }
+
   async onSubmit(): Promise<void> {
     if (this.form.invalid) return;
 
     const value = this.form.getRawValue();
     const exercises = value.exercises.map((e) => ({
       id: crypto.randomUUID(),
+      templateId: e['exerciseId'] || undefined,
+      trackingType: e['trackingType'] as ExerciseTrackingType,
       name: e['name']!,
       sets: e['sets']!,
-      reps: e['reps']!,
+      reps: e['reps'] || undefined,
       weight: e['weight'] || undefined,
       duration: e['duration'] || undefined,
       notes: e['notes'] || undefined

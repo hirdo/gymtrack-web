@@ -6,6 +6,7 @@ import { WorkoutService } from '../../core/services/workout.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { AuthService } from '../../core/services/auth.service';
 import { toLocalDateString } from '../../core/utils/date.util';
+import { PROGRAM_DIFFICULTIES, ProgramDifficulty } from '../../core/models/workout.model';
 
 @Component({
   selector: 'app-program-detail',
@@ -25,6 +26,7 @@ export class ProgramDetailComponent {
   readonly applying = signal(false);
   readonly startDate = signal(toLocalDateString(new Date()));
   readonly conflictDates = signal<string[] | null>(null);
+  readonly starRange = [1, 2, 3, 4, 5];
 
   readonly program = computed(() => {
     const id = this.route.snapshot.paramMap.get('id');
@@ -74,6 +76,14 @@ export class ProgramDetailComponent {
 
   closeConflictWarning(): void {
     this.conflictDates.set(null);
+  }
+
+  difficultyStars(difficulty: ProgramDifficulty): number {
+    return PROGRAM_DIFFICULTIES.find(d => d.value === difficulty)?.stars ?? 0;
+  }
+
+  difficultyLabel(difficulty: ProgramDifficulty): string {
+    return PROGRAM_DIFFICULTIES.find(d => d.value === difficulty)?.label ?? difficulty;
   }
 
   getExerciseImage(exerciseId: string): string | undefined {

@@ -64,10 +64,17 @@
               <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Target Sets</p>
               <p class="text-xl font-heading font-extrabold text-primary">{{ log.targetSets }}</p>
             </div>
-            <div class="bg-background rounded-xl p-3 text-center">
-              <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Target Reps</p>
-              <p class="text-xl font-heading font-extrabold text-accent">{{ log.targetReps }}</p>
-            </div>
+            @if (log.trackingType === 'duration') {
+              <div class="bg-background rounded-xl p-3 text-center">
+                <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Target Duration</p>
+                <p class="text-xl font-heading font-extrabold text-accent">{{ log.targetDuration }}s</p>
+              </div>
+            } @else {
+              <div class="bg-background rounded-xl p-3 text-center">
+                <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Target Reps</p>
+                <p class="text-xl font-heading font-extrabold text-accent">{{ log.targetReps }}</p>
+              </div>
+            }
             <div class="bg-background rounded-xl p-3 text-center">
               <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Completed</p>
               <p class="text-xl font-heading font-extrabold" [class]="log.sets.length >= log.targetSets ? 'text-accent' : 'text-warning'">{{ log.sets.length }}/{{ log.targetSets }}</p>
@@ -86,20 +93,29 @@
           <!-- Log Set Input -->
           <div class="bg-background rounded-xl p-4">
             <p class="text-xs text-text-muted font-semibold uppercase tracking-wider mb-4">Log Set {{ log.sets.length + 1 }}</p>
-            <div class="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label class="block text-xs text-text-muted mb-1.5">Weight (kg)</label>
-                <input type="number" [ngModel]="weightInput()" (ngModelChange)="weightInput.set($event)"
-                       class="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors"
-                       min="0" step="0.5">
-              </div>
-              <div>
-                <label class="block text-xs text-text-muted mb-1.5">Reps</label>
-                <input type="number" [ngModel]="repsInput()" (ngModelChange)="repsInput.set($event)"
+            @if (log.trackingType === 'duration') {
+              <div class="mb-4">
+                <label class="block text-xs text-text-muted mb-1.5">Duration (seconds)</label>
+                <input type="number" [ngModel]="durationInput()" (ngModelChange)="durationInput.set($event)"
                        class="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors"
                        min="1" step="1">
               </div>
-            </div>
+            } @else {
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="block text-xs text-text-muted mb-1.5">Weight (kg)</label>
+                  <input type="number" [ngModel]="weightInput()" (ngModelChange)="weightInput.set($event)"
+                         class="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors"
+                         min="0" step="0.5">
+                </div>
+                <div>
+                  <label class="block text-xs text-text-muted mb-1.5">Reps</label>
+                  <input type="number" [ngModel]="repsInput()" (ngModelChange)="repsInput.set($event)"
+                         class="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors"
+                         min="1" step="1">
+                </div>
+              </div>
+            }
             <button (click)="logSet()" class="btn-primary w-full py-3 text-base">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
               Log Set
@@ -114,11 +130,15 @@
                 @for (set of log.sets; track set.setNumber) {
                   <div class="flex items-center justify-between bg-background rounded-lg px-4 py-2.5">
                     <span class="text-text-muted text-sm">Set {{ set.setNumber }}</span>
-                    <div class="flex items-center gap-4">
-                      <span class="font-heading font-bold">{{ set.weight }}<span class="text-text-muted text-xs ml-0.5">kg</span></span>
-                      <span class="text-text-muted">&times;</span>
-                      <span class="font-heading font-bold text-accent">{{ set.reps }}<span class="text-text-muted text-xs ml-0.5">reps</span></span>
-                    </div>
+                    @if (log.trackingType === 'duration') {
+                      <span class="font-heading font-bold text-accent">{{ set.duration }}<span class="text-text-muted text-xs ml-0.5">s</span></span>
+                    } @else {
+                      <div class="flex items-center gap-4">
+                        <span class="font-heading font-bold">{{ set.weight }}<span class="text-text-muted text-xs ml-0.5">kg</span></span>
+                        <span class="text-text-muted">&times;</span>
+                        <span class="font-heading font-bold text-accent">{{ set.reps }}<span class="text-text-muted text-xs ml-0.5">reps</span></span>
+                      </div>
+                    }
                   </div>
                 }
               </div>
@@ -135,7 +155,11 @@
                     <p class="text-xs text-text-muted font-semibold mb-1.5">{{ formatHistoryDate(entry.date) }}</p>
                     <div class="flex flex-wrap gap-1.5">
                       @for (set of entry.sets; track set.setNumber) {
-                        <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-surface-light">{{ set.weight }}kg &times; {{ set.reps }}</span>
+                        @if (log.trackingType === 'duration') {
+                          <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-surface-light">{{ set.duration }}s</span>
+                        } @else {
+                          <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-surface-light">{{ set.weight }}kg &times; {{ set.reps }}</span>
+                        }
                       }
                     </div>
                   </div>

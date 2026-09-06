@@ -83,25 +83,24 @@
               <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Sets</p>
               <p class="text-2xl font-heading font-extrabold text-primary">{{ exercise.sets }}</p>
             </div>
-            <div class="bg-background rounded-xl p-3 text-center">
-              <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Reps</p>
-              <p class="text-2xl font-heading font-extrabold text-accent">{{ exercise.reps }}</p>
-            </div>
+            @if (exercise.trackingType === 'duration') {
+              <div class="bg-background rounded-xl p-3 text-center">
+                <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Duration</p>
+                <p class="text-2xl font-heading font-extrabold text-accent">{{ exercise.duration }}<span class="text-sm text-text-muted ml-0.5">s</span></p>
+              </div>
+            } @else {
+              <div class="bg-background rounded-xl p-3 text-center">
+                <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Reps</p>
+                <p class="text-2xl font-heading font-extrabold text-accent">{{ exercise.reps }}</p>
+              </div>
+            }
           </div>
-          @if (exercise.weight || exercise.duration) {
-            <div class="grid gap-4 mt-3" [class]="exercise.weight && exercise.duration ? 'grid-cols-2' : 'grid-cols-1'">
-              @if (exercise.weight) {
-                <div class="bg-background rounded-xl p-3 text-center">
-                  <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Weight</p>
-                  <p class="text-2xl font-heading font-extrabold">{{ exercise.weight }}<span class="text-sm text-text-muted ml-0.5">kg</span></p>
-                </div>
-              }
-              @if (exercise.duration) {
-                <div class="bg-background rounded-xl p-3 text-center">
-                  <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Duration</p>
-                  <p class="text-2xl font-heading font-extrabold">{{ exercise.duration }}<span class="text-sm text-text-muted ml-0.5">s</span></p>
-                </div>
-              }
+          @if (exercise.trackingType !== 'duration' && exercise.weight) {
+            <div class="grid grid-cols-1 gap-4 mt-3">
+              <div class="bg-background rounded-xl p-3 text-center">
+                <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Weight</p>
+                <p class="text-2xl font-heading font-extrabold">{{ exercise.weight }}<span class="text-sm text-text-muted ml-0.5">kg</span></p>
+              </div>
             </div>
           }
           @if (exercise.notes) {
