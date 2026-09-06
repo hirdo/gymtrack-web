@@ -49,33 +49,12 @@
       </div>
     }
 
-    <!-- Last Weight -->
-    @if (lastWeight(); as lw) {
+    <!-- Recommended Weight -->
+    @if (ex.recommendedWeight) {
       <div class="gym-card mb-6 border-primary/30">
         <div class="flex items-center justify-between">
-          <p class="text-text-muted text-xs font-semibold uppercase tracking-wider">Last Used Weight</p>
-          <p class="text-2xl font-heading font-extrabold text-primary">{{ lw }}<span class="text-sm text-text-muted ml-1">kg</span></p>
-        </div>
-      </div>
-    }
-
-    <!-- History -->
-    @if (history().length > 0) {
-      <div class="gym-card mb-6">
-        <h2 class="text-sm font-heading font-bold uppercase tracking-wider mb-4">Recent History</h2>
-        <div class="space-y-3">
-          @for (entry of history(); track entry.date) {
-            <div class="bg-background rounded-xl p-3">
-              <p class="text-xs text-text-muted font-semibold mb-2">{{ formatDate(entry.date) }}</p>
-              <div class="flex flex-wrap gap-2">
-                @for (set of entry.sets; track set.setNumber) {
-                  <span class="inline-flex items-center px-2 py-1 text-xs rounded-md bg-surface-light">
-                    {{ set.weight }}kg &times; {{ set.reps }}
-                  </span>
-                }
-              </div>
-            </div>
-          }
+          <p class="text-text-muted text-xs font-semibold uppercase tracking-wider">Recommended Weight</p>
+          <p class="text-2xl font-heading font-extrabold text-primary">{{ ex.recommendedWeight }}<span class="text-sm text-text-muted ml-1">kg</span></p>
         </div>
       </div>
     }

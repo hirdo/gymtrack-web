@@ -1,14 +1,17 @@
+export type ExerciseTrackingType = 'reps' | 'duration';
+
 export interface Exercise {
   id: string;
   name: string;
   sets: number;
-  reps: number;
+  reps?: number;
   weight?: number;
   duration?: number;
   restTime?: number;
   notes?: string;
   imageUrl?: string;
   templateId?: string;
+  trackingType?: ExerciseTrackingType;
 }
 
 export interface Workout {
@@ -48,6 +51,8 @@ export interface ExerciseTemplate {
   primaryMuscles: MuscleGroup[];
   secondaryMuscles?: MuscleGroup[];
   equipment: Equipment;
+  trackingType?: ExerciseTrackingType;
+  recommendedWeight?: number;
   imageUrl?: string;
   instructions?: string;
   isCustom?: boolean;
@@ -56,8 +61,9 @@ export interface ExerciseTemplate {
 
 export interface SetRecord {
   setNumber: number;
-  weight: number;
-  reps: number;
+  weight?: number;
+  reps?: number;
+  duration?: number;
   completedAt: string;
   isWarmup?: boolean;
 }
@@ -69,10 +75,12 @@ export interface ExerciseLog {
   exerciseIndex: number;
   exerciseTemplateId?: string;
   exerciseName: string;
+  trackingType?: ExerciseTrackingType;
   date: string;
   targetSets: number;
-  targetReps: number;
+  targetReps?: number;
   targetWeight?: number;
+  targetDuration?: number;
   restTime?: number;
   sets: SetRecord[];
   startedAt: string;
@@ -87,14 +95,24 @@ export interface ProgramDay {
   exercises: {
     exerciseId: string;
     exerciseName: string;
+    trackingType?: ExerciseTrackingType;
     targetSets: number;
-    targetReps: number;
+    targetReps?: number;
     targetWeight?: number;
+    targetDuration?: number;
     restTime?: number;
   }[];
 }
 
-export type ProgramDifficulty = 'beginner' | 'intermediate' | 'advanced';
+export type ProgramDifficulty = 'no_experience' | 'beginner' | 'intermediate' | 'advanced' | 'pro';
+
+export const PROGRAM_DIFFICULTIES: { value: ProgramDifficulty; label: string; stars: number }[] = [
+  { value: 'no_experience', label: 'No Experience', stars: 1 },
+  { value: 'beginner', label: 'Beginner', stars: 2 },
+  { value: 'intermediate', label: 'Intermediate', stars: 3 },
+  { value: 'advanced', label: 'Advanced', stars: 4 },
+  { value: 'pro', label: 'Pro', stars: 5 }
+];
 
 export interface TrainingProgram {
   id: string;

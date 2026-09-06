@@ -54,10 +54,12 @@ export class ExerciseLogService implements OnDestroy {
         exerciseIndex: i,
         exerciseTemplateId: ex.templateId,
         exerciseName: ex.name,
+        trackingType: ex.trackingType || 'reps',
         date,
         targetSets: ex.sets,
         targetReps: ex.reps,
         targetWeight: ex.weight,
+        targetDuration: ex.duration,
         restTime: ex.restTime,
         sets: [],
         startedAt: now,
@@ -99,14 +101,6 @@ export class ExerciseLogService implements OnDestroy {
       .filter(l => templateId ? l.exerciseTemplateId === templateId : l.exerciseName === exerciseName)
       .map(l => ({ date: l.date, sets: l.sets }))
       .sort((a, b) => b.date.localeCompare(a.date));
-  }
-
-  getLastWeight(exerciseName: string, templateId?: string): number | undefined {
-    const history = this.getExerciseHistory(exerciseName, templateId);
-    if (history.length === 0) return undefined;
-    const lastSets = history[0].sets;
-    if (lastSets.length === 0) return undefined;
-    return lastSets[lastSets.length - 1].weight;
   }
 
   private subscribeToLogs(userId: string): void {

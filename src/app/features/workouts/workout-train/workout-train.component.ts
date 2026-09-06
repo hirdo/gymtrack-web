@@ -27,6 +27,7 @@ export class WorkoutTrainComponent implements OnDestroy {
   readonly currentExerciseIndex = signal(0);
   readonly weightInput = signal<number>(0);
   readonly repsInput = signal<number>(0);
+  readonly durationInput = signal<number>(0);
   readonly restSeconds = signal(0);
   readonly isResting = signal(false);
   readonly elapsedSeconds = signal(0);
@@ -64,6 +65,7 @@ export class WorkoutTrainComponent implements OnDestroy {
     if (log) {
       this.weightInput.set(log.targetWeight || 0);
       this.repsInput.set(log.targetReps || 10);
+      this.durationInput.set(log.targetDuration || 0);
     }
   }
 
@@ -79,6 +81,7 @@ export class WorkoutTrainComponent implements OnDestroy {
       const lastSet = log.sets[log.sets.length - 1];
       this.weightInput.set(lastSet?.weight ?? log.targetWeight ?? 0);
       this.repsInput.set(lastSet?.reps ?? log.targetReps ?? 10);
+      this.durationInput.set(lastSet?.duration ?? log.targetDuration ?? 0);
     }
   }
 
@@ -98,12 +101,18 @@ export class WorkoutTrainComponent implements OnDestroy {
     const log = this.currentLog();
     if (!log) return;
 
-    const setRecord: SetRecord = {
-      setNumber: log.sets.length + 1,
-      weight: this.weightInput(),
-      reps: this.repsInput(),
-      completedAt: new Date().toISOString()
-    };
+    const setRecord: SetRecord = log.trackingType === 'duration'
+      ? {
+          setNumber: log.sets.length + 1,
+          duration: this.durationInput(),
+          completedAt: new Date().toISOString()
+        }
+      : {
+          setNumber: log.sets.length + 1,
+          weight: this.weightInput(),
+          reps: this.repsInput(),
+          completedAt: new Date().toISOString()
+        };
 
     await this.exerciseLogService.logSet(log.id, setRecord);
 

@@ -4,7 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { StorageService } from '../../core/services/storage.service';
-import { WorkoutCategory, MuscleGroup, Equipment } from '../../core/models/workout.model';
+import { WorkoutCategory, MuscleGroup, Equipment, ExerciseTrackingType } from '../../core/models/workout.model';
 
 @Component({
   selector: 'app-exercise-create',
@@ -44,6 +44,8 @@ export class ExerciseCreateComponent implements OnInit {
     name: ['', Validators.required],
     category: ['strength' as WorkoutCategory, Validators.required],
     equipment: ['barbell' as Equipment, Validators.required],
+    trackingType: ['reps' as ExerciseTrackingType, Validators.required],
+    recommendedWeight: [null as number | null],
     instructions: ['']
   });
 
@@ -63,6 +65,8 @@ export class ExerciseCreateComponent implements OnInit {
       name: exercise.name,
       category: exercise.category,
       equipment: exercise.equipment,
+      trackingType: exercise.trackingType || 'reps',
+      recommendedWeight: exercise.recommendedWeight ?? null,
       instructions: exercise.instructions || ''
     });
     for (const muscle of exercise.primaryMuscles) {
@@ -97,6 +101,8 @@ export class ExerciseCreateComponent implements OnInit {
       name: value.name!,
       category: value.category!,
       equipment: value.equipment!,
+      trackingType: value.trackingType!,
+      recommendedWeight: value.trackingType === 'reps' ? (value.recommendedWeight || undefined) : undefined,
       primaryMuscles: Array.from(this.selectedMuscles),
       instructions: value.instructions || undefined
     };

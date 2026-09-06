@@ -4,7 +4,7 @@ import { FormBuilder, FormArray, FormGroup, ReactiveFormsModule, Validators, For
 import { ProgramService } from '../../core/services/program.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { ExercisePickerModalComponent } from '../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
-import { ProgramDifficulty, ExerciseTemplate } from '../../core/models/workout.model';
+import { ProgramDifficulty, ExerciseTemplate, ExerciseTrackingType, PROGRAM_DIFFICULTIES } from '../../core/models/workout.model';
 
 @Component({
   selector: 'app-program-create',
@@ -20,11 +20,11 @@ export class ProgramCreateComponent implements OnInit {
   private readonly programService = inject(ProgramService);
   readonly exerciseService = inject(ExerciseLibraryService);
 
-  readonly difficulties: { value: ProgramDifficulty; label: string }[] = [
-    { value: 'beginner', label: 'Beginner' },
-    { value: 'intermediate', label: 'Intermediate' },
-    { value: 'advanced', label: 'Advanced' }
-  ];
+  readonly difficulties = PROGRAM_DIFFICULTIES;
+
+  starLabel(stars: number): string {
+    return '★'.repeat(stars) + '☆'.repeat(5 - stars);
+  }
 
   readonly pickerOpen = signal(false);
   private pickerTarget: { dayIndex: number; exerciseIndex: number } | null = null;
@@ -74,9 +74,11 @@ export class ProgramCreateComponent implements OnInit {
         exGroup.patchValue({
           exerciseId: ex.exerciseId,
           exerciseName: ex.exerciseName,
+          trackingType: ex.trackingType ?? 'reps',
           targetSets: ex.targetSets,
-          targetReps: ex.targetReps,
+          targetReps: ex.targetReps ?? null,
           targetWeight: ex.targetWeight ?? null,
+          targetDuration: ex.targetDuration ?? null,
           restTime: ex.restTime ?? null
         });
         exercises.push(exGroup);
@@ -101,9 +103,11 @@ export class ProgramCreateComponent implements OnInit {
     return this.fb.group({
       exerciseId: [crypto.randomUUID()],
       exerciseName: ['', Validators.required],
+      trackingType: ['reps' as ExerciseTrackingType],
       targetSets: [3, [Validators.required, Validators.min(1)]],
-      targetReps: [10, [Validators.required, Validators.min(1)]],
+      targetReps: [10 as number | null, [Validators.min(1)]],
       targetWeight: [null as number | null],
+      targetDuration: [null as number | null],
       restTime: [90 as number | null]
     });
   }
@@ -140,10 +144,25 @@ export class ProgramCreateComponent implements OnInit {
   onExercisePicked(exercise: ExerciseTemplate): void {
     if (!this.pickerTarget) return;
     const group = this.getDayExercises(this.pickerTarget.dayIndex).at(this.pickerTarget.exerciseIndex);
-    group.patchValue({
-      exerciseId: exercise.id,
-      exerciseName: exercise.name
-    });
+    const trackingType = exercise.trackingType ?? 'reps';
+    if (trackingType === 'duration') {
+      group.patchValue({
+        exerciseId: exercise.id,
+        exerciseName: exercise.name,
+        trackingType,
+        targetSets: 1,
+        targetReps: null,
+        targetWeight: null
+      });
+    } else {
+      group.patchValue({
+        exerciseId: exercise.id,
+        exerciseName: exercise.name,
+        trackingType,
+        targetWeight: exercise.recommendedWeight ?? group.get('targetWeight')?.value,
+        targetDuration: null
+      });
+    }
     this.pickerTarget = null;
   }
 
@@ -164,9 +183,11 @@ export class ProgramCreateComponent implements OnInit {
         exercises: exercises.map((e: Record<string, unknown>) => ({
           exerciseId: e['exerciseId'] as string,
           exerciseName: e['exerciseName'] as string,
+          trackingType: e['trackingType'] as ExerciseTrackingType,
           targetSets: e['targetSets'] as number,
-          targetReps: e['targetReps'] as number,
+          targetReps: (e['targetReps'] as number) || undefined,
           targetWeight: (e['targetWeight'] as number) || undefined,
+          targetDuration: (e['targetDuration'] as number) || undefined,
           restTime: (e['restTime'] as number) || undefined
         }))
       };

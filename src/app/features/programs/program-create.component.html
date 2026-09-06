@@ -25,7 +25,7 @@
           <select formControlName="difficulty"
                   class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:outline-none transition-colors">
             @for (d of difficulties; track d.value) {
-              <option [value]="d.value">{{ d.label }}</option>
+              <option [value]="d.value">{{ starLabel(d.stars) }} {{ d.label }}</option>
             }
           </select>
         </div>
@@ -74,28 +74,48 @@
                     </span>
                     <svg class="w-4 h-4 text-text-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                   </button>
-                  <div class="grid grid-cols-4 gap-2">
-                    <div>
-                      <label class="block text-[10px] text-text-muted mb-1">Sets</label>
-                      <input type="number" formControlName="targetSets" min="1"
-                             class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                  @if (ex.get('trackingType')?.value === 'duration') {
+                    <div class="grid grid-cols-3 gap-2">
+                      <div>
+                        <label class="block text-[10px] text-text-muted mb-1">Sets</label>
+                        <input type="number" formControlName="targetSets" min="1"
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                      </div>
+                      <div>
+                        <label class="block text-[10px] text-text-muted mb-1">Duration (s)</label>
+                        <input type="number" formControlName="targetDuration" min="1"
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                      </div>
+                      <div>
+                        <label class="block text-[10px] text-text-muted mb-1">Rest (s)</label>
+                        <input type="number" formControlName="restTime" min="0" step="15"
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                      </div>
                     </div>
-                    <div>
-                      <label class="block text-[10px] text-text-muted mb-1">Reps</label>
-                      <input type="number" formControlName="targetReps" min="1"
-                             class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                  } @else {
+                    <div class="grid grid-cols-4 gap-2">
+                      <div>
+                        <label class="block text-[10px] text-text-muted mb-1">Sets</label>
+                        <input type="number" formControlName="targetSets" min="1"
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                      </div>
+                      <div>
+                        <label class="block text-[10px] text-text-muted mb-1">Reps</label>
+                        <input type="number" formControlName="targetReps" min="1"
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                      </div>
+                      <div>
+                        <label class="block text-[10px] text-text-muted mb-1">Weight (kg)</label>
+                        <input type="number" formControlName="targetWeight" min="0" step="0.5"
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                      </div>
+                      <div>
+                        <label class="block text-[10px] text-text-muted mb-1">Rest (s)</label>
+                        <input type="number" formControlName="restTime" min="0" step="15"
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                      </div>
                     </div>
-                    <div>
-                      <label class="block text-[10px] text-text-muted mb-1">Weight (kg)</label>
-                      <input type="number" formControlName="targetWeight" min="0" step="0.5"
-                             class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
-                    </div>
-                    <div>
-                      <label class="block text-[10px] text-text-muted mb-1">Rest (s)</label>
-                      <input type="number" formControlName="restTime" min="0" step="15"
-                             class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
-                    </div>
-                  </div>
+                  }
                 </div>
               </div>
             }

@@ -94,9 +94,11 @@ export class ProgramService implements OnDestroy {
       const exercises: Exercise[] = day.exercises.map(e => ({
         id: crypto.randomUUID(),
         name: e.exerciseName,
+        trackingType: e.trackingType,
         sets: e.targetSets,
         reps: e.targetReps,
         weight: e.targetWeight,
+        duration: e.targetDuration,
         restTime: e.restTime,
         imageUrl: this.exerciseService.getById(e.exerciseId)?.imageUrl,
         templateId: e.exerciseId
