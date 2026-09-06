@@ -49,7 +49,7 @@
   </div>
 
   <!-- Active Program -->
-  @if (programService.activeProgram(); as program) {
+  @if (programService.userActiveProgram(); as program) {
     <div class="gym-card mb-10 border-primary/30">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-lg font-heading font-bold uppercase tracking-wider">Active Program</h2>
@@ -57,14 +57,14 @@
       </div>
       <h3 class="text-xl font-heading font-bold">{{ program.name }}</h3>
       <div class="flex items-center gap-4 mt-2 text-sm text-text-muted">
-        <span>Day {{ (program.currentDay || 0) + 1 }}/{{ program.totalDays }}</span>
+        <span>{{ activeProgramCompletedDays() }}/{{ program.totalDays }} days completed</span>
         <span>&middot;</span>
         <span>{{ program.sessionsPerWeek }}x/week</span>
         <span>&middot;</span>
         <span class="capitalize">{{ program.difficulty }}</span>
       </div>
       <div class="mt-3 bg-background rounded-full h-2 overflow-hidden">
-        <div class="bg-primary h-full rounded-full transition-all" [style.width.%]="program.totalDays > 0 ? ((program.currentDay || 0) / program.totalDays * 100) : 0"></div>
+        <div class="bg-primary h-full rounded-full transition-all" [style.width.%]="activeProgramProgress()"></div>
       </div>
     </div>
   }
@@ -153,14 +153,19 @@
               </div>
               <div>
                 <h3 class="font-semibold text-sm group-hover:text-primary transition-colors">{{ workout.name }}</h3>
-                <p class="text-text-muted text-xs">{{ workout.exercises.length }} exercises &middot; {{ workout.category }}</p>
+                <p class="text-text-muted text-xs">
+                  {{ workout.exercises.length }} exercises &middot; {{ workout.category }}
+                  @if (workout.scheduledDate) {
+                    &middot; {{ formatDate(workout.scheduledDate) }}
+                  }
+                </p>
               </div>
             </div>
             <div>
               @if (workout.completedDate) {
                 <span class="inline-flex items-center gap-1.5 text-accent text-xs font-semibold">
                   <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                  Done
+                  Done {{ formatCompletedDate(workout.completedDate) }}
                 </span>
               } @else {
                 <span class="text-warning text-xs font-semibold">Pending</span>

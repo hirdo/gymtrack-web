@@ -4,20 +4,32 @@
       <h1 class="text-3xl sm:text-4xl font-heading font-bold uppercase tracking-wide">Schedule</h1>
       <p class="text-text-muted mt-1 text-sm">Plan your training week</p>
     </div>
-    <div class="flex items-center gap-3">
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="flex items-center gap-1 bg-surface border border-border rounded-lg p-1">
+        <button (click)="dateMode.set('scheduled')"
+                class="px-3 py-1.5 rounded-md text-xs font-heading font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+                [class]="dateMode() === 'scheduled' ? 'bg-primary text-white' : 'text-text-muted hover:text-text'">
+          Scheduled
+        </button>
+        <button (click)="dateMode.set('completed')"
+                class="px-3 py-1.5 rounded-md text-xs font-heading font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+                [class]="dateMode() === 'completed' ? 'bg-accent text-white' : 'text-text-muted hover:text-text'">
+          Completed
+        </button>
+      </div>
       <div class="flex items-center gap-1 bg-surface border border-border rounded-lg p-1">
         <button (click)="viewMode.set('week')"
                 class="px-3 py-1.5 rounded-md text-xs font-heading font-semibold uppercase tracking-wider transition-colors cursor-pointer"
-                [class]="viewMode() === 'week' ? 'bg-primary text-white' : 'text-text-muted hover:text-text'">
+                [class]="viewMode() === 'week' ? (dateMode() === 'completed' ? 'bg-accent text-white' : 'bg-primary text-white') : 'text-text-muted hover:text-text'">
           Week
         </button>
         <button (click)="viewMode.set('month')"
                 class="px-3 py-1.5 rounded-md text-xs font-heading font-semibold uppercase tracking-wider transition-colors cursor-pointer"
-                [class]="viewMode() === 'month' ? 'bg-primary text-white' : 'text-text-muted hover:text-text'">
+                [class]="viewMode() === 'month' ? (dateMode() === 'completed' ? 'bg-accent text-white' : 'bg-primary text-white') : 'text-text-muted hover:text-text'">
           Month
         </button>
       </div>
-      <a routerLink="/workouts/new" class="btn-primary text-sm">
+      <a routerLink="/workouts/new" class="text-sm" [class.btn-primary]="dateMode() !== 'completed'" [class.btn-accent]="dateMode() === 'completed'">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
         New Workout
       </a>
@@ -45,21 +57,22 @@
     <!-- Week grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
       @for (date of weekDates(); track $index) {
-        <div [class]="'gym-card min-h-40 transition-all' + (isToday(date) ? ' border-primary/50 bg-primary/5' : '')">
+        <div [class]="'gym-card min-h-40 transition-all' + (isToday(date) ? (dateMode() === 'completed' ? ' border-accent/50 bg-accent/5' : ' border-primary/50 bg-primary/5') : '')">
           <div class="text-center mb-3 pb-3 border-b border-border/50">
             <p class="text-[10px] font-heading font-semibold text-text-muted uppercase tracking-widest">{{ weekDays[$index] }}</p>
-            <p class="text-2xl font-heading font-extrabold mt-0.5" [class.text-primary]="isToday(date)">
+            <p class="text-2xl font-heading font-extrabold mt-0.5" [class]="isToday(date) ? (dateMode() === 'completed' ? 'text-accent' : 'text-primary') : ''">
               {{ date.getDate() }}
             </p>
             @if (isToday(date)) {
-              <div class="w-1.5 h-1.5 rounded-full bg-primary mx-auto mt-1"></div>
+              <div class="w-1.5 h-1.5 rounded-full mx-auto mt-1" [class]="dateMode() === 'completed' ? 'bg-accent' : 'bg-primary'"></div>
             }
           </div>
 
           <div class="space-y-1.5">
             @for (workout of getWorkoutsForDate(date); track workout.id) {
               <a [routerLink]="['/workouts', workout.id]"
-                 class="block px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-colors truncate text-center">
+                 class="block px-2.5 py-1.5 rounded-lg text-xs font-semibold hover:opacity-80 transition-colors truncate text-center"
+                 [class]="dateMode() === 'completed' ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary'">
                 {{ workout.name }}
               </a>
             }
@@ -83,13 +96,14 @@
         <div class="bg-background min-h-24 sm:min-h-28 p-1.5 sm:p-2"
              [class]="!isCurrentMonth(date) ? 'opacity-40' : ''">
           <p class="text-xs sm:text-sm font-heading font-bold mb-1 inline-flex items-center justify-center w-6 h-6 rounded-full"
-             [class]="isToday(date) ? 'bg-primary text-white' : 'text-text'">
+             [class]="isToday(date) ? (dateMode() === 'completed' ? 'bg-accent text-white' : 'bg-primary text-white') : 'text-text'">
             {{ date.getDate() }}
           </p>
           <div class="space-y-1">
             @for (workout of getWorkoutsForDate(date).slice(0, 2); track workout.id) {
               <a [routerLink]="['/workouts', workout.id]"
-                 class="block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-colors truncate">
+                 class="block px-1.5 py-0.5 rounded text-[10px] font-semibold hover:opacity-80 transition-colors truncate"
+                 [class]="dateMode() === 'completed' ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary'">
                 {{ workout.name }}
               </a>
             }
@@ -103,12 +117,21 @@
   }
 
   <div class="mt-8 gym-card flex flex-col sm:flex-row items-center justify-between gap-4">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
-        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    @if (dateMode() === 'completed') {
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <p class="text-text-muted text-sm">Shows workouts on the day they were <strong class="text-text">completed</strong>.</p>
       </div>
-      <p class="text-text-muted text-sm">Set a <strong class="text-text">schedule date</strong> when creating a workout to see it here.</p>
-    </div>
-    <a routerLink="/workouts/new" class="btn-secondary text-sm py-2 shrink-0">Create Workout</a>
+    } @else {
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <p class="text-text-muted text-sm">Set a <strong class="text-text">schedule date</strong> when creating a workout to see it here.</p>
+      </div>
+    }
+    <a routerLink="/workouts/new" class="text-sm py-2 shrink-0" [class.btn-primary]="dateMode() !== 'completed'" [class.btn-accent]="dateMode() === 'completed'">Create Workout</a>
   </div>
 </div>

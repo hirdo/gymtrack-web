@@ -6,7 +6,7 @@ import { ExerciseLogService } from '../../../core/services/exercise-log.service'
 import { WorkoutService } from '../../../core/services/workout.service';
 import { SetRecord } from '../../../core/models/workout.model';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
-import { parseLocalDate } from '../../../core/utils/date.util';
+import { parseLocalDate, formatDisplayDate } from '../../../core/utils/date.util';
 
 @Component({
   selector: 'app-workout-train',
@@ -38,6 +38,12 @@ export class WorkoutTrainComponent implements OnDestroy {
   readonly logs = computed(() => this.exerciseLogService.logsForWorkout(this.workoutId));
 
   readonly currentLog = computed(() => this.logs()[this.currentExerciseIndex()]);
+
+  readonly currentExerciseImage = computed(() => {
+    const log = this.currentLog();
+    const w = this.workout();
+    return log && w ? w.exercises[log.exerciseIndex]?.imageUrl : undefined;
+  });
 
   readonly totalExercises = computed(() => this.logs().length);
 
@@ -146,7 +152,7 @@ export class WorkoutTrainComponent implements OnDestroy {
   }
 
   formatHistoryDate(dateStr: string): string {
-    return parseLocalDate(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return formatDisplayDate(parseLocalDate(dateStr));
   }
 
   skipRest(): void {

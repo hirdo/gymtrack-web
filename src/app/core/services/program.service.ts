@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { FirestoreService } from './firestore.service';
 import { WorkoutService } from './workout.service';
 import { ExerciseLibraryService } from './exercise-library.service';
-import { toLocalDateString } from '../utils/date.util';
+import { ExerciseLogService } from './exercise-log.service';
 import { Unsubscribe } from 'firebase/firestore';
 
 @Injectable({ providedIn: 'root' })
@@ -13,19 +13,33 @@ export class ProgramService implements OnDestroy {
   private readonly firestore = inject(FirestoreService);
   private readonly workoutService = inject(WorkoutService);
   private readonly exerciseService = inject(ExerciseLibraryService);
+  private readonly exerciseLogService = inject(ExerciseLogService);
   private readonly COLLECTION = 'programs';
   private readonly programsSignal = signal<TrainingProgram[]>([]);
   private unsubscribe: Unsubscribe | null = null;
 
   readonly programs = this.programsSignal.asReadonly();
 
-  readonly activeProgram = computed(() =>
-    this.programsSignal().find(p => p.isActive)
-  );
-
   readonly visiblePrograms = computed(() =>
     this.auth.isAdmin() ? this.programsSignal() : this.programsSignal().filter(p => p.isActive)
   );
+
+  /** The workout that defines the user's currently active program run: any
+   * not-yet-completed generated workout. Resolves on its own once every day
+   * of the program has been completed, freeing the user to choose another
+   * (or choose the same one again as a fresh run). */
+  private readonly userActiveWorkout = computed(() =>
+    this.workoutService.workouts().find(w => w.programId && !w.completedDate)
+  );
+
+  readonly userActiveProgramId = computed(() => this.userActiveWorkout()?.programId);
+
+  readonly userActiveProgramRunId = computed(() => this.userActiveWorkout()?.programRunId);
+
+  readonly userActiveProgram = computed(() => {
+    const id = this.userActiveProgramId();
+    return id ? this.getById(id) : undefined;
+  });
 
   readonly totalPrograms = computed(() => this.programsSignal().length);
 
@@ -83,14 +97,29 @@ export class ProgramService implements OnDestroy {
     });
   }
 
-  async applyProgram(id: string, startDate: string): Promise<void> {
+  /**
+   * Chooses a program to follow: generates one Workout per program day (no
+   * scheduledDate — the user assigns that later from the workout itself). If
+   * the user already has a different active program (one with incomplete
+   * generated workouts), that program's not-yet-completed workouts are
+   * deleted first, replacing it with this one.
+   */
+  async chooseProgram(id: string): Promise<void> {
     const program = this.getById(id);
     if (!program) return;
 
-    const dates = this.calculateConsecutiveDates(startDate, program.days.length);
+    const currentActiveRunId = this.userActiveProgramRunId();
+    if (currentActiveRunId) {
+      const staleWorkouts = this.workoutService.workouts().filter(w => w.programRunId === currentActiveRunId && !w.completedDate);
+      for (const w of staleWorkouts) {
+        await this.exerciseLogService.deleteLogsForWorkout(w.id);
+        await this.workoutService.delete(w.id);
+      }
+    }
 
-    for (let i = 0; i < program.days.length; i++) {
-      const day = program.days[i];
+    const programRunId = crypto.randomUUID();
+
+    for (const day of program.days) {
       const exercises: Exercise[] = day.exercises.map(e => ({
         id: crypto.randomUUID(),
         name: e.exerciseName,
@@ -108,8 +137,8 @@ export class ProgramService implements OnDestroy {
         name: `${program.name} - ${day.name}`,
         category: 'strength',
         exercises,
-        scheduledDate: dates[i],
-        programId: program.id
+        programId: program.id,
+        programRunId
       });
     }
   }
@@ -127,16 +156,6 @@ export class ProgramService implements OnDestroy {
       completedSessions,
       updatedAt: new Date().toISOString()
     });
-  }
-
-  calculateConsecutiveDates(startDate: string, totalDays: number): string[] {
-    const [y, m, d] = startDate.split('-').map(Number);
-    const dates: string[] = [];
-    for (let i = 0; i < totalDays; i++) {
-      const date = new Date(y, m - 1, d + i);
-      dates.push(toLocalDateString(date));
-    }
-    return dates;
   }
 
   private async runPublishMigration(): Promise<void> {

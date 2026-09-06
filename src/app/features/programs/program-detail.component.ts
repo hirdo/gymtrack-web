@@ -1,17 +1,14 @@
 import { Component, inject, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { ProgramService } from '../../core/services/program.service';
-import { WorkoutService } from '../../core/services/workout.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { AuthService } from '../../core/services/auth.service';
-import { toLocalDateString } from '../../core/utils/date.util';
-import { PROGRAM_DIFFICULTIES, ProgramDifficulty } from '../../core/models/workout.model';
+import { PROGRAM_DIFFICULTIES, ProgramDifficulty, TrainingProgram } from '../../core/models/workout.model';
 
 @Component({
   selector: 'app-program-detail',
   standalone: true,
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink],
   templateUrl: './program-detail.component.html',
   styleUrl: './program-detail.component.scss'
 })
@@ -19,13 +16,11 @@ export class ProgramDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly programService = inject(ProgramService);
-  private readonly workoutService = inject(WorkoutService);
   private readonly exerciseService = inject(ExerciseLibraryService);
   readonly auth = inject(AuthService);
 
-  readonly applying = signal(false);
-  readonly startDate = signal(toLocalDateString(new Date()));
-  readonly conflictDates = signal<string[] | null>(null);
+  readonly choosing = signal(false);
+  readonly replaceConfirmProgram = signal<TrainingProgram | null>(null);
   readonly starRange = [1, 2, 3, 4, 5];
 
   readonly program = computed(() => {
@@ -35,10 +30,9 @@ export class ProgramDetailComponent {
     return p;
   });
 
-  readonly progressPercent = computed(() => {
+  readonly isMyActiveProgram = computed(() => {
     const p = this.program();
-    if (!p || p.totalDays === 0) return 0;
-    return Math.round(((p.currentDay || 0) / p.totalDays) * 100);
+    return !!p && this.programService.userActiveProgramId() === p.id;
   });
 
   async publish(): Promise<void> {
@@ -51,31 +45,37 @@ export class ProgramDetailComponent {
     if (p) await this.programService.setActive(p.id, false);
   }
 
-  async applyProgram(): Promise<void> {
+  async chooseProgram(): Promise<void> {
     const p = this.program();
-    if (!p || this.applying()) return;
+    if (!p || this.choosing()) return;
 
-    const dates = this.programService.calculateConsecutiveDates(this.startDate(), p.days.length);
-    const conflicts = this.workoutService.getWorkoutsOnDates(dates)
-      .map(w => w.scheduledDate!)
-      .filter((d): d is string => !!d);
-
-    if (conflicts.length > 0) {
-      this.conflictDates.set(conflicts);
+    const current = this.programService.userActiveProgram();
+    if (current && current.id !== p.id) {
+      this.replaceConfirmProgram.set(current);
       return;
     }
 
-    this.applying.set(true);
-    try {
-      await this.programService.applyProgram(p.id, this.startDate());
-      this.router.navigate(['/schedule']);
-    } finally {
-      this.applying.set(false);
-    }
+    await this.doChooseProgram(p.id);
   }
 
-  closeConflictWarning(): void {
-    this.conflictDates.set(null);
+  async confirmReplace(): Promise<void> {
+    const p = this.program();
+    this.replaceConfirmProgram.set(null);
+    if (p) await this.doChooseProgram(p.id);
+  }
+
+  cancelReplace(): void {
+    this.replaceConfirmProgram.set(null);
+  }
+
+  private async doChooseProgram(id: string): Promise<void> {
+    this.choosing.set(true);
+    try {
+      await this.programService.chooseProgram(id);
+      this.router.navigate(['/workouts']);
+    } finally {
+      this.choosing.set(false);
+    }
   }
 
   difficultyStars(difficulty: ProgramDifficulty): number {

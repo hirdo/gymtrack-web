@@ -94,10 +94,6 @@ export class WorkoutService implements OnDestroy {
     return this.workoutsSignal().filter((w) => w.category === category);
   }
 
-  getWorkoutsOnDates(dates: string[]): Workout[] {
-    return this.workoutsSignal().filter((w) => w.scheduledDate && dates.includes(w.scheduledDate));
-  }
-
   async add(workout: Omit<Workout, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<Workout> {
     const userId = this.auth.userId();
     const now = new Date().toISOString();

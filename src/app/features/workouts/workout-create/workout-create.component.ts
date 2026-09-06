@@ -8,8 +8,9 @@ import {
   Validators
 } from '@angular/forms';
 import { WorkoutService } from '../../../core/services/workout.service';
-import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate } from '../../../core/models/workout.model';
+import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate, Workout } from '../../../core/models/workout.model';
 import { ExercisePickerModalComponent } from '../../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
+import { toLocalDateString } from '../../../core/utils/date.util';
 
 @Component({
   selector: 'app-workout-create',
@@ -29,6 +30,9 @@ export class WorkoutCreateComponent implements OnInit {
 
   readonly pickerOpen = signal(false);
   private pickerTarget: number | null = null;
+
+  readonly minDate = toLocalDateString(new Date());
+  readonly dateConflictWorkout = signal<Workout | null>(null);
 
   readonly categories: { value: WorkoutCategory; label: string }[] = [
     { value: 'strength', label: 'Strength' },
@@ -70,6 +74,7 @@ export class WorkoutCreateComponent implements OnInit {
             exerciseId: ex.templateId || null,
             trackingType: ex.trackingType || 'reps',
             name: ex.name,
+            imageUrl: ex.imageUrl || null,
             sets: ex.sets,
             reps: ex.reps ?? null,
             weight: ex.weight || null,
@@ -91,6 +96,7 @@ export class WorkoutCreateComponent implements OnInit {
       exerciseId: [null as string | null],
       trackingType: ['reps' as ExerciseTrackingType],
       name: ['', Validators.required],
+      imageUrl: [null as string | null],
       sets: [3, [Validators.required, Validators.min(1)]],
       reps: [10 as number | null, [Validators.min(1)]],
       weight: [null as number | null],
@@ -123,6 +129,7 @@ export class WorkoutCreateComponent implements OnInit {
         exerciseId: exercise.id,
         trackingType,
         name: exercise.name,
+        imageUrl: exercise.imageUrl || null,
         sets: 1,
         reps: null,
         weight: null,
@@ -133,6 +140,7 @@ export class WorkoutCreateComponent implements OnInit {
         exerciseId: exercise.id,
         trackingType,
         name: exercise.name,
+        imageUrl: exercise.imageUrl || null,
         reps: exercise.recommendedReps ?? group.get('reps')?.value,
         weight: null,
         duration: null
@@ -142,6 +150,7 @@ export class WorkoutCreateComponent implements OnInit {
         exerciseId: exercise.id,
         trackingType,
         name: exercise.name,
+        imageUrl: exercise.imageUrl || null,
         reps: exercise.recommendedReps ?? group.get('reps')?.value,
         weight: exercise.recommendedWeight ?? group.get('weight')?.value,
         duration: null
@@ -155,15 +164,31 @@ export class WorkoutCreateComponent implements OnInit {
     this.pickerTarget = null;
   }
 
+  closeDateConflict(): void {
+    this.dateConflictWorkout.set(null);
+  }
+
   async onSubmit(): Promise<void> {
     if (this.form.invalid) return;
 
     const value = this.form.getRawValue();
+
+    if (value.scheduledDate) {
+      const conflict = this.workoutService.workouts().find(w =>
+        w.scheduledDate === value.scheduledDate && w.id !== this.editId
+      );
+      if (conflict) {
+        this.dateConflictWorkout.set(conflict);
+        return;
+      }
+    }
+
     const exercises = value.exercises.map((e) => ({
       id: crypto.randomUUID(),
       templateId: e['exerciseId'] || undefined,
       trackingType: e['trackingType'] as ExerciseTrackingType,
       name: e['name']!,
+      imageUrl: e['imageUrl'] || undefined,
       sets: e['sets']!,
       reps: e['reps'] || undefined,
       weight: e['weight'] || undefined,

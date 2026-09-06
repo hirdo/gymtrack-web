@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { WorkoutService } from '../../core/services/workout.service';
-import { toLocalDateString } from '../../core/utils/date.util';
+import { toLocalDateString, formatDisplayDate } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-schedule',
@@ -15,6 +15,7 @@ export class ScheduleComponent {
 
   readonly weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   readonly viewMode = signal<'week' | 'month'>('month');
+  readonly dateMode = signal<'scheduled' | 'completed'>('scheduled');
   readonly currentWeekStart = signal(this.getMonday(new Date()));
   readonly currentMonthStart = signal(this.getMonthStart(new Date()));
 
@@ -48,6 +49,11 @@ export class ScheduleComponent {
     return workouts.filter(w => w.scheduledDate);
   });
 
+  readonly completedWorkouts = computed(() => {
+    const workouts = this.workoutService.workouts();
+    return workouts.filter(w => w.completedDate);
+  });
+
   isToday(date: Date): boolean {
     const today = new Date();
     return date.toDateString() === today.toDateString();
@@ -59,6 +65,9 @@ export class ScheduleComponent {
 
   getWorkoutsForDate(date: Date) {
     const dateStr = toLocalDateString(date);
+    if (this.dateMode() === 'completed') {
+      return this.completedWorkouts().filter(w => toLocalDateString(new Date(w.completedDate!)) === dateStr);
+    }
     return this.scheduledWorkouts().filter(w => w.scheduledDate?.startsWith(dateStr));
   }
 
@@ -103,7 +112,7 @@ export class ScheduleComponent {
   }
 
   formatDate(date: Date): string {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return formatDisplayDate(date);
   }
 
   formatMonthYear(date: Date): string {
