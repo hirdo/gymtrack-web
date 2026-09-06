@@ -15,6 +15,7 @@ export class ScheduleComponent {
 
   readonly weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   readonly viewMode = signal<'week' | 'month'>('month');
+  readonly dateMode = signal<'scheduled' | 'completed'>('scheduled');
   readonly currentWeekStart = signal(this.getMonday(new Date()));
   readonly currentMonthStart = signal(this.getMonthStart(new Date()));
 
@@ -48,6 +49,11 @@ export class ScheduleComponent {
     return workouts.filter(w => w.scheduledDate);
   });
 
+  readonly completedWorkouts = computed(() => {
+    const workouts = this.workoutService.workouts();
+    return workouts.filter(w => w.completedDate);
+  });
+
   isToday(date: Date): boolean {
     const today = new Date();
     return date.toDateString() === today.toDateString();
@@ -59,6 +65,9 @@ export class ScheduleComponent {
 
   getWorkoutsForDate(date: Date) {
     const dateStr = toLocalDateString(date);
+    if (this.dateMode() === 'completed') {
+      return this.completedWorkouts().filter(w => toLocalDateString(new Date(w.completedDate!)) === dateStr);
+    }
     return this.scheduledWorkouts().filter(w => w.scheduledDate?.startsWith(dateStr));
   }
 

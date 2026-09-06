@@ -34,7 +34,7 @@
 
         <div>
           <label for="workout-date" class="block text-sm font-semibold text-text-muted mb-1.5 uppercase tracking-wider">Schedule Date <span class="normal-case font-normal">(optional)</span></label>
-          <input id="workout-date" formControlName="scheduledDate" type="date"
+          <input id="workout-date" formControlName="scheduledDate" type="date" [attr.min]="minDate"
                  class="w-full bg-background border border-border rounded-lg px-4 py-3 text-text focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors cursor-pointer">
         </div>
       </div>
@@ -138,4 +138,20 @@
     [open]="pickerOpen()"
     (closed)="closeExercisePicker()"
     (exerciseSelected)="onExercisePicked($event)" />
+
+  @if (dateConflictWorkout(); as conflict) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <div class="absolute inset-0 bg-background/80 backdrop-blur-sm" (click)="closeDateConflict()"></div>
+      <div class="relative bg-surface border border-border rounded-2xl w-full max-w-md p-6">
+        <div class="w-12 h-12 bg-warning/10 rounded-xl flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86l-8.18 14.18A2 2 0 004.11 21h15.78a2 2 0 001.99-2.96L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        </div>
+        <h2 class="text-lg font-heading font-bold uppercase tracking-wider mb-2">Date Already Taken</h2>
+        <p class="text-text-muted text-sm mb-6">
+          You already have <span class="text-text font-semibold">{{ conflict.name }}</span> scheduled on this date. Only one workout can be scheduled per day — pick a different date.
+        </p>
+        <button (click)="closeDateConflict()" class="btn-primary w-full py-2.5">Got It</button>
+      </div>
+    </div>
+  }
 </div>

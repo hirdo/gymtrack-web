@@ -8,8 +8,9 @@ import {
   Validators
 } from '@angular/forms';
 import { WorkoutService } from '../../../core/services/workout.service';
-import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate } from '../../../core/models/workout.model';
+import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate, Workout } from '../../../core/models/workout.model';
 import { ExercisePickerModalComponent } from '../../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
+import { toLocalDateString } from '../../../core/utils/date.util';
 
 @Component({
   selector: 'app-workout-create',
@@ -29,6 +30,9 @@ export class WorkoutCreateComponent implements OnInit {
 
   readonly pickerOpen = signal(false);
   private pickerTarget: number | null = null;
+
+  readonly minDate = toLocalDateString(new Date());
+  readonly dateConflictWorkout = signal<Workout | null>(null);
 
   readonly categories: { value: WorkoutCategory; label: string }[] = [
     { value: 'strength', label: 'Strength' },
@@ -160,10 +164,25 @@ export class WorkoutCreateComponent implements OnInit {
     this.pickerTarget = null;
   }
 
+  closeDateConflict(): void {
+    this.dateConflictWorkout.set(null);
+  }
+
   async onSubmit(): Promise<void> {
     if (this.form.invalid) return;
 
     const value = this.form.getRawValue();
+
+    if (value.scheduledDate) {
+      const conflict = this.workoutService.workouts().find(w =>
+        w.scheduledDate === value.scheduledDate && w.id !== this.editId
+      );
+      if (conflict) {
+        this.dateConflictWorkout.set(conflict);
+        return;
+      }
+    }
+
     const exercises = value.exercises.map((e) => ({
       id: crypto.randomUUID(),
       templateId: e['exerciseId'] || undefined,
