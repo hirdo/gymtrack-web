@@ -20,16 +20,16 @@
       <div class="flex items-center gap-1 bg-surface border border-border rounded-lg p-1">
         <button (click)="viewMode.set('week')"
                 class="px-3 py-1.5 rounded-md text-xs font-heading font-semibold uppercase tracking-wider transition-colors cursor-pointer"
-                [class]="viewMode() === 'week' ? 'bg-primary text-white' : 'text-text-muted hover:text-text'">
+                [class]="viewMode() === 'week' ? (dateMode() === 'completed' ? 'bg-accent text-white' : 'bg-primary text-white') : 'text-text-muted hover:text-text'">
           Week
         </button>
         <button (click)="viewMode.set('month')"
                 class="px-3 py-1.5 rounded-md text-xs font-heading font-semibold uppercase tracking-wider transition-colors cursor-pointer"
-                [class]="viewMode() === 'month' ? 'bg-primary text-white' : 'text-text-muted hover:text-text'">
+                [class]="viewMode() === 'month' ? (dateMode() === 'completed' ? 'bg-accent text-white' : 'bg-primary text-white') : 'text-text-muted hover:text-text'">
           Month
         </button>
       </div>
-      <a routerLink="/workouts/new" class="btn-secondary text-sm">
+      <a routerLink="/workouts/new" class="btn-info text-sm">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
         New Workout
       </a>
@@ -132,6 +132,6 @@
         <p class="text-text-muted text-sm">Set a <strong class="text-text">schedule date</strong> when creating a workout to see it here.</p>
       </div>
     }
-    <a routerLink="/workouts/new" class="btn-secondary text-sm py-2 shrink-0">Create Workout</a>
+    <a routerLink="/workouts/new" class="btn-info text-sm py-2 shrink-0">Create Workout</a>
   </div>
 </div>
