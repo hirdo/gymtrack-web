@@ -29,7 +29,7 @@
           Month
         </button>
       </div>
-      <a routerLink="/workouts/new" class="btn-info text-sm">
+      <a routerLink="/workouts/new" class="text-sm" [class.btn-primary]="dateMode() !== 'completed'" [class.btn-accent]="dateMode() === 'completed'">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
         New Workout
       </a>
@@ -132,6 +132,6 @@
         <p class="text-text-muted text-sm">Set a <strong class="text-text">schedule date</strong> when creating a workout to see it here.</p>
       </div>
     }
-    <a routerLink="/workouts/new" class="btn-info text-sm py-2 shrink-0">Create Workout</a>
+    <a routerLink="/workouts/new" class="text-sm py-2 shrink-0" [class.btn-primary]="dateMode() !== 'completed'" [class.btn-accent]="dateMode() === 'completed'">Create Workout</a>
   </div>
 </div>
