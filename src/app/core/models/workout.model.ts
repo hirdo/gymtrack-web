@@ -26,6 +26,7 @@ export interface Workout {
   durationMinutes?: number;
   category: WorkoutCategory;
   programId?: string;
+  programRunId?: string;
   createdAt: string;
   updatedAt: string;
 }

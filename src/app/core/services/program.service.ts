@@ -24,12 +24,17 @@ export class ProgramService implements OnDestroy {
     this.auth.isAdmin() ? this.programsSignal() : this.programsSignal().filter(p => p.isActive)
   );
 
-  /** The program the current user is actively following: any program with at least
-   * one not-yet-completed generated workout. Resolves on its own once every day
-   * of the program has been completed, freeing the user to choose another. */
-  readonly userActiveProgramId = computed(() =>
-    this.workoutService.workouts().find(w => w.programId && !w.completedDate)?.programId
+  /** The workout that defines the user's currently active program run: any
+   * not-yet-completed generated workout. Resolves on its own once every day
+   * of the program has been completed, freeing the user to choose another
+   * (or choose the same one again as a fresh run). */
+  private readonly userActiveWorkout = computed(() =>
+    this.workoutService.workouts().find(w => w.programId && !w.completedDate)
   );
+
+  readonly userActiveProgramId = computed(() => this.userActiveWorkout()?.programId);
+
+  readonly userActiveProgramRunId = computed(() => this.userActiveWorkout()?.programRunId);
 
   readonly userActiveProgram = computed(() => {
     const id = this.userActiveProgramId();
@@ -103,14 +108,16 @@ export class ProgramService implements OnDestroy {
     const program = this.getById(id);
     if (!program) return;
 
-    const currentActiveId = this.userActiveProgramId();
-    if (currentActiveId && currentActiveId !== id) {
-      const staleWorkouts = this.workoutService.workouts().filter(w => w.programId === currentActiveId && !w.completedDate);
+    const currentActiveRunId = this.userActiveProgramRunId();
+    if (currentActiveRunId) {
+      const staleWorkouts = this.workoutService.workouts().filter(w => w.programRunId === currentActiveRunId && !w.completedDate);
       for (const w of staleWorkouts) {
         await this.exerciseLogService.deleteLogsForWorkout(w.id);
         await this.workoutService.delete(w.id);
       }
     }
+
+    const programRunId = crypto.randomUUID();
 
     for (const day of program.days) {
       const exercises: Exercise[] = day.exercises.map(e => ({
@@ -130,7 +137,8 @@ export class ProgramService implements OnDestroy {
         name: `${program.name} - ${day.name}`,
         category: 'strength',
         exercises,
-        programId: program.id
+        programId: program.id,
+        programRunId
       });
     }
   }

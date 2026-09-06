@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { WorkoutService } from '../../core/services/workout.service';
 import { ProgramService } from '../../core/services/program.service';
-import { parseLocalDate } from '../../core/utils/date.util';
+import { parseLocalDate, formatDisplayDate } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,9 +18,9 @@ export class DashboardComponent {
   readonly programService = inject(ProgramService);
 
   readonly activeProgramCompletedDays = computed(() => {
-    const program = this.programService.userActiveProgram();
-    if (!program) return 0;
-    return this.workoutService.workouts().filter(w => w.programId === program.id && w.completedDate).length;
+    const runId = this.programService.userActiveProgramRunId();
+    if (!runId) return 0;
+    return this.workoutService.workouts().filter(w => w.programRunId === runId && w.completedDate).length;
   });
 
   readonly activeProgramProgress = computed(() => {
@@ -30,10 +30,10 @@ export class DashboardComponent {
   });
 
   formatDate(dateStr: string): string {
-    return parseLocalDate(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return formatDisplayDate(parseLocalDate(dateStr));
   }
 
   formatCompletedDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return formatDisplayDate(new Date(iso));
   }
 }

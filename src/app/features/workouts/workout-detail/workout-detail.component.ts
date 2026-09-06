@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
 import { ExerciseLog } from '../../../core/models/workout.model';
+import { formatDisplayDate } from '../../../core/utils/date.util';
 
 @Component({
   selector: 'app-workout-detail',
@@ -37,7 +38,7 @@ export class WorkoutDetailComponent {
   }
 
   formatCompletedDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return formatDisplayDate(new Date(iso));
   }
 
   readonly starting = signal(false);

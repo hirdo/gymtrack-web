@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { WorkoutService } from '../../core/services/workout.service';
-import { toLocalDateString } from '../../core/utils/date.util';
+import { toLocalDateString, formatDisplayDate } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-schedule',
@@ -103,7 +103,7 @@ export class ScheduleComponent {
   }
 
   formatDate(date: Date): string {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return formatDisplayDate(date);
   }
 
   formatMonthYear(date: Date): string {

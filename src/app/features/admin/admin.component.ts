@@ -3,6 +3,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { MembershipService, MembershipTier } from '../../core/services/membership.service';
 import { WorkoutService } from '../../core/services/workout.service';
 import { FirestoreService } from '../../core/services/firestore.service';
+import { formatDisplayDate } from '../../core/utils/date.util';
 
 interface AdminUser {
   id: string;
@@ -114,20 +115,13 @@ export class AdminComponent implements OnInit {
 
   formatDate(dateStr: string): string {
     if (!dateStr) return '-';
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    return formatDisplayDate(new Date(dateStr));
   }
 
   formatDateTime(dateStr: string): string {
     if (!dateStr) return '-';
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    const date = new Date(dateStr);
+    const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    return `${formatDisplayDate(date)}, ${time}`;
   }
 }

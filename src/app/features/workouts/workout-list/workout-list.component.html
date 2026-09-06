@@ -34,8 +34,8 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       @for (workout of filteredWorkouts; track workout.id) {
         <a [routerLink]="['/workouts', workout.id]" class="gym-card hover:border-primary/30 transition-all group">
-          <div class="flex items-start justify-between mb-3">
-            <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-md uppercase tracking-wider"
+          <div class="flex items-start justify-between mb-3 gap-2">
+            <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-md uppercase tracking-wider shrink-0"
                   [class]="workout.category === 'strength' ? 'bg-primary/10 text-primary' :
                            workout.category === 'cardio' ? 'bg-accent/10 text-accent' :
                            workout.category === 'hiit' ? 'bg-warning/10 text-warning' :
@@ -43,21 +43,23 @@
                            'bg-surface-light text-text-muted'">
               {{ workout.category }}
             </span>
-            <button (click)="deleteWorkout(workout.id, $event)"
-                    class="opacity-0 group-hover:opacity-100 text-text-muted hover:text-error transition-all p-1 cursor-pointer"
-                    aria-label="Delete workout">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
+            <div class="flex items-center gap-1 shrink-0">
+              @if (workout.scheduledDate) {
+                <span class="text-text-muted text-xs inline-flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  {{ formatDate(workout.scheduledDate) }}
+                </span>
+              }
+              <button (click)="deleteWorkout(workout.id, $event)"
+                      class="opacity-0 group-hover:opacity-100 text-text-muted hover:text-error transition-all p-1 cursor-pointer"
+                      aria-label="Delete workout">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
           </div>
           <h3 class="text-lg font-heading font-bold uppercase tracking-wide group-hover:text-primary transition-colors">{{ workout.name }}</h3>
-          @if (workout.scheduledDate) {
-            <p class="text-text-muted text-xs mt-1 inline-flex items-center gap-1">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-              {{ formatDate(workout.scheduledDate) }}
-            </p>
-          }
           @if (workout.description) {
             <p class="text-text-muted text-sm mt-1.5 line-clamp-2 leading-relaxed">{{ workout.description }}</p>
           }
