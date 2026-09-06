@@ -54,10 +54,6 @@
               {{ difficultyLabel(program.difficulty) }}
             </span>
           </div>
-          <div class="bg-background rounded-full h-1.5 overflow-hidden">
-            <div class="bg-primary h-full rounded-full transition-all" [style.width.%]="progressPercent(program.currentDay, program.totalDays)"></div>
-          </div>
-          <p class="text-[10px] text-text-muted mt-1.5">Day {{ (program.currentDay || 0) + 1 }}/{{ program.totalDays }}</p>
         </a>
       }
     </div>

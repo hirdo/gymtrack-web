@@ -42,6 +42,10 @@ export class WorkoutListComponent {
     return parseLocalDate(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
+  formatCompletedDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
   async deleteWorkout(id: string, event: Event): Promise<void> {
     event.preventDefault();
     event.stopPropagation();

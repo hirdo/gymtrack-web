@@ -17,10 +17,6 @@ export class ProgramListComponent {
 
   readonly starRange = [1, 2, 3, 4, 5];
 
-  progressPercent(currentDay: number | undefined, totalDays: number): number {
-    return totalDays > 0 ? Math.round(((currentDay || 0) / totalDays) * 100) : 0;
-  }
-
   difficultyStars(difficulty: ProgramDifficulty): number {
     return PROGRAM_DIFFICULTIES.find(d => d.value === difficulty)?.stars ?? 0;
   }

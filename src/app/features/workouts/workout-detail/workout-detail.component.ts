@@ -36,6 +36,10 @@ export class WorkoutDetailComponent {
     return this.logsForWorkout().find(l => l.exerciseIndex === exerciseIndex);
   }
 
+  formatCompletedDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
   readonly starting = signal(false);
 
   async startTraining(): Promise<void> {

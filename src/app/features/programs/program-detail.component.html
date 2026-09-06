@@ -29,16 +29,21 @@
           </div>
         </div>
         <div class="flex flex-wrap gap-2 shrink-0 items-center">
-          <input type="date" [ngModel]="startDate()" (ngModelChange)="startDate.set($event)"
-                 class="bg-background border border-border rounded-lg px-3 py-2 text-text text-sm focus:border-primary focus:outline-none transition-colors">
-          <button (click)="applyProgram()" class="btn-accent text-sm py-2 px-4" [disabled]="applying()">
-            @if (applying()) {
-              Applying...
-            } @else {
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-              Apply to Schedule
-            }
-          </button>
+          @if (isMyActiveProgram()) {
+            <span class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent/10 text-accent text-sm font-semibold">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              Your Active Program
+            </span>
+          } @else {
+            <button (click)="chooseProgram()" class="btn-accent text-sm py-2 px-4" [disabled]="choosing()">
+              @if (choosing()) {
+                Choosing...
+              } @else {
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Choose Program
+              }
+            </button>
+          }
           @if (auth.isAdmin()) {
             @if (p.isActive) {
               <button (click)="unpublish()" class="btn-secondary text-sm py-2 px-4">Unpublish</button>
@@ -107,21 +112,21 @@
     </div>
   }
 
-  @if (conflictDates(); as conflicts) {
+  @if (replaceConfirmProgram(); as current) {
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div class="absolute inset-0 bg-background/80 backdrop-blur-sm" (click)="closeConflictWarning()"></div>
+      <div class="absolute inset-0 bg-background/80 backdrop-blur-sm" (click)="cancelReplace()"></div>
       <div class="relative bg-surface border border-border rounded-2xl w-full max-w-md p-6">
-        <div class="w-12 h-12 bg-error/10 rounded-xl flex items-center justify-center mb-4">
-          <svg class="w-6 h-6 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86l-8.18 14.18A2 2 0 004.11 21h15.78a2 2 0 001.99-2.96L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        <div class="w-12 h-12 bg-warning/10 rounded-xl flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86l-8.18 14.18A2 2 0 004.11 21h15.78a2 2 0 001.99-2.96L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
         </div>
-        <h2 class="text-lg font-heading font-bold uppercase tracking-wider mb-2">Schedule Conflict</h2>
-        <p class="text-text-muted text-sm mb-4">You already have a workout scheduled on:</p>
-        <ul class="space-y-1.5 mb-6">
-          @for (date of conflicts; track date) {
-            <li class="bg-background rounded-lg px-3 py-2 text-sm font-semibold">{{ date }}</li>
-          }
-        </ul>
-        <button (click)="closeConflictWarning()" class="btn-primary w-full py-2.5">Choose a Different Date</button>
+        <h2 class="text-lg font-heading font-bold uppercase tracking-wider mb-2">Replace Active Program?</h2>
+        <p class="text-text-muted text-sm mb-6">
+          You're currently following <span class="text-text font-semibold">{{ current.name }}</span>. Choosing this program will delete any not-yet-completed workouts from it and generate new ones for this program instead. Workouts you've already completed stay as history.
+        </p>
+        <div class="flex gap-3">
+          <button (click)="cancelReplace()" class="btn-secondary flex-1 py-2.5">Cancel</button>
+          <button (click)="confirmReplace()" class="btn-accent flex-1 py-2.5">Replace It</button>
+        </div>
       </div>
     </div>
   }
