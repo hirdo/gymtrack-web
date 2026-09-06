@@ -29,7 +29,7 @@
           Month
         </button>
       </div>
-      <a routerLink="/workouts/new" class="btn-primary text-sm">
+      <a routerLink="/workouts/new" class="btn-secondary text-sm">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
         New Workout
       </a>
@@ -57,14 +57,14 @@
     <!-- Week grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
       @for (date of weekDates(); track $index) {
-        <div [class]="'gym-card min-h-40 transition-all' + (isToday(date) ? ' border-primary/50 bg-primary/5' : '')">
+        <div [class]="'gym-card min-h-40 transition-all' + (isToday(date) ? (dateMode() === 'completed' ? ' border-accent/50 bg-accent/5' : ' border-primary/50 bg-primary/5') : '')">
           <div class="text-center mb-3 pb-3 border-b border-border/50">
             <p class="text-[10px] font-heading font-semibold text-text-muted uppercase tracking-widest">{{ weekDays[$index] }}</p>
-            <p class="text-2xl font-heading font-extrabold mt-0.5" [class.text-primary]="isToday(date)">
+            <p class="text-2xl font-heading font-extrabold mt-0.5" [class]="isToday(date) ? (dateMode() === 'completed' ? 'text-accent' : 'text-primary') : ''">
               {{ date.getDate() }}
             </p>
             @if (isToday(date)) {
-              <div class="w-1.5 h-1.5 rounded-full bg-primary mx-auto mt-1"></div>
+              <div class="w-1.5 h-1.5 rounded-full mx-auto mt-1" [class]="dateMode() === 'completed' ? 'bg-accent' : 'bg-primary'"></div>
             }
           </div>
 
@@ -96,7 +96,7 @@
         <div class="bg-background min-h-24 sm:min-h-28 p-1.5 sm:p-2"
              [class]="!isCurrentMonth(date) ? 'opacity-40' : ''">
           <p class="text-xs sm:text-sm font-heading font-bold mb-1 inline-flex items-center justify-center w-6 h-6 rounded-full"
-             [class]="isToday(date) ? 'bg-primary text-white' : 'text-text'">
+             [class]="isToday(date) ? (dateMode() === 'completed' ? 'bg-accent text-white' : 'bg-primary text-white') : 'text-text'">
             {{ date.getDate() }}
           </p>
           <div class="space-y-1">
