@@ -125,13 +125,24 @@ export class WorkoutCreateComponent implements OnInit {
         name: exercise.name,
         sets: 1,
         reps: null,
-        weight: null
+        weight: null,
+        duration: exercise.recommendedDuration ?? group.get('duration')?.value
+      });
+    } else if (trackingType === 'reps_only') {
+      group.patchValue({
+        exerciseId: exercise.id,
+        trackingType,
+        name: exercise.name,
+        reps: exercise.recommendedReps ?? group.get('reps')?.value,
+        weight: null,
+        duration: null
       });
     } else {
       group.patchValue({
         exerciseId: exercise.id,
         trackingType,
         name: exercise.name,
+        reps: exercise.recommendedReps ?? group.get('reps')?.value,
         weight: exercise.recommendedWeight ?? group.get('weight')?.value,
         duration: null
       });

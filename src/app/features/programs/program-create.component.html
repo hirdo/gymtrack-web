@@ -38,16 +38,22 @@
     </div>
 
     <!-- Days -->
-    <div formArrayName="days" class="space-y-4">
+    <div formArrayName="days" class="space-y-4" cdkDropList (cdkDropListDropped)="dropDay($event)">
       @for (day of days.controls; track day; let di = $index) {
-        <div [formGroupName]="di" class="gym-card border-primary/20">
+        <div [formGroupName]="di" class="gym-card border-primary/20" cdkDrag [cdkDragData]="di">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-sm font-heading font-bold uppercase tracking-wider">
-              <span class="text-primary mr-2">Day {{ di + 1 }}</span>
+            <h2 class="text-sm font-heading font-bold uppercase tracking-wider flex items-center gap-2">
+              <span cdkDragHandle class="cursor-grab active:cursor-grabbing text-text-muted hover:text-text" title="Drag to reorder">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a1 1 0 11-2 0 1 1 0 012 0zM7 10a1 1 0 11-2 0 1 1 0 012 0zM7 16a1 1 0 11-2 0 1 1 0 012 0zM15 4a1 1 0 11-2 0 1 1 0 012 0zM15 10a1 1 0 11-2 0 1 1 0 012 0zM15 16a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
+              </span>
+              <span class="text-primary">Day {{ di + 1 }}</span>
             </h2>
-            @if (days.length > 1) {
-              <button type="button" (click)="removeDay(di)" class="text-text-muted hover:text-error text-xs transition-colors">Remove Day</button>
-            }
+            <div class="flex items-center gap-3">
+              <button type="button" (click)="duplicateDay(di)" class="text-text-muted hover:text-primary text-xs transition-colors">Duplicate</button>
+              @if (days.length > 1) {
+                <button type="button" (click)="removeDay(di)" class="text-text-muted hover:text-error text-xs transition-colors">Remove Day</button>
+              }
+            </div>
           </div>
 
           <div class="mb-4">
@@ -57,11 +63,16 @@
           </div>
 
           <!-- Exercises in Day -->
-          <div formArrayName="exercises" class="space-y-3">
+          <div formArrayName="exercises" class="space-y-3" cdkDropList (cdkDropListDropped)="dropExercise(di, $event)">
             @for (ex of getDayExercises(di).controls; track ex; let ei = $index) {
-              <div [formGroupName]="ei" class="bg-background rounded-xl p-3">
+              <div [formGroupName]="ei" class="bg-background rounded-xl p-3" cdkDrag>
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-[10px] text-text-muted font-semibold uppercase tracking-wider">Exercise {{ ei + 1 }}</span>
+                  <span class="flex items-center gap-1.5 text-[10px] text-text-muted font-semibold uppercase tracking-wider">
+                    <span cdkDragHandle class="cursor-grab active:cursor-grabbing hover:text-text" title="Drag to reorder">
+                      <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a1 1 0 11-2 0 1 1 0 012 0zM7 10a1 1 0 11-2 0 1 1 0 012 0zM7 16a1 1 0 11-2 0 1 1 0 012 0zM15 4a1 1 0 11-2 0 1 1 0 012 0zM15 10a1 1 0 11-2 0 1 1 0 012 0zM15 16a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
+                    </span>
+                    Exercise {{ ei + 1 }}
+                  </span>
                   @if (getDayExercises(di).length > 1) {
                     <button type="button" (click)="removeExercise(di, ei)" class="text-text-muted hover:text-error text-xs transition-colors">Remove</button>
                   }
@@ -84,6 +95,24 @@
                       <div>
                         <label class="block text-[10px] text-text-muted mb-1">Duration (s)</label>
                         <input type="number" formControlName="targetDuration" min="1"
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                      </div>
+                      <div>
+                        <label class="block text-[10px] text-text-muted mb-1">Rest (s)</label>
+                        <input type="number" formControlName="restTime" min="0" step="15"
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                      </div>
+                    </div>
+                  } @else if (ex.get('trackingType')?.value === 'reps_only') {
+                    <div class="grid grid-cols-3 gap-2">
+                      <div>
+                        <label class="block text-[10px] text-text-muted mb-1">Sets</label>
+                        <input type="number" formControlName="targetSets" min="1"
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                      </div>
+                      <div>
+                        <label class="block text-[10px] text-text-muted mb-1">Reps</label>
+                        <input type="number" formControlName="targetReps" min="1"
                                class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
                       </div>
                       <div>

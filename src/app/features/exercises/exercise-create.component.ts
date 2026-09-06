@@ -45,7 +45,9 @@ export class ExerciseCreateComponent implements OnInit {
     category: ['strength' as WorkoutCategory, Validators.required],
     equipment: ['barbell' as Equipment, Validators.required],
     trackingType: ['reps' as ExerciseTrackingType, Validators.required],
+    recommendedReps: [null as number | null],
     recommendedWeight: [null as number | null],
+    recommendedDuration: [null as number | null],
     instructions: ['']
   });
 
@@ -66,7 +68,9 @@ export class ExerciseCreateComponent implements OnInit {
       category: exercise.category,
       equipment: exercise.equipment,
       trackingType: exercise.trackingType || 'reps',
+      recommendedReps: exercise.recommendedReps ?? null,
       recommendedWeight: exercise.recommendedWeight ?? null,
+      recommendedDuration: exercise.recommendedDuration ?? null,
       instructions: exercise.instructions || ''
     });
     for (const muscle of exercise.primaryMuscles) {
@@ -102,7 +106,9 @@ export class ExerciseCreateComponent implements OnInit {
       category: value.category!,
       equipment: value.equipment!,
       trackingType: value.trackingType!,
+      recommendedReps: value.trackingType !== 'duration' ? (value.recommendedReps || undefined) : undefined,
       recommendedWeight: value.trackingType === 'reps' ? (value.recommendedWeight || undefined) : undefined,
+      recommendedDuration: value.trackingType === 'duration' ? (value.recommendedDuration || undefined) : undefined,
       primaryMuscles: Array.from(this.selectedMuscles),
       instructions: value.instructions || undefined
     };
