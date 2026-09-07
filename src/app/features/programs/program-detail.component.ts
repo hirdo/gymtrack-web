@@ -90,6 +90,10 @@ export class ProgramDetailComponent {
     return this.exerciseService.getById(exerciseId)?.imageUrl;
   }
 
+  getExerciseName(exerciseId: string): string | undefined {
+    return this.exerciseService.getById(exerciseId)?.name;
+  }
+
   async deleteProgram(): Promise<void> {
     const p = this.program();
     if (p) {

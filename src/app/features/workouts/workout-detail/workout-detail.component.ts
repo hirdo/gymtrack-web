@@ -33,8 +33,14 @@ export class WorkoutDetailComponent {
     return w ? this.exerciseLogService.logsForWorkout(w.id) : [];
   });
 
-  getLogForExercise(exerciseIndex: number): ExerciseLog | undefined {
-    return this.logsForWorkout().find(l => l.exerciseIndex === exerciseIndex);
+  getLogsForExercise(exerciseIndex: number): ExerciseLog[] {
+    return this.logsForWorkout()
+      .filter(l => l.exerciseIndex === exerciseIndex)
+      .sort((a, b) => a.startedAt.localeCompare(b.startedAt));
+  }
+
+  hasAnyLoggedSets(logs: ExerciseLog[]): boolean {
+    return logs.some(l => l.sets.length > 0);
   }
 
   formatCompletedDate(iso: string): string {

@@ -1,5 +1,5 @@
 import { inject, Injectable, signal, computed, effect, OnDestroy } from '@angular/core';
-import { ExerciseLog, SetRecord, Workout } from '../models/workout.model';
+import { ExerciseLog, ExerciseTemplate, SetRecord, Workout } from '../models/workout.model';
 import { AuthService } from './auth.service';
 import { FirestoreService } from './firestore.service';
 import { toLocalDateString } from '../utils/date.util';
@@ -68,6 +68,37 @@ export class ExerciseLogService implements OnDestroy {
       };
       await this.firestore.addDocument(this.COLLECTION, data);
     }
+  }
+
+  async addAlternateLog(workout: Workout, exerciseIndex: number, alternate: ExerciseTemplate): Promise<string> {
+    const userId = this.auth.userId();
+    const existing = this.logsSignal().find(l =>
+      l.workoutId === workout.id && l.exerciseIndex === exerciseIndex && l.exerciseTemplateId === alternate.id
+    );
+    if (existing) return existing.id;
+
+    const primary = this.logsForWorkout(workout.id).find(l => l.exerciseIndex === exerciseIndex);
+    const now = new Date().toISOString();
+    const trackingType = alternate.trackingType || 'reps';
+    const data = {
+      userId: userId || '',
+      workoutId: workout.id,
+      exerciseIndex,
+      exerciseTemplateId: alternate.id,
+      exerciseName: alternate.name,
+      trackingType,
+      date: primary?.date || toLocalDateString(new Date()),
+      targetSets: primary?.targetSets ?? 3,
+      targetReps: trackingType !== 'duration' ? (primary?.targetReps ?? alternate.recommendedReps) : undefined,
+      targetWeight: trackingType === 'reps' ? (primary?.targetWeight ?? alternate.recommendedWeight) : undefined,
+      targetDuration: trackingType === 'duration' ? (primary?.targetDuration ?? alternate.recommendedDuration) : undefined,
+      restTime: primary?.restTime,
+      sets: [],
+      startedAt: now,
+      createdAt: now,
+      updatedAt: now
+    };
+    return this.firestore.addDocument(this.COLLECTION, data);
   }
 
   async logSet(logId: string, setRecord: SetRecord): Promise<void> {

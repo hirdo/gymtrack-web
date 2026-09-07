@@ -67,7 +67,7 @@
       @for (exercise of filteredExercises(); track exercise.id) {
         <a [routerLink]="['/exercises', exercise.id]" class="gym-card hover:border-primary/30 transition-colors group">
           @if (exercise.imageUrl) {
-            <img [src]="exercise.imageUrl" alt="{{ exercise.name }}" class="w-full h-32 object-cover rounded-lg mb-3">
+            <img [src]="exercise.imageUrl" alt="{{ exercise.name }}" class="w-full h-32 object-contain bg-white rounded-lg mb-3">
           }
           <h3 class="font-heading font-semibold uppercase tracking-wide text-sm group-hover:text-primary transition-colors mb-2">{{ exercise.name }}</h3>
           <div class="flex flex-wrap gap-1.5 mb-3">

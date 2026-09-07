@@ -49,7 +49,7 @@
               </a>
             }
           }
-          @if (!w.completedDate) {
+          @if (!w.completedDate && !w.programId && !hasBeenTrained()) {
             <a [routerLink]="['/workouts', w.id, 'edit']" class="btn-secondary text-sm py-2 px-4">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
               Edit
@@ -79,7 +79,7 @@
         <div class="gym-card">
           <div class="flex items-center gap-4 mb-4">
             @if (exercise.imageUrl) {
-              <img [src]="exercise.imageUrl" alt="{{ exercise.name }}" class="w-20 h-20 rounded-xl object-cover shrink-0">
+              <img [src]="exercise.imageUrl" alt="{{ exercise.name }}" class="w-20 h-20 rounded-xl object-contain bg-white shrink-0">
             } @else {
               <div class="w-20 h-20 bg-primary/10 rounded-xl flex items-center justify-center shrink-0 text-primary font-heading font-bold text-xl">{{ i + 1 }}</div>
             }
@@ -119,22 +119,33 @@
             <p class="mt-3 text-sm text-text-muted border-l-2 border-primary/30 pl-3">{{ exercise.notes }}</p>
           }
           @if (w.completedDate) {
-            @if (getLogForExercise(i); as log) {
+            @if (getLogsForExercise(i); as exerciseLogs) {
               <div class="mt-4 pt-4 border-t border-border/50">
                 <p class="text-xs text-text-muted font-semibold uppercase tracking-wider mb-2">Logged Sets</p>
-                @if (log.sets.length > 0) {
-                  <div class="space-y-2">
-                    @for (set of log.sets; track set.setNumber) {
-                      <div class="flex items-center justify-between bg-background rounded-lg px-3 py-2 text-sm">
-                        <span class="text-text-muted">Set {{ set.setNumber }}</span>
-                        @if (exercise.trackingType === 'duration') {
-                          <span class="font-semibold">{{ set.duration }}<span class="text-text-muted text-xs ml-0.5">s</span></span>
-                        } @else if (exercise.trackingType === 'reps_only') {
-                          <span class="font-semibold">{{ set.reps }}<span class="text-text-muted text-xs ml-0.5">reps</span></span>
-                        } @else {
-                          <span class="font-semibold">{{ set.weight }}<span class="text-text-muted text-xs ml-0.5">kg</span> &times; {{ set.reps }}<span class="text-text-muted text-xs ml-0.5">reps</span></span>
-                        }
-                      </div>
+                @if (hasAnyLoggedSets(exerciseLogs)) {
+                  <div class="space-y-3">
+                    @for (log of exerciseLogs; track log.id) {
+                      @if (log.sets.length > 0) {
+                        <div>
+                          @if (exerciseLogs.length > 1) {
+                            <p class="text-xs font-semibold text-primary mb-1.5">{{ log.exerciseName }}</p>
+                          }
+                          <div class="space-y-2">
+                            @for (set of log.sets; track set.setNumber) {
+                              <div class="flex items-center justify-between bg-background rounded-lg px-3 py-2 text-sm">
+                                <span class="text-text-muted">Set {{ set.setNumber }}</span>
+                                @if (log.trackingType === 'duration') {
+                                  <span class="font-semibold">{{ set.duration }}<span class="text-text-muted text-xs ml-0.5">s</span></span>
+                                } @else if (log.trackingType === 'reps_only') {
+                                  <span class="font-semibold">{{ set.reps }}<span class="text-text-muted text-xs ml-0.5">reps</span></span>
+                                } @else {
+                                  <span class="font-semibold">{{ set.weight }}<span class="text-text-muted text-xs ml-0.5">kg</span> &times; {{ set.reps }}<span class="text-text-muted text-xs ml-0.5">reps</span></span>
+                                }
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
                     }
                   </div>
                 } @else {

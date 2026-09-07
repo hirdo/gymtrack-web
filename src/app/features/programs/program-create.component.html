@@ -79,8 +79,11 @@
                 </div>
                 <div class="space-y-2">
                   <button type="button" (click)="openExercisePicker(di, ei)"
-                          class="w-full bg-surface border border-border rounded-lg px-3 py-2 text-left text-sm hover:border-primary/50 focus:border-primary focus:outline-none transition-colors flex items-center justify-between cursor-pointer">
-                    <span [class]="ex.get('exerciseName')?.value ? '' : 'text-text-muted'">
+                          class="w-full bg-surface border border-border rounded-lg px-3 py-2 text-left text-sm hover:border-primary/50 focus:border-primary focus:outline-none transition-colors flex items-center gap-2 cursor-pointer">
+                    @if (getExerciseImage(ex.get('exerciseId')?.value); as img) {
+                      <img [src]="img" alt="" class="w-8 h-8 rounded object-contain bg-white shrink-0">
+                    }
+                    <span class="flex-1" [class]="ex.get('exerciseName')?.value ? '' : 'text-text-muted'">
                       {{ ex.get('exerciseName')?.value || 'Choose exercise…' }}
                     </span>
                     <svg class="w-4 h-4 text-text-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -145,6 +148,30 @@
                       </div>
                     </div>
                   }
+
+                  <!-- Alternative Exercises -->
+                  <div class="pt-1">
+                    <label class="block text-[10px] text-text-muted mb-1.5">Alternative Exercises (optional, max 5)</label>
+                    <div class="flex flex-wrap gap-2 mb-1.5">
+                      @for (altId of ex.get('alternativeExerciseIds')?.value; track altId) {
+                        <span class="inline-flex items-center gap-2 bg-surface border border-border rounded-lg pl-1 pr-2 py-1.5">
+                          @if (getExerciseImage(altId); as img) {
+                            <img [src]="img" alt="" class="w-8 h-8 rounded object-contain bg-white shrink-0">
+                          }
+                          <span class="text-xs text-text truncate max-w-[8rem]">{{ getExerciseName(altId) }}</span>
+                          <button type="button" (click)="removeAlternative(di, ei, altId)" class="text-text-muted hover:text-error transition-colors shrink-0" aria-label="Remove alternative">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                          </button>
+                        </span>
+                      }
+                    </div>
+                    @if ((ex.get('alternativeExerciseIds')?.value?.length || 0) < 5) {
+                      <button type="button" (click)="openAlternativesPicker(di, ei)" class="text-xs text-primary hover:text-primary-light transition-colors inline-flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Add Alternative
+                      </button>
+                    }
+                  </div>
                 </div>
               </div>
             }
@@ -176,4 +203,14 @@
     [open]="pickerOpen()"
     (closed)="closeExercisePicker()"
     (exerciseSelected)="onExercisePicked($event)" />
+
+  <app-exercise-picker-modal
+    [open]="altPickerOpen()"
+    [multiple]="true"
+    [maxSelect]="5"
+    [excludeIds]="altPickerTargetExcludeIds()"
+    [preselectedIds]="altPreselectedIds()"
+    [requiredTrackingType]="altPickerTargetTrackingType()"
+    (closed)="closeAlternativesPicker()"
+    (multipleSelected)="onAlternativesPicked($event)" />
 </div>

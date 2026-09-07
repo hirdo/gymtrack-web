@@ -65,10 +65,13 @@ export class ExerciseLibraryService implements OnDestroy {
   getAlternatives(exerciseId: string): ExerciseTemplate[] {
     const exercise = this.getById(exerciseId);
     if (!exercise) return [];
-    return this.exercisesSignal().filter(e =>
-      e.id !== exerciseId &&
-      e.primaryMuscles.some(m => exercise.primaryMuscles.includes(m))
-    );
+    return this.exercisesSignal()
+      .filter(e => e.id !== exerciseId && e.primaryMuscles.some(m => exercise.primaryMuscles.includes(m)))
+      .sort((a, b) => {
+        const scoreA = a.primaryMuscles.filter(m => exercise.primaryMuscles.includes(m)).length;
+        const scoreB = b.primaryMuscles.filter(m => exercise.primaryMuscles.includes(m)).length;
+        return scoreB - scoreA || a.name.localeCompare(b.name);
+      });
   }
 
   async addExercise(exercise: Omit<ExerciseTemplate, 'id'>): Promise<ExerciseTemplate> {

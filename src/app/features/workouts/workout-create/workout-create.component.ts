@@ -8,6 +8,8 @@ import {
   Validators
 } from '@angular/forms';
 import { WorkoutService } from '../../../core/services/workout.service';
+import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
+import { ExerciseLogService } from '../../../core/services/exercise-log.service';
 import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate, Workout } from '../../../core/models/workout.model';
 import { ExercisePickerModalComponent } from '../../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
 import { toLocalDateString } from '../../../core/utils/date.util';
@@ -24,6 +26,8 @@ export class WorkoutCreateComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly workoutService = inject(WorkoutService);
+  private readonly exerciseLogService = inject(ExerciseLogService);
+  readonly exerciseService = inject(ExerciseLibraryService);
 
   readonly isEditMode = signal(false);
   private editId: string | null = null;
@@ -58,7 +62,8 @@ export class WorkoutCreateComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       const workout = this.workoutService.getById(id);
-      if (workout && !workout.completedDate) {
+      const locked = !!workout && (!!workout.completedDate || !!workout.programId || this.exerciseLogService.logsForWorkout(id).length > 0);
+      if (workout && !locked) {
         this.isEditMode.set(true);
         this.editId = id;
         this.form.patchValue({
@@ -79,11 +84,12 @@ export class WorkoutCreateComponent implements OnInit {
             reps: ex.reps ?? null,
             weight: ex.weight || null,
             duration: ex.duration || null,
-            notes: ex.notes || ''
+            notes: ex.notes || '',
+            alternativeExerciseIds: ex.alternativeExerciseIds ?? []
           });
           this.exercises.push(group);
         }
-      } else if (workout?.completedDate) {
+      } else if (workout) {
         this.router.navigate(['/workouts', id]);
       } else {
         this.router.navigate(['/workouts']);
@@ -101,7 +107,8 @@ export class WorkoutCreateComponent implements OnInit {
       reps: [10 as number | null, [Validators.min(1)]],
       weight: [null as number | null],
       duration: [null as number | null],
-      notes: ['']
+      notes: [''],
+      alternativeExerciseIds: [[] as string[]]
     });
   }
 
@@ -133,7 +140,8 @@ export class WorkoutCreateComponent implements OnInit {
         sets: 1,
         reps: null,
         weight: null,
-        duration: exercise.recommendedDuration ?? group.get('duration')?.value
+        duration: exercise.recommendedDuration ?? group.get('duration')?.value,
+        alternativeExerciseIds: []
       });
     } else if (trackingType === 'reps_only') {
       group.patchValue({
@@ -143,7 +151,8 @@ export class WorkoutCreateComponent implements OnInit {
         imageUrl: exercise.imageUrl || null,
         reps: exercise.recommendedReps ?? group.get('reps')?.value,
         weight: null,
-        duration: null
+        duration: null,
+        alternativeExerciseIds: []
       });
     } else {
       group.patchValue({
@@ -153,7 +162,8 @@ export class WorkoutCreateComponent implements OnInit {
         imageUrl: exercise.imageUrl || null,
         reps: exercise.recommendedReps ?? group.get('reps')?.value,
         weight: exercise.recommendedWeight ?? group.get('weight')?.value,
-        duration: null
+        duration: null,
+        alternativeExerciseIds: []
       });
     }
     this.pickerTarget = null;
@@ -162,6 +172,58 @@ export class WorkoutCreateComponent implements OnInit {
   closeExercisePicker(): void {
     this.pickerOpen.set(false);
     this.pickerTarget = null;
+  }
+
+  readonly altPickerOpen = signal(false);
+  private altPickerTarget: number | null = null;
+
+  openAlternativesPicker(index: number): void {
+    this.altPickerTarget = index;
+    this.altPickerOpen.set(true);
+  }
+
+  closeAlternativesPicker(): void {
+    this.altPickerOpen.set(false);
+    this.altPickerTarget = null;
+  }
+
+  onAlternativesPicked(exercises: ExerciseTemplate[]): void {
+    if (this.altPickerTarget === null) return;
+    const group = this.exercises.at(this.altPickerTarget);
+    group.get('alternativeExerciseIds')?.setValue(exercises.map(e => e.id));
+    this.altPickerTarget = null;
+  }
+
+  removeAlternative(index: number, id: string): void {
+    const group = this.exercises.at(index);
+    const control = group.get('alternativeExerciseIds');
+    const current = (control?.value as string[]) || [];
+    control?.setValue(current.filter(i => i !== id));
+  }
+
+  altPickerTargetExcludeIds(): string[] {
+    if (this.altPickerTarget === null) return [];
+    const mainId = this.exercises.at(this.altPickerTarget).get('exerciseId')?.value;
+    return mainId ? [mainId] : [];
+  }
+
+  altPreselectedIds(): string[] {
+    if (this.altPickerTarget === null) return [];
+    return (this.exercises.at(this.altPickerTarget).get('alternativeExerciseIds')?.value as string[]) || [];
+  }
+
+  getAlternativeImage(id: string): string | undefined {
+    return this.exerciseService.getById(id)?.imageUrl;
+  }
+
+  getAlternativeName(id: string): string | undefined {
+    return this.exerciseService.getById(id)?.name;
+  }
+
+  altPickerTargetTrackingType(): ExerciseTrackingType | null {
+    if (this.altPickerTarget === null) return null;
+    const group = this.exercises.at(this.altPickerTarget);
+    return (group.get('trackingType')?.value as ExerciseTrackingType) ?? 'reps';
   }
 
   closeDateConflict(): void {
@@ -193,7 +255,8 @@ export class WorkoutCreateComponent implements OnInit {
       reps: e['reps'] || undefined,
       weight: e['weight'] || undefined,
       duration: e['duration'] || undefined,
-      notes: e['notes'] || undefined
+      notes: e['notes'] || undefined,
+      alternativeExerciseIds: (e['alternativeExerciseIds'] as string[])?.length ? (e['alternativeExerciseIds'] as string[]) : undefined
     }));
 
     if (this.isEditMode() && this.editId) {
