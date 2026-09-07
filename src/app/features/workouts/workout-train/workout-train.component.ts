@@ -1,7 +1,6 @@
 import { Component, inject, computed, signal, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { SlicePipe } from '@angular/common';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
@@ -12,7 +11,7 @@ import { parseLocalDate, formatDisplayDate } from '../../../core/utils/date.util
 @Component({
   selector: 'app-workout-train',
   standalone: true,
-  imports: [RouterLink, FormsModule, SlicePipe, LoadingSpinnerComponent],
+  imports: [RouterLink, FormsModule, LoadingSpinnerComponent],
   templateUrl: './workout-train.component.html',
   styleUrl: './workout-train.component.scss'
 })

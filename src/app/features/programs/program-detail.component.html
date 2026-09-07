@@ -82,10 +82,10 @@
           </div>
           <div class="space-y-2">
             @for (ex of day.exercises; track ex.exerciseId) {
-              <div class="bg-background rounded-lg p-2">
+              <div class="bg-background rounded-lg p-3">
                 <div class="flex items-center gap-3">
                   @if (getExerciseImage(ex.exerciseId); as img) {
-                    <img [src]="img" alt="{{ ex.exerciseName }}" class="w-14 h-14 rounded-lg object-contain bg-white shrink-0">
+                    <img [src]="img" alt="{{ ex.exerciseName }}" class="w-16 h-16 rounded-lg object-contain bg-white shrink-0">
                   }
                   <div class="flex-1 flex items-center justify-between text-sm">
                     <span>{{ ex.exerciseName }}</span>
@@ -102,16 +102,18 @@
                   </div>
                 </div>
                 @if (ex.alternativeExerciseIds?.length) {
-                  <div class="flex items-center gap-2 mt-2 pl-1 flex-wrap">
-                    <span class="text-[10px] text-text-muted uppercase tracking-wider shrink-0">Alt:</span>
-                    @for (altId of ex.alternativeExerciseIds; track altId) {
-                      <span class="inline-flex items-center gap-1.5 bg-surface rounded-md pl-0.5 pr-2 py-0.5">
-                        @if (getExerciseImage(altId); as img) {
-                          <img [src]="img" alt="" class="w-6 h-6 rounded object-contain bg-white shrink-0">
-                        }
-                        <span class="text-xs text-text-muted">{{ getExerciseName(altId) }}</span>
-                      </span>
-                    }
+                  <div class="mt-3 pt-3 border-t border-border/50">
+                    <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-2">Alternatives</p>
+                    <div class="flex flex-wrap gap-2">
+                      @for (altId of ex.alternativeExerciseIds; track altId) {
+                        <div class="flex items-center gap-2 bg-surface rounded-lg pl-1 pr-3 py-1.5">
+                          @if (getExerciseImage(altId); as img) {
+                            <img [src]="img" alt="" class="w-10 h-10 rounded-lg object-contain bg-white shrink-0">
+                          }
+                          <span class="text-xs text-text-muted">{{ getExerciseName(altId) }}</span>
+                        </div>
+                      }
+                    </div>
                   </div>
                 }
               </div>

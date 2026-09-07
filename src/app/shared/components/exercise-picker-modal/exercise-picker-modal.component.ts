@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, inject, signal, computed, input, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
@@ -17,9 +17,9 @@ export class ExercisePickerModalComponent implements OnChanges {
   @Input() open = false;
   @Input() multiple = false;
   @Input() maxSelect = 5;
-  @Input() excludeIds: string[] = [];
+  readonly excludeIds = input<string[]>([]);
   @Input() preselectedIds: string[] = [];
-  @Input() requiredTrackingType: ExerciseTrackingType | null = null;
+  readonly requiredTrackingType = input<ExerciseTrackingType | null>(null);
   @Output() closed = new EventEmitter<void>();
   @Output() exerciseSelected = new EventEmitter<ExerciseTemplate>();
   @Output() multipleSelected = new EventEmitter<ExerciseTemplate[]>();
@@ -49,11 +49,13 @@ export class ExercisePickerModalComponent implements OnChanges {
     if (equip) {
       results = results.filter(e => e.equipment === equip);
     }
-    if (this.excludeIds.length > 0) {
-      results = results.filter(e => !this.excludeIds.includes(e.id));
+    const exclude = this.excludeIds();
+    if (exclude.length > 0) {
+      results = results.filter(e => !exclude.includes(e.id));
     }
-    if (this.requiredTrackingType) {
-      results = results.filter(e => (e.trackingType ?? 'reps') === this.requiredTrackingType);
+    const requiredType = this.requiredTrackingType();
+    if (requiredType) {
+      results = results.filter(e => (e.trackingType ?? 'reps') === requiredType);
     }
     return results;
   });
