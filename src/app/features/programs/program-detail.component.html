@@ -84,7 +84,7 @@
             @for (ex of day.exercises; track ex.exerciseId) {
               <div class="flex items-center gap-3 bg-background rounded-lg p-2">
                 @if (getExerciseImage(ex.exerciseId); as img) {
-                  <img [src]="img" alt="{{ ex.exerciseName }}" class="w-14 h-14 rounded-lg object-cover shrink-0">
+                  <img [src]="img" alt="{{ ex.exerciseName }}" class="w-14 h-14 rounded-lg object-contain bg-white shrink-0">
                 }
                 <div class="flex-1 flex items-center justify-between text-sm">
                   <span>{{ ex.exerciseName }}</span>
