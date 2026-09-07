@@ -27,6 +27,14 @@ export class ExerciseDetailComponent {
     return this.exerciseService.getAlternatives(ex.id).slice(0, 6);
   });
 
+  readonly curatedAlternatives = computed(() => {
+    const ex = this.exercise();
+    if (!ex?.alternativeExerciseIds) return [];
+    return ex.alternativeExerciseIds
+      .map(id => this.exerciseService.getById(id))
+      .filter((e): e is NonNullable<typeof e> => !!e);
+  });
+
   async deleteExercise(): Promise<void> {
     const ex = this.exercise();
     if (ex) {

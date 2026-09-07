@@ -8,6 +8,7 @@ import {
   Validators
 } from '@angular/forms';
 import { WorkoutService } from '../../../core/services/workout.service';
+import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
 import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate, Workout } from '../../../core/models/workout.model';
 import { ExercisePickerModalComponent } from '../../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
 import { toLocalDateString } from '../../../core/utils/date.util';
@@ -24,6 +25,7 @@ export class WorkoutCreateComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly workoutService = inject(WorkoutService);
+  readonly exerciseService = inject(ExerciseLibraryService);
 
   readonly isEditMode = signal(false);
   private editId: string | null = null;
@@ -79,7 +81,8 @@ export class WorkoutCreateComponent implements OnInit {
             reps: ex.reps ?? null,
             weight: ex.weight || null,
             duration: ex.duration || null,
-            notes: ex.notes || ''
+            notes: ex.notes || '',
+            alternativeExerciseIds: ex.alternativeExerciseIds ?? []
           });
           this.exercises.push(group);
         }
@@ -101,7 +104,8 @@ export class WorkoutCreateComponent implements OnInit {
       reps: [10 as number | null, [Validators.min(1)]],
       weight: [null as number | null],
       duration: [null as number | null],
-      notes: ['']
+      notes: [''],
+      alternativeExerciseIds: [[] as string[]]
     });
   }
 
@@ -133,7 +137,8 @@ export class WorkoutCreateComponent implements OnInit {
         sets: 1,
         reps: null,
         weight: null,
-        duration: exercise.recommendedDuration ?? group.get('duration')?.value
+        duration: exercise.recommendedDuration ?? group.get('duration')?.value,
+        alternativeExerciseIds: exercise.alternativeExerciseIds ?? []
       });
     } else if (trackingType === 'reps_only') {
       group.patchValue({
@@ -143,7 +148,8 @@ export class WorkoutCreateComponent implements OnInit {
         imageUrl: exercise.imageUrl || null,
         reps: exercise.recommendedReps ?? group.get('reps')?.value,
         weight: null,
-        duration: null
+        duration: null,
+        alternativeExerciseIds: exercise.alternativeExerciseIds ?? []
       });
     } else {
       group.patchValue({
@@ -153,7 +159,8 @@ export class WorkoutCreateComponent implements OnInit {
         imageUrl: exercise.imageUrl || null,
         reps: exercise.recommendedReps ?? group.get('reps')?.value,
         weight: exercise.recommendedWeight ?? group.get('weight')?.value,
-        duration: null
+        duration: null,
+        alternativeExerciseIds: exercise.alternativeExerciseIds ?? []
       });
     }
     this.pickerTarget = null;
@@ -162,6 +169,48 @@ export class WorkoutCreateComponent implements OnInit {
   closeExercisePicker(): void {
     this.pickerOpen.set(false);
     this.pickerTarget = null;
+  }
+
+  readonly altPickerOpen = signal(false);
+  private altPickerTarget: number | null = null;
+
+  openAlternativesPicker(index: number): void {
+    this.altPickerTarget = index;
+    this.altPickerOpen.set(true);
+  }
+
+  closeAlternativesPicker(): void {
+    this.altPickerOpen.set(false);
+    this.altPickerTarget = null;
+  }
+
+  onAlternativesPicked(exercises: ExerciseTemplate[]): void {
+    if (this.altPickerTarget === null) return;
+    const group = this.exercises.at(this.altPickerTarget);
+    group.get('alternativeExerciseIds')?.setValue(exercises.map(e => e.id));
+    this.altPickerTarget = null;
+  }
+
+  removeAlternative(index: number, id: string): void {
+    const group = this.exercises.at(index);
+    const control = group.get('alternativeExerciseIds');
+    const current = (control?.value as string[]) || [];
+    control?.setValue(current.filter(i => i !== id));
+  }
+
+  altPickerTargetExcludeIds(): string[] {
+    if (this.altPickerTarget === null) return [];
+    const mainId = this.exercises.at(this.altPickerTarget).get('exerciseId')?.value;
+    return mainId ? [mainId] : [];
+  }
+
+  altPreselectedIds(): string[] {
+    if (this.altPickerTarget === null) return [];
+    return (this.exercises.at(this.altPickerTarget).get('alternativeExerciseIds')?.value as string[]) || [];
+  }
+
+  getAlternativeImage(id: string): string | undefined {
+    return this.exerciseService.getById(id)?.imageUrl;
   }
 
   closeDateConflict(): void {
@@ -193,7 +242,8 @@ export class WorkoutCreateComponent implements OnInit {
       reps: e['reps'] || undefined,
       weight: e['weight'] || undefined,
       duration: e['duration'] || undefined,
-      notes: e['notes'] || undefined
+      notes: e['notes'] || undefined,
+      alternativeExerciseIds: (e['alternativeExerciseIds'] as string[])?.length ? (e['alternativeExerciseIds'] as string[]) : undefined
     }));
 
     if (this.isEditMode() && this.editId) {

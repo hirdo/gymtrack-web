@@ -115,6 +115,32 @@
         <textarea formControlName="instructions" rows="4" placeholder="Form tips, technique notes..."
                   class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:outline-none transition-colors resize-none"></textarea>
       </div>
+
+      <div>
+        <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Alternative Exercises <span class="normal-case font-normal">(optional, max 5)</span></label>
+        <div class="flex flex-wrap gap-2 mb-2">
+          @for (id of alternativeIds(); track id) {
+            @if (getAlternativeExercise(id); as alt) {
+              <span class="inline-flex items-center gap-2 bg-background border border-border rounded-lg pl-1.5 pr-2 py-1.5">
+                @if (alt.imageUrl) {
+                  <img [src]="alt.imageUrl" alt="" class="w-6 h-6 rounded object-contain bg-white shrink-0">
+                }
+                <span class="text-xs font-semibold">{{ alt.name }}</span>
+                <button type="button" (click)="removeAlternative(id)" class="text-text-muted hover:text-error transition-colors" aria-label="Remove alternative">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </span>
+            }
+          }
+        </div>
+        @if (alternativeIds().length < 5) {
+          <button type="button" (click)="openAltPicker()" class="btn-secondary text-xs py-2 px-3">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Add Alternative
+          </button>
+        }
+        <p class="text-xs text-text-muted mt-1.5">Exercises users can swap to when training this one (e.g. same muscle group).</p>
+      </div>
     </div>
 
     <div class="flex gap-3">
@@ -128,4 +154,13 @@
       <a routerLink="/exercises" class="btn-secondary py-3 px-6">Cancel</a>
     </div>
   </form>
+
+  <app-exercise-picker-modal
+    [open]="altPickerOpen()"
+    [multiple]="true"
+    [maxSelect]="5"
+    [excludeIds]="altExcludeIds"
+    [preselectedIds]="alternativeIds()"
+    (closed)="closeAltPicker()"
+    (multipleSelected)="onAlternativesPicked($event)" />
 </div>

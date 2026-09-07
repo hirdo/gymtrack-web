@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
 import { WorkoutService } from '../../../core/services/workout.service';
-import { SetRecord } from '../../../core/models/workout.model';
+import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
+import { ExerciseTemplate, SetRecord } from '../../../core/models/workout.model';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { parseLocalDate, formatDisplayDate } from '../../../core/utils/date.util';
 
@@ -20,6 +21,7 @@ export class WorkoutTrainComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly exerciseLogService = inject(ExerciseLogService);
   private readonly workoutService = inject(WorkoutService);
+  private readonly exerciseLibraryService = inject(ExerciseLibraryService);
   private timerInterval: ReturnType<typeof setInterval> | null = null;
 
   private readonly workoutId = this.route.snapshot.paramMap.get('id') || '';
@@ -32,20 +34,74 @@ export class WorkoutTrainComponent implements OnDestroy {
   readonly isResting = signal(false);
   readonly elapsedSeconds = signal(0);
   readonly completing = signal(false);
+  readonly altSwapOpen = signal(false);
+
+  /** Which log is "active" (receiving newly logged sets) per exercise slot, once
+   * the user has swapped away from the default (earliest-created) log for that slot. */
+  private readonly activeLogId = signal<Map<number, string>>(new Map());
 
   readonly workout = computed(() => this.workoutService.getById(this.workoutId));
 
   readonly logs = computed(() => this.exerciseLogService.logsForWorkout(this.workoutId));
 
-  readonly currentLog = computed(() => this.logs()[this.currentExerciseIndex()]);
+  readonly totalExercises = computed(() => this.workout()?.exercises.length ?? 0);
+
+  readonly slots = computed(() => {
+    const w = this.workout();
+    if (!w) return [];
+    return w.exercises.map((ex, i) => {
+      const slotLogs = this.logs().filter(l => l.exerciseIndex === i);
+      const primary = [...slotLogs].sort((a, b) => a.startedAt.localeCompare(b.startedAt))[0];
+      const completed = slotLogs.reduce((sum, l) => sum + l.sets.length, 0);
+      const target = primary?.targetSets ?? ex.sets;
+      return { index: i, name: ex.name, completed, target };
+    });
+  });
+
+  readonly logsForCurrentSlot = computed(() =>
+    this.logs()
+      .filter(l => l.exerciseIndex === this.currentExerciseIndex())
+      .sort((a, b) => a.startedAt.localeCompare(b.startedAt))
+  );
+
+  readonly currentLog = computed(() => {
+    const slotLogs = this.logsForCurrentSlot();
+    if (slotLogs.length === 0) return undefined;
+    const activeId = this.activeLogId().get(this.currentExerciseIndex());
+    if (activeId) {
+      const found = slotLogs.find(l => l.id === activeId);
+      if (found) return found;
+    }
+    return slotLogs[0];
+  });
+
+  readonly slotTargetSets = computed(() => this.logsForCurrentSlot()[0]?.targetSets ?? 0);
+
+  readonly slotCompletedSets = computed(() =>
+    this.logsForCurrentSlot().reduce((sum, l) => sum + l.sets.length, 0)
+  );
 
   readonly currentExerciseImage = computed(() => {
     const log = this.currentLog();
     const w = this.workout();
-    return log && w ? w.exercises[log.exerciseIndex]?.imageUrl : undefined;
+    if (!log || !w) return undefined;
+    const slotExercise = w.exercises[this.currentExerciseIndex()];
+    if (log.exerciseTemplateId && log.exerciseTemplateId === slotExercise?.templateId) {
+      return slotExercise.imageUrl;
+    }
+    return log.exerciseTemplateId ? this.exerciseLibraryService.getById(log.exerciseTemplateId)?.imageUrl : undefined;
   });
 
-  readonly totalExercises = computed(() => this.logs().length);
+  readonly currentExerciseAlternatives = computed(() => {
+    const w = this.workout();
+    if (!w) return [];
+    const slot = w.exercises[this.currentExerciseIndex()];
+    if (!slot) return [];
+    const ids = [slot.templateId, ...(slot.alternativeExerciseIds || [])].filter((id): id is string => !!id);
+    return ids
+      .map(id => this.exerciseLibraryService.getById(id))
+      .filter((e): e is ExerciseTemplate => !!e);
+  });
 
   readonly hasLoggedAnySet = computed(() => this.logs().some(l => l.sets.length > 0));
 
@@ -55,9 +111,9 @@ export class WorkoutTrainComponent implements OnDestroy {
   });
 
   readonly overallProgress = computed(() => {
-    const logs = this.logs();
-    const totalSets = logs.reduce((sum, l) => sum + l.targetSets, 0);
-    const completedSets = logs.reduce((sum, l) => sum + l.sets.length, 0);
+    const slots = this.slots();
+    const totalSets = slots.reduce((sum, s) => sum + s.target, 0);
+    const completedSets = slots.reduce((sum, s) => sum + s.completed, 0);
     return totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
   });
 
@@ -67,12 +123,7 @@ export class WorkoutTrainComponent implements OnDestroy {
     if (w?.completedDate) {
       this.router.navigate(['/workouts', w.id]);
     }
-    const log = this.currentLog();
-    if (log) {
-      this.weightInput.set(log.targetWeight || 0);
-      this.repsInput.set(log.targetReps || 10);
-      this.durationInput.set(log.targetDuration || 0);
-    }
+    this.syncInputsFromCurrentLog();
   }
 
   ngOnDestroy(): void {
@@ -82,13 +133,8 @@ export class WorkoutTrainComponent implements OnDestroy {
   navigateExercise(index: number): void {
     this.currentExerciseIndex.set(index);
     this.stopRestTimer();
-    const log = this.logs()[index];
-    if (log) {
-      const lastSet = log.sets[log.sets.length - 1];
-      this.weightInput.set(lastSet?.weight ?? log.targetWeight ?? 0);
-      this.repsInput.set(lastSet?.reps ?? log.targetReps ?? 10);
-      this.durationInput.set(lastSet?.duration ?? log.targetDuration ?? 0);
-    }
+    this.altSwapOpen.set(false);
+    this.syncInputsFromCurrentLog();
   }
 
   prevExercise(): void {
@@ -101,6 +147,29 @@ export class WorkoutTrainComponent implements OnDestroy {
     if (this.currentExerciseIndex() < this.totalExercises() - 1) {
       this.navigateExercise(this.currentExerciseIndex() + 1);
     }
+  }
+
+  toggleAltSwap(): void {
+    this.altSwapOpen.set(!this.altSwapOpen());
+  }
+
+  async switchToExercise(templateId: string): Promise<void> {
+    const w = this.workout();
+    if (!w) return;
+    if (this.currentLog()?.exerciseTemplateId === templateId) {
+      this.altSwapOpen.set(false);
+      return;
+    }
+    const alternate = this.exerciseLibraryService.getById(templateId);
+    if (!alternate) return;
+
+    const exerciseIndex = this.currentExerciseIndex();
+    const logId = await this.exerciseLogService.addAlternateLog(w, exerciseIndex, alternate);
+    const map = new Map(this.activeLogId());
+    map.set(exerciseIndex, logId);
+    this.activeLogId.set(map);
+    this.altSwapOpen.set(false);
+    this.syncInputsFromCurrentLog();
   }
 
   async logSet(): Promise<void> {
@@ -131,7 +200,7 @@ export class WorkoutTrainComponent implements OnDestroy {
 
     await this.exerciseLogService.logSet(log.id, setRecord);
 
-    if (log.restTime && log.sets.length + 1 < log.targetSets) {
+    if (log.restTime && this.slotCompletedSets() + 1 < this.slotTargetSets()) {
       this.startRestTimer(log.restTime);
     }
   }
@@ -157,6 +226,16 @@ export class WorkoutTrainComponent implements OnDestroy {
 
   skipRest(): void {
     this.stopRestTimer();
+  }
+
+  private syncInputsFromCurrentLog(): void {
+    const log = this.currentLog();
+    if (log) {
+      const lastSet = log.sets[log.sets.length - 1];
+      this.weightInput.set(lastSet?.weight ?? log.targetWeight ?? 0);
+      this.repsInput.set(lastSet?.reps ?? log.targetReps ?? 10);
+      this.durationInput.set(lastSet?.duration ?? log.targetDuration ?? 0);
+    }
   }
 
   private startRestTimer(seconds: number): void {

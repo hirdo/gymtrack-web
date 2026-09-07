@@ -67,6 +67,30 @@
       </div>
     }
 
+    <!-- Curated Alternative Exercises -->
+    @if (curatedAlternatives().length > 0) {
+      <div class="gym-card mb-6">
+        <h2 class="text-sm font-heading font-bold uppercase tracking-wider mb-4">Alternative Exercises</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          @for (alt of curatedAlternatives(); track alt.id) {
+            <a [routerLink]="['/exercises', alt.id]" class="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-light transition-colors group">
+              @if (alt.imageUrl) {
+                <img [src]="alt.imageUrl" alt="{{ alt.name }}" class="w-10 h-10 rounded-lg object-contain bg-white shrink-0">
+              } @else {
+                <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </div>
+              }
+              <div>
+                <p class="text-sm font-semibold group-hover:text-primary transition-colors">{{ alt.name }}</p>
+                <p class="text-xs text-text-muted capitalize">{{ alt.equipment }}</p>
+              </div>
+            </a>
+          }
+        </div>
+      </div>
+    }
+
     <!-- Alternatives -->
     @if (alternatives().length > 0) {
       <div class="gym-card">

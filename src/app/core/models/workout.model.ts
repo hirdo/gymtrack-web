@@ -13,6 +13,7 @@ export interface Exercise {
   imageUrl?: string;
   templateId?: string;
   trackingType?: ExerciseTrackingType;
+  alternativeExerciseIds?: string[];
 }
 
 export interface Workout {
@@ -61,6 +62,7 @@ export interface ExerciseTemplate {
   instructions?: string;
   isCustom?: boolean;
   createdBy?: string;
+  alternativeExerciseIds?: string[];
 }
 
 export interface SetRecord {
@@ -105,6 +107,7 @@ export interface ProgramDay {
     targetWeight?: number;
     targetDuration?: number;
     restTime?: number;
+    alternativeExerciseIds?: string[];
   }[];
 }
 

@@ -38,7 +38,9 @@
         } @else {
           @for (exercise of filteredExercises(); track exercise.id) {
             <button type="button" (click)="select(exercise)"
-                    class="w-full text-left flex items-center justify-between p-3 rounded-xl hover:bg-surface-light transition-colors cursor-pointer">
+                    [disabled]="multiple && !isSelected(exercise) && selectedIds().length >= maxSelect"
+                    class="w-full text-left flex items-center justify-between p-3 rounded-xl transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    [class]="multiple && isSelected(exercise) ? 'bg-primary/10 border border-primary/40' : 'hover:bg-surface-light border border-transparent'">
               <div class="flex items-center gap-3">
                 @if (exercise.imageUrl) {
                   <img [src]="exercise.imageUrl" alt="{{ exercise.name }}" class="w-12 h-12 rounded-lg object-contain bg-white shrink-0">
@@ -52,11 +54,27 @@
                   <p class="text-text-muted text-xs mt-0.5 capitalize">{{ exercise.equipment }} &middot; {{ exercise.primaryMuscles.join(', ') }}</p>
                 </div>
               </div>
-              <svg class="w-4 h-4 text-text-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              @if (multiple) {
+                @if (isSelected(exercise)) {
+                  <svg class="w-5 h-5 text-primary shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                } @else {
+                  <span class="w-5 h-5 rounded-full border border-border shrink-0"></span>
+                }
+              } @else {
+                <svg class="w-4 h-4 text-text-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              }
             </button>
           }
         }
       </div>
+
+      @if (multiple) {
+        <div class="p-4 border-t border-border shrink-0">
+          <button type="button" (click)="confirmMultiple()" class="btn-primary w-full py-2.5">
+            Done ({{ selectedIds().length }}/{{ maxSelect }})
+          </button>
+        </div>
+      }
     </div>
   </div>
 }

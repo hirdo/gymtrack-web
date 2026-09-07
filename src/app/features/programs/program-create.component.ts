@@ -80,7 +80,8 @@ export class ProgramCreateComponent implements OnInit {
           targetReps: ex.targetReps ?? null,
           targetWeight: ex.targetWeight ?? null,
           targetDuration: ex.targetDuration ?? null,
-          restTime: ex.restTime ?? null
+          restTime: ex.restTime ?? null,
+          alternativeExerciseIds: ex.alternativeExerciseIds ?? []
         });
         exercises.push(exGroup);
       }
@@ -109,7 +110,8 @@ export class ProgramCreateComponent implements OnInit {
       targetReps: [10 as number | null, [Validators.min(1)]],
       targetWeight: [null as number | null],
       targetDuration: [null as number | null],
-      restTime: [90 as number | null]
+      restTime: [90 as number | null],
+      alternativeExerciseIds: [[] as string[]]
     });
   }
 
@@ -185,7 +187,8 @@ export class ProgramCreateComponent implements OnInit {
         targetSets: 1,
         targetReps: null,
         targetWeight: null,
-        targetDuration: exercise.recommendedDuration ?? group.get('targetDuration')?.value
+        targetDuration: exercise.recommendedDuration ?? group.get('targetDuration')?.value,
+        alternativeExerciseIds: exercise.alternativeExerciseIds ?? []
       });
     } else if (trackingType === 'reps_only') {
       group.patchValue({
@@ -194,7 +197,8 @@ export class ProgramCreateComponent implements OnInit {
         trackingType,
         targetReps: exercise.recommendedReps ?? group.get('targetReps')?.value,
         targetWeight: null,
-        targetDuration: null
+        targetDuration: null,
+        alternativeExerciseIds: exercise.alternativeExerciseIds ?? []
       });
     } else {
       group.patchValue({
@@ -203,7 +207,8 @@ export class ProgramCreateComponent implements OnInit {
         trackingType,
         targetReps: exercise.recommendedReps ?? group.get('targetReps')?.value,
         targetWeight: exercise.recommendedWeight ?? group.get('targetWeight')?.value,
-        targetDuration: null
+        targetDuration: null,
+        alternativeExerciseIds: exercise.alternativeExerciseIds ?? []
       });
     }
     this.pickerTarget = null;
@@ -216,6 +221,45 @@ export class ProgramCreateComponent implements OnInit {
 
   getExerciseImage(exerciseId: string): string | undefined {
     return this.exerciseService.getById(exerciseId)?.imageUrl;
+  }
+
+  readonly altPickerOpen = signal(false);
+  private altPickerTarget: { dayIndex: number; exerciseIndex: number } | null = null;
+
+  openAlternativesPicker(dayIndex: number, exerciseIndex: number): void {
+    this.altPickerTarget = { dayIndex, exerciseIndex };
+    this.altPickerOpen.set(true);
+  }
+
+  closeAlternativesPicker(): void {
+    this.altPickerOpen.set(false);
+    this.altPickerTarget = null;
+  }
+
+  onAlternativesPicked(exercises: ExerciseTemplate[]): void {
+    if (!this.altPickerTarget) return;
+    const group = this.getDayExercises(this.altPickerTarget.dayIndex).at(this.altPickerTarget.exerciseIndex);
+    group.get('alternativeExerciseIds')?.setValue(exercises.map(e => e.id));
+    this.altPickerTarget = null;
+  }
+
+  removeAlternative(dayIndex: number, exerciseIndex: number, id: string): void {
+    const group = this.getDayExercises(dayIndex).at(exerciseIndex);
+    const control = group.get('alternativeExerciseIds');
+    const current = (control?.value as string[]) || [];
+    control?.setValue(current.filter(i => i !== id));
+  }
+
+  altPickerTargetExcludeIds(): string[] {
+    if (!this.altPickerTarget) return [];
+    const mainId = this.getDayExercises(this.altPickerTarget.dayIndex).at(this.altPickerTarget.exerciseIndex).get('exerciseId')?.value;
+    return mainId ? [mainId] : [];
+  }
+
+  altPreselectedIds(): string[] {
+    if (!this.altPickerTarget) return [];
+    const group = this.getDayExercises(this.altPickerTarget.dayIndex).at(this.altPickerTarget.exerciseIndex);
+    return (group.get('alternativeExerciseIds')?.value as string[]) || [];
   }
 
   async onSubmit(): Promise<void> {
@@ -235,7 +279,8 @@ export class ProgramCreateComponent implements OnInit {
           targetReps: (e['targetReps'] as number) || undefined,
           targetWeight: (e['targetWeight'] as number) || undefined,
           targetDuration: (e['targetDuration'] as number) || undefined,
-          restTime: (e['restTime'] as number) || undefined
+          restTime: (e['restTime'] as number) || undefined,
+          alternativeExerciseIds: (e['alternativeExerciseIds'] as string[])?.length ? (e['alternativeExerciseIds'] as string[]) : undefined
         }))
       };
     });
