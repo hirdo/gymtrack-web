@@ -9,6 +9,7 @@ import {
 } from '@angular/forms';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
+import { ExerciseLogService } from '../../../core/services/exercise-log.service';
 import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate, Workout } from '../../../core/models/workout.model';
 import { ExercisePickerModalComponent } from '../../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
 import { toLocalDateString } from '../../../core/utils/date.util';
@@ -25,6 +26,7 @@ export class WorkoutCreateComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly workoutService = inject(WorkoutService);
+  private readonly exerciseLogService = inject(ExerciseLogService);
   readonly exerciseService = inject(ExerciseLibraryService);
 
   readonly isEditMode = signal(false);
@@ -60,7 +62,8 @@ export class WorkoutCreateComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       const workout = this.workoutService.getById(id);
-      if (workout && !workout.completedDate) {
+      const locked = !!workout && (!!workout.completedDate || !!workout.programId || this.exerciseLogService.logsForWorkout(id).length > 0);
+      if (workout && !locked) {
         this.isEditMode.set(true);
         this.editId = id;
         this.form.patchValue({
@@ -86,7 +89,7 @@ export class WorkoutCreateComponent implements OnInit {
           });
           this.exercises.push(group);
         }
-      } else if (workout?.completedDate) {
+      } else if (workout) {
         this.router.navigate(['/workouts', id]);
       } else {
         this.router.navigate(['/workouts']);
@@ -211,6 +214,16 @@ export class WorkoutCreateComponent implements OnInit {
 
   getAlternativeImage(id: string): string | undefined {
     return this.exerciseService.getById(id)?.imageUrl;
+  }
+
+  getAlternativeName(id: string): string | undefined {
+    return this.exerciseService.getById(id)?.name;
+  }
+
+  altPickerTargetTrackingType(): ExerciseTrackingType | null {
+    if (this.altPickerTarget === null) return null;
+    const group = this.exercises.at(this.altPickerTarget);
+    return (group.get('trackingType')?.value as ExerciseTrackingType) ?? 'reps';
   }
 
   closeDateConflict(): void {

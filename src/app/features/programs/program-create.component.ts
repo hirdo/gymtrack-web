@@ -223,6 +223,10 @@ export class ProgramCreateComponent implements OnInit {
     return this.exerciseService.getById(exerciseId)?.imageUrl;
   }
 
+  getExerciseName(exerciseId: string): string | undefined {
+    return this.exerciseService.getById(exerciseId)?.name;
+  }
+
   readonly altPickerOpen = signal(false);
   private altPickerTarget: { dayIndex: number; exerciseIndex: number } | null = null;
 
@@ -260,6 +264,12 @@ export class ProgramCreateComponent implements OnInit {
     if (!this.altPickerTarget) return [];
     const group = this.getDayExercises(this.altPickerTarget.dayIndex).at(this.altPickerTarget.exerciseIndex);
     return (group.get('alternativeExerciseIds')?.value as string[]) || [];
+  }
+
+  altPickerTargetTrackingType(): ExerciseTrackingType | null {
+    if (!this.altPickerTarget) return null;
+    const group = this.getDayExercises(this.altPickerTarget.dayIndex).at(this.altPickerTarget.exerciseIndex);
+    return (group.get('trackingType')?.value as ExerciseTrackingType) ?? 'reps';
   }
 
   async onSubmit(): Promise<void> {

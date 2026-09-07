@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, Input, Output, EventEmitter, OnCha
 import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
-import { ExerciseTemplate, MuscleGroup, Equipment } from '../../../core/models/workout.model';
+import { ExerciseTemplate, ExerciseTrackingType, MuscleGroup, Equipment } from '../../../core/models/workout.model';
 
 @Component({
   selector: 'app-exercise-picker-modal',
@@ -19,6 +19,7 @@ export class ExercisePickerModalComponent implements OnChanges {
   @Input() maxSelect = 5;
   @Input() excludeIds: string[] = [];
   @Input() preselectedIds: string[] = [];
+  @Input() requiredTrackingType: ExerciseTrackingType | null = null;
   @Output() closed = new EventEmitter<void>();
   @Output() exerciseSelected = new EventEmitter<ExerciseTemplate>();
   @Output() multipleSelected = new EventEmitter<ExerciseTemplate[]>();
@@ -50,6 +51,9 @@ export class ExercisePickerModalComponent implements OnChanges {
     }
     if (this.excludeIds.length > 0) {
       results = results.filter(e => !this.excludeIds.includes(e.id));
+    }
+    if (this.requiredTrackingType) {
+      results = results.filter(e => (e.trackingType ?? 'reps') === this.requiredTrackingType);
     }
     return results;
   });
