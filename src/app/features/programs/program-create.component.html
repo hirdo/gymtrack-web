@@ -79,8 +79,11 @@
                 </div>
                 <div class="space-y-2">
                   <button type="button" (click)="openExercisePicker(di, ei)"
-                          class="w-full bg-surface border border-border rounded-lg px-3 py-2 text-left text-sm hover:border-primary/50 focus:border-primary focus:outline-none transition-colors flex items-center justify-between cursor-pointer">
-                    <span [class]="ex.get('exerciseName')?.value ? '' : 'text-text-muted'">
+                          class="w-full bg-surface border border-border rounded-lg px-3 py-2 text-left text-sm hover:border-primary/50 focus:border-primary focus:outline-none transition-colors flex items-center gap-2 cursor-pointer">
+                    @if (getExerciseImage(ex.get('exerciseId')?.value); as img) {
+                      <img [src]="img" alt="" class="w-8 h-8 rounded object-contain bg-white shrink-0">
+                    }
+                    <span class="flex-1" [class]="ex.get('exerciseName')?.value ? '' : 'text-text-muted'">
                       {{ ex.get('exerciseName')?.value || 'Choose exercise…' }}
                     </span>
                     <svg class="w-4 h-4 text-text-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>

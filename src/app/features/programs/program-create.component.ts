@@ -214,6 +214,10 @@ export class ProgramCreateComponent implements OnInit {
     this.pickerTarget = null;
   }
 
+  getExerciseImage(exerciseId: string): string | undefined {
+    return this.exerciseService.getById(exerciseId)?.imageUrl;
+  }
+
   async onSubmit(): Promise<void> {
     if (this.form.invalid) return;
 
