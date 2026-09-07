@@ -4,13 +4,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { StorageService } from '../../core/services/storage.service';
-import { WorkoutCategory, MuscleGroup, Equipment, ExerciseTrackingType, ExerciseTemplate } from '../../core/models/workout.model';
-import { ExercisePickerModalComponent } from '../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
+import { WorkoutCategory, MuscleGroup, Equipment, ExerciseTrackingType } from '../../core/models/workout.model';
 
 @Component({
   selector: 'app-exercise-create',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, TitleCasePipe, ExercisePickerModalComponent],
+  imports: [ReactiveFormsModule, RouterLink, TitleCasePipe],
   templateUrl: './exercise-create.component.html',
   styleUrl: './exercise-create.component.scss'
 })
@@ -40,9 +39,6 @@ export class ExerciseCreateComponent implements OnInit {
   readonly imagePreviewUrl = signal<string | null>(null);
   readonly uploading = signal(false);
   readonly uploadError = signal<string | null>(null);
-
-  readonly alternativeIds = signal<string[]>([]);
-  readonly altPickerOpen = signal(false);
 
   readonly form = this.fb.group({
     name: ['', Validators.required],
@@ -83,7 +79,6 @@ export class ExerciseCreateComponent implements OnInit {
     if (exercise.imageUrl) {
       this.imagePreviewUrl.set(exercise.imageUrl);
     }
-    this.alternativeIds.set(exercise.alternativeExerciseIds || []);
   }
 
   toggleMuscle(muscle: MuscleGroup): void {
@@ -92,30 +87,6 @@ export class ExerciseCreateComponent implements OnInit {
     } else {
       this.selectedMuscles.add(muscle);
     }
-  }
-
-  getAlternativeExercise(id: string): ExerciseTemplate | undefined {
-    return this.exerciseService.getById(id);
-  }
-
-  get altExcludeIds(): string[] {
-    return this.editId ? [this.editId] : [];
-  }
-
-  openAltPicker(): void {
-    this.altPickerOpen.set(true);
-  }
-
-  closeAltPicker(): void {
-    this.altPickerOpen.set(false);
-  }
-
-  onAlternativesPicked(exercises: ExerciseTemplate[]): void {
-    this.alternativeIds.set(exercises.map(e => e.id));
-  }
-
-  removeAlternative(id: string): void {
-    this.alternativeIds.set(this.alternativeIds().filter(i => i !== id));
   }
 
   onFileSelected(event: Event): void {
@@ -139,8 +110,7 @@ export class ExerciseCreateComponent implements OnInit {
       recommendedWeight: value.trackingType === 'reps' ? (value.recommendedWeight || undefined) : undefined,
       recommendedDuration: value.trackingType === 'duration' ? (value.recommendedDuration || undefined) : undefined,
       primaryMuscles: Array.from(this.selectedMuscles),
-      instructions: value.instructions || undefined,
-      alternativeExerciseIds: this.alternativeIds().length > 0 ? this.alternativeIds() : undefined
+      instructions: value.instructions || undefined
     };
 
     let exerciseId: string;

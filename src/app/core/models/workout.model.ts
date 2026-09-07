@@ -62,7 +62,6 @@ export interface ExerciseTemplate {
   instructions?: string;
   isCustom?: boolean;
   createdBy?: string;
-  alternativeExerciseIds?: string[];
 }
 
 export interface SetRecord {

@@ -138,7 +138,7 @@ export class WorkoutCreateComponent implements OnInit {
         reps: null,
         weight: null,
         duration: exercise.recommendedDuration ?? group.get('duration')?.value,
-        alternativeExerciseIds: exercise.alternativeExerciseIds ?? []
+        alternativeExerciseIds: []
       });
     } else if (trackingType === 'reps_only') {
       group.patchValue({
@@ -149,7 +149,7 @@ export class WorkoutCreateComponent implements OnInit {
         reps: exercise.recommendedReps ?? group.get('reps')?.value,
         weight: null,
         duration: null,
-        alternativeExerciseIds: exercise.alternativeExerciseIds ?? []
+        alternativeExerciseIds: []
       });
     } else {
       group.patchValue({
@@ -160,7 +160,7 @@ export class WorkoutCreateComponent implements OnInit {
         reps: exercise.recommendedReps ?? group.get('reps')?.value,
         weight: exercise.recommendedWeight ?? group.get('weight')?.value,
         duration: null,
-        alternativeExerciseIds: exercise.alternativeExerciseIds ?? []
+        alternativeExerciseIds: []
       });
     }
     this.pickerTarget = null;

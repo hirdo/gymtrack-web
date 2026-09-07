@@ -188,7 +188,7 @@ export class ProgramCreateComponent implements OnInit {
         targetReps: null,
         targetWeight: null,
         targetDuration: exercise.recommendedDuration ?? group.get('targetDuration')?.value,
-        alternativeExerciseIds: exercise.alternativeExerciseIds ?? []
+        alternativeExerciseIds: []
       });
     } else if (trackingType === 'reps_only') {
       group.patchValue({
@@ -198,7 +198,7 @@ export class ProgramCreateComponent implements OnInit {
         targetReps: exercise.recommendedReps ?? group.get('targetReps')?.value,
         targetWeight: null,
         targetDuration: null,
-        alternativeExerciseIds: exercise.alternativeExerciseIds ?? []
+        alternativeExerciseIds: []
       });
     } else {
       group.patchValue({
@@ -208,7 +208,7 @@ export class ProgramCreateComponent implements OnInit {
         targetReps: exercise.recommendedReps ?? group.get('targetReps')?.value,
         targetWeight: exercise.recommendedWeight ?? group.get('targetWeight')?.value,
         targetDuration: null,
-        alternativeExerciseIds: exercise.alternativeExerciseIds ?? []
+        alternativeExerciseIds: []
       });
     }
     this.pickerTarget = null;

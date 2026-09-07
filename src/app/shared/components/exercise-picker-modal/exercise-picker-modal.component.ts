@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, Input, Output, EventEmitter, OnChanges } from '@angular/core';
+import { Component, inject, signal, computed, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
@@ -54,8 +54,8 @@ export class ExercisePickerModalComponent implements OnChanges {
     return results;
   });
 
-  ngOnChanges(): void {
-    if (this.open && this.multiple) {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['open'] && this.open && this.multiple) {
       this.selectedIds.set([...this.preselectedIds]);
     }
   }
