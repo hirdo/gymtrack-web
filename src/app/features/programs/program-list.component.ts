@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ProgramService } from '../../core/services/program.service';
 import { AuthService } from '../../core/services/auth.service';
-import { PROGRAM_DIFFICULTIES, ProgramDifficulty } from '../../core/models/workout.model';
+import { PROGRAM_DIFFICULTIES, ProgramDifficulty, difficultyLabel } from '../../core/models/workout.model';
 
 @Component({
   selector: 'app-program-list',
@@ -21,7 +21,5 @@ export class ProgramListComponent {
     return PROGRAM_DIFFICULTIES.find(d => d.value === difficulty)?.stars ?? 0;
   }
 
-  difficultyLabel(difficulty: ProgramDifficulty): string {
-    return PROGRAM_DIFFICULTIES.find(d => d.value === difficulty)?.label ?? difficulty;
-  }
+  readonly difficultyLabel = difficultyLabel;
 }

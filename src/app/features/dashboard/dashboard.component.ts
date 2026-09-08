@@ -4,6 +4,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { WorkoutService } from '../../core/services/workout.service';
 import { ProgramService } from '../../core/services/program.service';
 import { parseLocalDate, formatDisplayDate } from '../../core/utils/date.util';
+import { difficultyLabel } from '../../core/models/workout.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,6 +17,7 @@ export class DashboardComponent {
   readonly auth = inject(AuthService);
   readonly workoutService = inject(WorkoutService);
   readonly programService = inject(ProgramService);
+  readonly difficultyLabel = difficultyLabel;
 
   readonly activeProgramCompletedDays = computed(() => {
     const runId = this.programService.userActiveProgramRunId();

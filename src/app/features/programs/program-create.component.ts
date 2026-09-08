@@ -107,7 +107,7 @@ export class ProgramCreateComponent implements OnInit {
       exerciseName: ['', Validators.required],
       trackingType: ['reps' as ExerciseTrackingType],
       targetSets: [3, [Validators.required, Validators.min(1)]],
-      targetReps: [10 as number | null, [Validators.min(1)]],
+      targetReps: [12 as number | null, [Validators.min(1)]],
       targetWeight: [null as number | null],
       targetDuration: [null as number | null],
       restTime: [90 as number | null],

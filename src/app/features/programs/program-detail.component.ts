@@ -3,7 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProgramService } from '../../core/services/program.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { AuthService } from '../../core/services/auth.service';
-import { PROGRAM_DIFFICULTIES, ProgramDifficulty, TrainingProgram } from '../../core/models/workout.model';
+import { PROGRAM_DIFFICULTIES, ProgramDifficulty, TrainingProgram, difficultyLabel } from '../../core/models/workout.model';
 
 @Component({
   selector: 'app-program-detail',
@@ -82,9 +82,7 @@ export class ProgramDetailComponent {
     return PROGRAM_DIFFICULTIES.find(d => d.value === difficulty)?.stars ?? 0;
   }
 
-  difficultyLabel(difficulty: ProgramDifficulty): string {
-    return PROGRAM_DIFFICULTIES.find(d => d.value === difficulty)?.label ?? difficulty;
-  }
+  readonly difficultyLabel = difficultyLabel;
 
   getExerciseImage(exerciseId: string): string | undefined {
     return this.exerciseService.getById(exerciseId)?.imageUrl;

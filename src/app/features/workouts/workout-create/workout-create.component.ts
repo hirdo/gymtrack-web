@@ -104,7 +104,7 @@ export class WorkoutCreateComponent implements OnInit {
       name: ['', Validators.required],
       imageUrl: [null as string | null],
       sets: [3, [Validators.required, Validators.min(1)]],
-      reps: [10 as number | null, [Validators.min(1)]],
+      reps: [12 as number | null, [Validators.min(1)]],
       weight: [null as number | null],
       duration: [null as number | null],
       notes: [''],

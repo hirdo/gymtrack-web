@@ -232,7 +232,7 @@ export class WorkoutTrainComponent implements OnDestroy {
     if (log) {
       const lastSet = log.sets[log.sets.length - 1];
       this.weightInput.set(lastSet?.weight ?? log.targetWeight ?? 0);
-      this.repsInput.set(lastSet?.reps ?? log.targetReps ?? 10);
+      this.repsInput.set(lastSet?.reps ?? log.targetReps ?? 12);
       this.durationInput.set(lastSet?.duration ?? log.targetDuration ?? 0);
     }
   }
