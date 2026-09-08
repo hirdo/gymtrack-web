@@ -34,9 +34,13 @@
       <div class="hidden md:flex items-center gap-3">
         @if (auth.isAuthenticated()) {
           <a routerLink="/profile" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface transition-colors group">
-            <div class="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
-              {{ auth.getUserName()[0] }}
-            </div>
+            @if (profileService.profile()?.avatarUrl; as avatar) {
+              <img [src]="avatar" alt="" class="w-7 h-7 rounded-full object-cover">
+            } @else {
+              <div class="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                {{ auth.getUserName()[0] }}
+              </div>
+            }
             <span class="text-sm text-text-muted group-hover:text-text transition-colors">{{ auth.getUserName() }}</span>
           </a>
           <button (click)="auth.logout()" class="btn-secondary text-xs py-2 px-3">Logout</button>
@@ -65,9 +69,13 @@
       <div class="px-4 py-3 space-y-1">
         @if (auth.isAuthenticated()) {
           <div class="flex items-center gap-3 px-3 py-3 mb-2">
-            <div class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
-              {{ auth.getUserName()[0] }}
-            </div>
+            @if (profileService.profile()?.avatarUrl; as avatar) {
+              <img [src]="avatar" alt="" class="w-9 h-9 rounded-full object-cover">
+            } @else {
+              <div class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
+                {{ auth.getUserName()[0] }}
+              </div>
+            }
             <div>
               <p class="font-semibold text-sm">{{ auth.getUserName() }}</p>
               <p class="text-text-muted text-xs">Member</p>
