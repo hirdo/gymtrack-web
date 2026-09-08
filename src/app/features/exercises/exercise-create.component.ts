@@ -23,11 +23,11 @@ export class ExerciseCreateComponent implements OnInit {
   readonly categories: WorkoutCategory[] = ['strength', 'cardio', 'flexibility', 'hiit', 'custom'];
   readonly muscleGroups: MuscleGroup[] = [
     'chest', 'back', 'shoulders', 'biceps', 'triceps',
-    'forearms', 'core', 'quads', 'hamstrings', 'glutes', 'calves'
+    'forearms', 'core', 'legs', 'glutes'
   ];
   readonly equipmentList: Equipment[] = [
     'barbell', 'dumbbell', 'machine', 'cable',
-    'bodyweight', 'kettlebell', 'band', 'other'
+    'bodyweight', 'other'
   ];
 
   readonly selectedMuscles = new Set<MuscleGroup>();

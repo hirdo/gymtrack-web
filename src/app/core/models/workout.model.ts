@@ -41,11 +41,11 @@ export type WorkoutCategory =
 
 export type MuscleGroup =
   | 'chest' | 'back' | 'shoulders' | 'biceps' | 'triceps'
-  | 'forearms' | 'core' | 'quads' | 'hamstrings' | 'glutes' | 'calves';
+  | 'forearms' | 'core' | 'legs' | 'glutes';
 
 export type Equipment =
   | 'barbell' | 'dumbbell' | 'machine' | 'cable'
-  | 'bodyweight' | 'kettlebell' | 'band' | 'other';
+  | 'bodyweight' | 'other';
 
 export interface ExerciseTemplate {
   id: string;

@@ -23,12 +23,12 @@ export class ExerciseListComponent {
 
   readonly allMuscleGroups: MuscleGroup[] = [
     'chest', 'back', 'shoulders', 'biceps', 'triceps',
-    'forearms', 'core', 'quads', 'hamstrings', 'glutes', 'calves'
+    'forearms', 'core', 'legs', 'glutes'
   ];
 
   readonly allEquipment: Equipment[] = [
     'barbell', 'dumbbell', 'machine', 'cable',
-    'bodyweight', 'kettlebell', 'band', 'other'
+    'bodyweight', 'other'
   ];
 
   readonly filteredExercises = computed(() => {
