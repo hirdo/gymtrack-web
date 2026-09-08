@@ -7,9 +7,9 @@
         Back to Workouts
       </a>
       <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div>
+        <div class="min-w-0 flex-1">
           <h1 class="text-3xl sm:text-4xl font-heading font-bold uppercase tracking-wide">{{ w.name }}</h1>
-          <div class="flex items-center gap-3 mt-3">
+          <div class="flex items-center gap-3 gap-y-2 mt-3 flex-wrap">
             <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-md uppercase tracking-wider"
                   [class]="w.category === 'strength' ? 'bg-primary/10 text-primary' :
                            w.category === 'cardio' ? 'bg-accent/10 text-accent' :
@@ -32,7 +32,7 @@
             }
           </div>
         </div>
-        <div class="flex gap-2 shrink-0">
+        <div class="flex gap-2 flex-wrap shrink-0">
           @if (starting()) {
             <button class="btn-primary text-sm py-2 px-4 opacity-60 cursor-not-allowed" disabled>Starting...</button>
           } @else {

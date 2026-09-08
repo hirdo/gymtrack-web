@@ -120,6 +120,10 @@ export const PROGRAM_DIFFICULTIES: { value: ProgramDifficulty; label: string; st
   { value: 'pro', label: 'Pro', stars: 5 }
 ];
 
+export function difficultyLabel(difficulty: ProgramDifficulty): string {
+  return PROGRAM_DIFFICULTIES.find(d => d.value === difficulty)?.label ?? difficulty;
+}
+
 export interface TrainingProgram {
   id: string;
   userId: string;

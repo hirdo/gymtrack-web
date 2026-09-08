@@ -110,7 +110,7 @@ export class ExerciseCreateComponent implements OnInit {
       recommendedWeight: value.trackingType === 'reps' ? (value.recommendedWeight || undefined) : undefined,
       recommendedDuration: value.trackingType === 'duration' ? (value.recommendedDuration || undefined) : undefined,
       primaryMuscles: Array.from(this.selectedMuscles),
-      instructions: value.instructions || undefined
+      instructions: value.instructions || ''
     };
 
     let exerciseId: string;
@@ -127,7 +127,7 @@ export class ExerciseCreateComponent implements OnInit {
       this.uploading.set(true);
       this.uploadError.set(null);
       try {
-        const imageUrl = await this.storageService.uploadExerciseImage(exerciseId, file);
+        const imageUrl = await this.storageService.uploadImage(exerciseId, file);
         await this.exerciseService.updateExercise(exerciseId, { imageUrl });
       } catch (err) {
         this.uploadError.set(

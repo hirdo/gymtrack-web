@@ -6,7 +6,7 @@ export class StorageService {
   private readonly configured = !!environment.cloudinary.cloudName &&
     !environment.cloudinary.cloudName.startsWith('YOUR_');
 
-  async uploadExerciseImage(exerciseId: string, file: File): Promise<string> {
+  async uploadImage(id: string, file: File): Promise<string> {
     if (!this.configured) {
       throw new Error('Cloudinary is not configured for this project yet.');
     }
