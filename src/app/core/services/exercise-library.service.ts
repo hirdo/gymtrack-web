@@ -1,4 +1,4 @@
-import { inject, Injectable, signal, computed, OnDestroy } from '@angular/core';
+import { inject, Injectable, signal, computed, effect, OnDestroy } from '@angular/core';
 import { ExerciseTemplate, MuscleGroup, Equipment } from '../models/workout.model';
 import { FirestoreService } from './firestore.service';
 import { AuthService } from './auth.service';
@@ -31,6 +31,48 @@ export class ExerciseLibraryService implements OnDestroy {
 
   constructor() {
     this.loadExercises();
+    effect(() => {
+      if (this.auth.isAdmin()) {
+        this.runTaxonomyMigration();
+      }
+    });
+  }
+
+  private taxonomyMigrationChecked = false;
+
+  private async runTaxonomyMigration(): Promise<void> {
+    if (this.taxonomyMigrationChecked) return;
+    this.taxonomyMigrationChecked = true;
+
+    const marker = await this.firestore.getDocument('meta', 'exerciseTaxonomyMigration');
+    if (marker) return;
+
+    const legacyMuscleMap: Record<string, MuscleGroup> = { quads: 'legs', hamstrings: 'legs', calves: 'legs' };
+    const legacyEquipmentMap: Record<string, Equipment> = { kettlebell: 'other', band: 'other' };
+
+    const all = await this.firestore.queryDocuments<ExerciseTemplate>(this.COLLECTION);
+    await Promise.all(all.map(async (ex) => {
+      const changes: Partial<ExerciseTemplate> = {};
+
+      const newPrimary = Array.from(new Set((ex.primaryMuscles as string[]).map(m => legacyMuscleMap[m] ?? m))) as MuscleGroup[];
+      if (newPrimary.join(',') !== ex.primaryMuscles.join(',')) changes.primaryMuscles = newPrimary;
+
+      if (ex.secondaryMuscles) {
+        const newSecondary = Array.from(new Set((ex.secondaryMuscles as string[]).map(m => legacyMuscleMap[m] ?? m))) as MuscleGroup[];
+        if (newSecondary.join(',') !== ex.secondaryMuscles.join(',')) changes.secondaryMuscles = newSecondary;
+      }
+
+      const mappedEquipment = legacyEquipmentMap[ex.equipment as string];
+      if (mappedEquipment) changes.equipment = mappedEquipment;
+
+      if (Object.keys(changes).length > 0) {
+        await this.firestore.updateDocument(this.COLLECTION, ex.id, changes);
+      }
+    }));
+
+    await this.firestore.setDocument('meta', 'exerciseTaxonomyMigration', {
+      migratedAt: new Date().toISOString()
+    });
   }
 
   ngOnDestroy(): void {
