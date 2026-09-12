@@ -135,7 +135,7 @@ export class ProgramService implements OnDestroy {
       }));
 
       await this.workoutService.add({
-        name: `${program.name} - ${day.name}`,
+        name: `${program.name} - Day ${day.dayNumber + 1}: ${day.name}`,
         category: 'strength',
         exercises,
         programId: program.id,

@@ -28,8 +28,8 @@
           <p class="text-text-muted text-xs font-semibold uppercase tracking-wider">Overall Progress</p>
           <p class="text-primary font-heading font-bold">{{ overallProgress() }}%</p>
         </div>
-        <div class="bg-background rounded-full h-2.5 overflow-hidden">
-          <div class="bg-primary h-full rounded-full transition-all duration-500 ease-out" [style.width.%]="overallProgress()"></div>
+        <div class="progress-track">
+          <div class="progress-fill" [style.--progress]="overallProgress()"></div>
         </div>
       </div>
 
@@ -121,7 +121,7 @@
                 <p class="text-xl font-heading font-extrabold text-accent">{{ log.targetReps }}</p>
               </div>
             }
-            <div class="bg-background rounded-xl p-3 text-center" [class.ui-scale-in]="justCompletedSet()">
+            <div class="bg-background rounded-xl p-3 text-center" [class.ui-scale-in]="justCompletedSet()" [class.flash-glow-accent]="justCompletedSet()">
               <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Completed</p>
               <p class="text-xl font-heading font-extrabold" [class]="slotCompletedSets() >= slotTargetSets() ? 'text-accent' : 'text-warning'">{{ slotCompletedSets() }}/{{ slotTargetSets() }}</p>
             </div>
@@ -238,14 +238,14 @@
         <!-- Exercise Navigation Buttons -->
         <div class="flex gap-3">
           <button (click)="prevExercise()" [disabled]="currentExerciseIndex() === 0"
-                  class="btn-secondary flex-1 py-3 disabled:opacity-30 disabled:cursor-not-allowed">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                  class="btn-secondary group flex-1 py-3 disabled:opacity-30 disabled:cursor-not-allowed">
+            <svg class="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             Previous
           </button>
           <button (click)="nextExercise()" [disabled]="currentExerciseIndex() >= totalExercises() - 1"
-                  class="btn-secondary flex-1 py-3 disabled:opacity-30 disabled:cursor-not-allowed">
+                  class="btn-secondary group flex-1 py-3 disabled:opacity-30 disabled:cursor-not-allowed">
             Next
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <svg class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           </button>
         </div>
       }

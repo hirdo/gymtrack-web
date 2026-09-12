@@ -130,7 +130,15 @@ export class ProgramCreateComponent implements OnInit {
 
   duplicateDay(index: number): void {
     const sourceValue = this.days.at(index).getRawValue();
-    const newDay = this.createDayGroup(index + 1);
+    this.days.push(this.cloneDayGroup(sourceValue));
+    this.renumberDays();
+  }
+
+  // Shared by duplicateDay() and duplicateDayRange() — builds a fresh day
+  // FormGroup with the same name/exercises as the given day's raw value.
+  // dayNumber is left at its placeholder; renumberDays() fixes it afterwards.
+  private cloneDayGroup(sourceValue: Record<string, unknown>): FormGroup {
+    const newDay = this.createDayGroup(0);
     newDay.patchValue({ name: sourceValue['name'] });
     const exercises = newDay.get('exercises') as FormArray;
     exercises.clear();
@@ -139,7 +147,32 @@ export class ProgramCreateComponent implements OnInit {
       exGroup.patchValue(ex);
       exercises.push(exGroup);
     }
-    this.days.insert(index + 1, newDay);
+    return newDay;
+  }
+
+  readonly duplicateRangeStart = signal(1);
+  readonly duplicateRangeEnd = signal(1);
+
+  canDuplicateRange(): boolean {
+    const start = this.duplicateRangeStart();
+    const end = this.duplicateRangeEnd();
+    return start >= 1 && end >= start && end <= this.days.length;
+  }
+
+  // Duplicates Day `start`..`end` as a new block appended to the end, in the
+  // same order, e.g. duplicating Days 1-3 of a 3-day program adds Days 4-6
+  // with identical names/exercises.
+  duplicateDayRange(): void {
+    if (!this.canDuplicateRange()) return;
+    const startIndex = this.duplicateRangeStart() - 1;
+    const endIndex = this.duplicateRangeEnd() - 1;
+    const sourceValues = [];
+    for (let i = startIndex; i <= endIndex; i++) {
+      sourceValues.push(this.days.at(i).getRawValue());
+    }
+    for (const sourceValue of sourceValues) {
+      this.days.push(this.cloneDayGroup(sourceValue));
+    }
     this.renumberDays();
   }
 
