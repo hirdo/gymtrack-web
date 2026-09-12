@@ -12,27 +12,30 @@
       <div>
         <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Program Name</label>
         <input type="text" formControlName="name" placeholder="e.g. Hypertrophy Plan"
-               class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:outline-none transition-colors">
+               class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
+        <app-field-error [control]="form.controls.name" label="Program Name" />
       </div>
       <div>
         <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Description (optional)</label>
         <textarea formControlName="description" rows="2" placeholder="Describe your training plan..."
-                  class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:outline-none transition-colors resize-none"></textarea>
+                  class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors resize-none"></textarea>
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Difficulty</label>
           <select formControlName="difficulty"
-                  class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:outline-none transition-colors">
+                  class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
             @for (d of difficulties; track d.value) {
               <option [value]="d.value">{{ starLabel(d.stars) }} {{ d.label }}</option>
             }
           </select>
+          <app-field-error [control]="form.controls.difficulty" label="Difficulty" />
         </div>
         <div>
           <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Sessions/Week</label>
           <input type="number" formControlName="sessionsPerWeek" min="1" max="7"
-                 class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:outline-none transition-colors">
+                 class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
+          <app-field-error [control]="form.controls.sessionsPerWeek" label="Sessions per week" />
         </div>
       </div>
     </div>
@@ -59,7 +62,8 @@
           <div class="mb-4">
             <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Day Name</label>
             <input type="text" formControlName="name" placeholder="e.g. Chest + Triceps"
-                   class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text text-sm focus:border-primary focus:outline-none transition-colors">
+                   class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text text-sm focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
+            <app-field-error [control]="day.get('name')" label="Day Name" />
           </div>
 
           <!-- Exercises in Day -->
@@ -79,7 +83,7 @@
                 </div>
                 <div class="space-y-2">
                   <button type="button" (click)="openExercisePicker(di, ei)"
-                          class="w-full bg-surface border border-border rounded-lg px-3 py-2 text-left text-sm hover:border-primary/50 focus:border-primary focus:outline-none transition-colors flex items-center gap-2 cursor-pointer">
+                          class="w-full bg-surface border border-border rounded-lg px-3 py-2 text-left text-sm hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors flex items-center gap-2 cursor-pointer">
                     @if (getExerciseImage(ex.get('exerciseId')?.value); as img) {
                       <img [src]="img" alt="" class="w-8 h-8 rounded object-contain bg-white shrink-0">
                     }
@@ -88,63 +92,69 @@
                     </span>
                     <svg class="w-4 h-4 text-text-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                   </button>
+                  <app-field-error [control]="ex.get('exerciseName')" label="Exercise" />
                   @if (ex.get('trackingType')?.value === 'duration') {
-                    <div class="grid grid-cols-3 gap-2">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       <div>
                         <label class="block text-[10px] text-text-muted mb-1">Sets</label>
                         <input type="number" formControlName="targetSets" min="1"
-                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
+                        <app-field-error [control]="ex.get('targetSets')" label="Sets" />
                       </div>
                       <div>
                         <label class="block text-[10px] text-text-muted mb-1">Duration (s)</label>
                         <input type="number" formControlName="targetDuration" min="1"
-                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                       </div>
                       <div>
                         <label class="block text-[10px] text-text-muted mb-1">Rest (s)</label>
                         <input type="number" formControlName="restTime" min="0" step="15"
-                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                       </div>
                     </div>
                   } @else if (ex.get('trackingType')?.value === 'reps_only') {
-                    <div class="grid grid-cols-3 gap-2">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       <div>
                         <label class="block text-[10px] text-text-muted mb-1">Sets</label>
                         <input type="number" formControlName="targetSets" min="1"
-                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
+                        <app-field-error [control]="ex.get('targetSets')" label="Sets" />
                       </div>
                       <div>
                         <label class="block text-[10px] text-text-muted mb-1">Reps</label>
                         <input type="number" formControlName="targetReps" min="1"
-                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
+                        <app-field-error [control]="ex.get('targetReps')" label="Reps" />
                       </div>
                       <div>
                         <label class="block text-[10px] text-text-muted mb-1">Rest (s)</label>
                         <input type="number" formControlName="restTime" min="0" step="15"
-                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                       </div>
                     </div>
                   } @else {
-                    <div class="grid grid-cols-4 gap-2">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       <div>
                         <label class="block text-[10px] text-text-muted mb-1">Sets</label>
                         <input type="number" formControlName="targetSets" min="1"
-                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
+                        <app-field-error [control]="ex.get('targetSets')" label="Sets" />
                       </div>
                       <div>
                         <label class="block text-[10px] text-text-muted mb-1">Reps</label>
                         <input type="number" formControlName="targetReps" min="1"
-                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
+                        <app-field-error [control]="ex.get('targetReps')" label="Reps" />
                       </div>
                       <div>
                         <label class="block text-[10px] text-text-muted mb-1">Weight (kg)</label>
                         <input type="number" formControlName="targetWeight" min="0" step="0.5"
-                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                       </div>
                       <div>
                         <label class="block text-[10px] text-text-muted mb-1">Rest (s)</label>
                         <input type="number" formControlName="restTime" min="0" step="15"
-                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:outline-none transition-colors">
+                               class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                       </div>
                     </div>
                   }
@@ -193,9 +203,16 @@
       </span>
     </button>
 
-    <div class="flex gap-3">
-      <button type="submit" class="btn-primary flex-1 py-3" [disabled]="form.invalid">{{ isEditMode() ? 'Save Changes' : 'Create Program' }}</button>
-      <a routerLink="/programs" class="btn-secondary py-3 px-6">Cancel</a>
+    <div class="sticky bottom-0 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-surface/95 backdrop-blur border-t border-border flex gap-3">
+      <button type="submit" class="btn-primary flex-1 py-3" [disabled]="form.invalid || submitting()">
+        @if (submitting()) {
+          <div class="w-4 h-4 border-2 border-background/40 border-t-background rounded-full animate-spin"></div>
+          {{ isEditMode() ? 'Saving…' : 'Creating…' }}
+        } @else {
+          {{ isEditMode() ? 'Save Changes' : 'Create Program' }}
+        }
+      </button>
+      <a routerLink="/programs" class="btn-secondary py-3 px-6" [class.pointer-events-none]="submitting()" [class.opacity-40]="submitting()">Cancel</a>
     </div>
   </form>
 

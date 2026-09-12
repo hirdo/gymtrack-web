@@ -10,7 +10,7 @@
 
   <!-- Stats Grid -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-10">
-    <div class="gym-card group hover:border-primary/30">
+    <div class="gym-card group hover:border-primary/30 ui-slide-up-in" style="animation-delay: 0ms">
       <div class="flex items-center justify-between mb-3">
         <p class="text-text-muted text-xs font-semibold uppercase tracking-wider">Total Workouts</p>
         <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -19,7 +19,7 @@
       </div>
       <p class="text-3xl sm:text-4xl font-heading font-extrabold text-primary">{{ workoutService.totalWorkouts() }}</p>
     </div>
-    <div class="gym-card group hover:border-accent/30">
+    <div class="gym-card group hover:border-accent/30 ui-slide-up-in" style="animation-delay: 60ms">
       <div class="flex items-center justify-between mb-3">
         <p class="text-text-muted text-xs font-semibold uppercase tracking-wider">Completed</p>
         <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
@@ -28,7 +28,7 @@
       </div>
       <p class="text-3xl sm:text-4xl font-heading font-extrabold text-accent">{{ workoutService.completedWorkouts() }}</p>
     </div>
-    <div class="gym-card group hover:border-warning/30">
+    <div class="gym-card group hover:border-warning/30 ui-slide-up-in" style="animation-delay: 120ms">
       <div class="flex items-center justify-between mb-3">
         <p class="text-text-muted text-xs font-semibold uppercase tracking-wider">This Week</p>
         <div class="w-8 h-8 bg-warning/10 rounded-lg flex items-center justify-center">
@@ -37,7 +37,7 @@
       </div>
       <p class="text-3xl sm:text-4xl font-heading font-extrabold text-warning">{{ workoutService.thisWeekCount() }}</p>
     </div>
-    <div class="gym-card group hover:border-primary-light/30">
+    <div class="gym-card group hover:border-primary-light/30 ui-slide-up-in" style="animation-delay: 180ms">
       <div class="flex items-center justify-between mb-3">
         <p class="text-text-muted text-xs font-semibold uppercase tracking-wider">Streak</p>
         <div class="w-8 h-8 bg-primary-light/10 rounded-lg flex items-center justify-center">
@@ -56,15 +56,23 @@
         <a [routerLink]="['/programs', program.id]" class="text-primary text-sm font-heading font-semibold uppercase tracking-wider hover:text-primary-light transition-colors">View</a>
       </div>
       <h3 class="text-xl font-heading font-bold">{{ program.name }}</h3>
-      <div class="flex items-center gap-4 mt-2 text-sm text-text-muted">
+      <div class="mt-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-primary shrink-0 whitespace-nowrap" [attr.aria-label]="difficultyLabel(program.difficulty)">
+          <span class="inline-flex gap-0.5">
+            @for (n of starRange; track n) {
+              <svg class="w-3.5 h-3.5" [class]="n <= difficultyStars(program.difficulty) ? 'text-background' : 'text-background/30'" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.446a1 1 0 00-.363 1.118l1.287 3.957c.3.922-.755 1.688-1.54 1.118l-3.366-2.446a1 1 0 00-1.176 0l-3.367 2.446c-.784.57-1.838-.196-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.813 9.385c-.783-.57-.38-1.81.588-1.81h4.163a1 1 0 00.95-.69l1.286-3.958z"/></svg>
+            }
+          </span>
+          <span class="text-xs font-semibold uppercase tracking-wider text-background">{{ difficultyLabel(program.difficulty) }}</span>
+        </span>
+      </div>
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-text-muted">
         <span>{{ activeProgramCompletedDays() }}/{{ program.totalDays }} days completed</span>
         <span>&middot;</span>
         <span>{{ program.sessionsPerWeek }} times/week</span>
-        <span>&middot;</span>
-        <span>{{ difficultyLabel(program.difficulty) }}</span>
       </div>
       <div class="mt-3 bg-background rounded-full h-2 overflow-hidden">
-        <div class="bg-primary h-full rounded-full transition-all" [style.width.%]="activeProgramProgress()"></div>
+        <div class="bg-primary h-full rounded-full transition-all duration-500 ease-out" [style.width.%]="activeProgramProgress()"></div>
       </div>
     </div>
   }
@@ -73,7 +81,7 @@
   <div class="mb-10">
     <h2 class="text-lg font-heading font-bold uppercase tracking-wider mb-4">Quick Actions</h2>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-      <a routerLink="/workouts/new" class="gym-card flex items-center gap-4 hover:border-primary/40 transition-all cursor-pointer group">
+      <a routerLink="/workouts/new" class="gym-card ui-card-lift flex items-center gap-4 hover:border-primary/40 transition-all cursor-pointer group">
         <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
           <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -85,7 +93,7 @@
         </div>
       </a>
 
-      <a routerLink="/workouts" class="gym-card flex items-center gap-4 hover:border-accent/40 transition-all cursor-pointer group">
+      <a routerLink="/workouts" class="gym-card ui-card-lift flex items-center gap-4 hover:border-accent/40 transition-all cursor-pointer group">
         <div class="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
           <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -97,7 +105,7 @@
         </div>
       </a>
 
-      <a routerLink="/schedule" class="gym-card flex items-center gap-4 hover:border-warning/40 transition-all cursor-pointer group">
+      <a routerLink="/schedule" class="gym-card ui-card-lift flex items-center gap-4 hover:border-warning/40 transition-all cursor-pointer group">
         <div class="w-12 h-12 bg-warning/10 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-warning/20 transition-colors">
           <svg class="w-6 h-6 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -109,7 +117,7 @@
         </div>
       </a>
 
-      <a routerLink="/programs" class="gym-card flex items-center gap-4 hover:border-primary-light/40 transition-all cursor-pointer group">
+      <a routerLink="/programs" class="gym-card ui-card-lift flex items-center gap-4 hover:border-primary-light/40 transition-all cursor-pointer group">
         <div class="w-12 h-12 bg-primary-light/10 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-primary-light/20 transition-colors">
           <svg class="w-6 h-6 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -140,11 +148,12 @@
       </div>
     } @else {
       <div class="space-y-2">
-        @for (workout of workoutService.recentWorkouts(); track workout.id) {
+        @for (workout of workoutService.recentWorkouts(); track workout.id; let i = $index) {
           <a [routerLink]="['/workouts', workout.id]"
-             class="flex items-center justify-between p-4 rounded-xl hover:bg-surface-light transition-colors group">
+             class="flex items-center justify-between p-4 rounded-xl hover:bg-surface-light transition-colors group ui-slide-up-in"
+             [style.animation-delay.ms]="Math.min(i, 8) * 60">
             <div class="flex items-center gap-4">
-              @if (workout.exercises[0].imageUrl; as img) {
+              @if (workout.exercises.at(0)?.imageUrl; as img) {
                 <img [src]="img" alt="" class="w-10 h-10 rounded-xl object-contain bg-white shrink-0">
               } @else {
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"

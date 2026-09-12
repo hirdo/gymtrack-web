@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal, OnDestroy } from '@angular/core';
+import { Component, ElementRef, inject, computed, signal, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
@@ -6,12 +6,13 @@ import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
 import { ExerciseTemplate, SetRecord } from '../../../core/models/workout.model';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { NumberStepperComponent } from '../../../shared/components/number-stepper/number-stepper.component';
 import { parseLocalDate, formatDisplayDate } from '../../../core/utils/date.util';
 
 @Component({
   selector: 'app-workout-train',
   standalone: true,
-  imports: [RouterLink, FormsModule, LoadingSpinnerComponent],
+  imports: [RouterLink, FormsModule, LoadingSpinnerComponent, NumberStepperComponent],
   templateUrl: './workout-train.component.html',
   styleUrl: './workout-train.component.scss'
 })
@@ -21,6 +22,7 @@ export class WorkoutTrainComponent implements OnDestroy {
   private readonly exerciseLogService = inject(ExerciseLogService);
   private readonly workoutService = inject(WorkoutService);
   private readonly exerciseLibraryService = inject(ExerciseLibraryService);
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private timerInterval: ReturnType<typeof setInterval> | null = null;
 
   private readonly workoutId = this.route.snapshot.paramMap.get('id') || '';
@@ -33,7 +35,11 @@ export class WorkoutTrainComponent implements OnDestroy {
   readonly isResting = signal(false);
   readonly elapsedSeconds = signal(0);
   readonly completing = signal(false);
+  readonly loggingSet = signal(false);
   readonly altSwapOpen = signal(false);
+  readonly altSwapClosing = signal(false);
+  readonly restClosing = signal(false);
+  readonly justCompletedSet = signal(false);
 
   /** Which log is "active" (receiving newly logged sets) per exercise slot, once
    * the user has swapped away from the default (earliest-created) log for that slot. */
@@ -132,8 +138,9 @@ export class WorkoutTrainComponent implements OnDestroy {
   navigateExercise(index: number): void {
     this.currentExerciseIndex.set(index);
     this.stopRestTimer();
-    this.altSwapOpen.set(false);
+    this.resetAltSwap();
     this.syncInputsFromCurrentLog();
+    queueMicrotask(() => this.scrollActivePillIntoView());
   }
 
   prevExercise(): void {
@@ -149,14 +156,18 @@ export class WorkoutTrainComponent implements OnDestroy {
   }
 
   toggleAltSwap(): void {
-    this.altSwapOpen.set(!this.altSwapOpen());
+    if (this.altSwapOpen()) {
+      this.closeAltSwap();
+    } else {
+      this.altSwapOpen.set(true);
+    }
   }
 
   async switchToExercise(templateId: string): Promise<void> {
     const w = this.workout();
     if (!w) return;
     if (this.currentLog()?.exerciseTemplateId === templateId) {
-      this.altSwapOpen.set(false);
+      this.closeAltSwap();
       return;
     }
     const alternate = this.exerciseLibraryService.getById(templateId);
@@ -167,13 +178,27 @@ export class WorkoutTrainComponent implements OnDestroy {
     const map = new Map(this.activeLogId());
     map.set(exerciseIndex, logId);
     this.activeLogId.set(map);
-    this.altSwapOpen.set(false);
+    this.closeAltSwap();
     this.syncInputsFromCurrentLog();
+  }
+
+  private closeAltSwap(): void {
+    if (!this.altSwapOpen()) return;
+    this.altSwapClosing.set(true);
+    setTimeout(() => {
+      this.altSwapOpen.set(false);
+      this.altSwapClosing.set(false);
+    }, 160);
+  }
+
+  private resetAltSwap(): void {
+    this.altSwapOpen.set(false);
+    this.altSwapClosing.set(false);
   }
 
   async logSet(): Promise<void> {
     const log = this.currentLog();
-    if (!log) return;
+    if (!log || this.loggingSet()) return;
 
     let setRecord: SetRecord;
     if (log.trackingType === 'duration') {
@@ -197,11 +222,24 @@ export class WorkoutTrainComponent implements OnDestroy {
       };
     }
 
-    await this.exerciseLogService.logSet(log.id, setRecord);
+    this.loggingSet.set(true);
+    try {
+      await this.exerciseLogService.logSet(log.id, setRecord);
+      this.flashCompletedTile();
 
-    if (log.restTime && this.slotCompletedSets() + 1 < this.slotTargetSets()) {
-      this.startRestTimer(log.restTime);
+      if (log.restTime && this.slotCompletedSets() + 1 < this.slotTargetSets()) {
+        this.startRestTimer(log.restTime);
+      }
+    } finally {
+      this.loggingSet.set(false);
     }
+  }
+
+  private flashCompletedTile(): void {
+    this.justCompletedSet.set(false);
+    // Re-trigger the CSS animation on the next frame even if it's already mid-flash.
+    requestAnimationFrame(() => this.justCompletedSet.set(true));
+    setTimeout(() => this.justCompletedSet.set(false), 260);
   }
 
   async completeTraining(): Promise<void> {
@@ -209,7 +247,7 @@ export class WorkoutTrainComponent implements OnDestroy {
     if (!w || !this.hasLoggedAnySet()) return;
     this.completing.set(true);
     await this.exerciseLogService.completeWorkoutLogs(w.id);
-    await this.workoutService.markComplete(w.id);
+    await this.workoutService.markComplete(w.id, this.elapsedSeconds());
     this.router.navigate(['/workouts', w.id]);
   }
 
@@ -224,7 +262,12 @@ export class WorkoutTrainComponent implements OnDestroy {
   }
 
   skipRest(): void {
-    this.stopRestTimer();
+    this.finishRestTimer();
+  }
+
+  private scrollActivePillIntoView(): void {
+    const pill = this.elementRef.nativeElement.querySelector<HTMLElement>('[data-active-pill="true"]');
+    pill?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   }
 
   private syncInputsFromCurrentLog(): void {
@@ -238,22 +281,41 @@ export class WorkoutTrainComponent implements OnDestroy {
   }
 
   private startRestTimer(seconds: number): void {
-    this.stopRestTimer();
+    this.clearRestInterval();
+    this.restClosing.set(false);
     this.restSeconds.set(seconds);
     this.isResting.set(true);
     this.timerInterval = setInterval(() => {
       const remaining = this.restSeconds() - 1;
       if (remaining <= 0) {
-        this.stopRestTimer();
+        this.finishRestTimer();
       } else {
         this.restSeconds.set(remaining);
       }
     }, 1000);
   }
 
+  /** Animated close — countdown expiry or an explicit "Skip Rest" tap. */
+  private finishRestTimer(): void {
+    this.clearRestInterval();
+    if (!this.isResting()) return;
+    this.restClosing.set(true);
+    setTimeout(() => {
+      this.isResting.set(false);
+      this.restSeconds.set(0);
+      this.restClosing.set(false);
+    }, 200);
+  }
+
+  /** Hard/immediate reset — navigating away or tearing down, no animation. */
   private stopRestTimer(): void {
+    this.clearRestInterval();
     this.isResting.set(false);
+    this.restClosing.set(false);
     this.restSeconds.set(0);
+  }
+
+  private clearRestInterval(): void {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
       this.timerInterval = null;

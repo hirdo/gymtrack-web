@@ -4,7 +4,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { WorkoutService } from '../../core/services/workout.service';
 import { ProgramService } from '../../core/services/program.service';
 import { parseLocalDate, formatDisplayDate } from '../../core/utils/date.util';
-import { difficultyLabel } from '../../core/models/workout.model';
+import { difficultyLabel, PROGRAM_DIFFICULTIES, ProgramDifficulty } from '../../core/models/workout.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,6 +18,12 @@ export class DashboardComponent {
   readonly workoutService = inject(WorkoutService);
   readonly programService = inject(ProgramService);
   readonly difficultyLabel = difficultyLabel;
+  readonly starRange = [1, 2, 3, 4, 5];
+  protected readonly Math = Math;
+
+  difficultyStars(difficulty: ProgramDifficulty): number {
+    return PROGRAM_DIFFICULTIES.find(d => d.value === difficulty)?.stars ?? 0;
+  }
 
   readonly activeProgramCompletedDays = computed(() => {
     const runId = this.programService.userActiveProgramRunId();

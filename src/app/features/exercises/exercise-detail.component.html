@@ -8,22 +8,37 @@
       <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
           <h1 class="text-3xl sm:text-4xl font-heading font-bold uppercase tracking-wide">{{ ex.name }}</h1>
-          <div class="flex items-center gap-3 mt-3">
-            <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-md uppercase tracking-wider bg-primary/10 text-primary">{{ ex.category }}</span>
-            <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-md uppercase tracking-wider bg-surface-light text-text-muted capitalize">{{ ex.equipment }}</span>
+          <div class="flex flex-wrap items-center gap-2 mt-3">
+            <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded uppercase tracking-wider bg-primary/10 text-primary">{{ ex.category }}</span>
+            <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded uppercase tracking-wider bg-surface-light text-text-muted capitalize">{{ ex.equipment }}</span>
           </div>
         </div>
         @if (auth.isAdmin()) {
-          <div class="flex gap-2 shrink-0">
-            <a [routerLink]="['/exercises', ex.id, 'edit']" class="btn-secondary text-sm py-2 px-4">Edit</a>
-            <button (click)="deleteExercise()" class="btn-secondary text-sm py-2 px-4 hover:!text-error hover:!border-error/50">Delete</button>
+          <div class="flex gap-2 shrink-0 items-center">
+            <a [routerLink]="['/exercises', ex.id, 'edit']" class="btn-secondary min-h-11 text-sm px-4">Edit</a>
+            @if (confirmingDelete()) {
+              <span class="text-error text-sm font-semibold ui-fade-in">Delete?</span>
+              <button (click)="deleteExercise()" [disabled]="deleting()" class="btn-secondary min-h-11 text-sm px-4 ui-fade-in !border-error/50 !text-error hover:!bg-error/10 disabled:opacity-60 disabled:cursor-wait">
+                {{ deleting() ? 'Deleting…' : 'Confirm' }}
+              </button>
+              <button (click)="cancelDelete()" [disabled]="deleting()" class="btn-secondary min-h-11 text-sm px-4 ui-fade-in">Cancel</button>
+            } @else {
+              <button (click)="confirmDelete()" class="btn-secondary min-h-11 text-sm px-4 hover:!text-error hover:!border-error/50">Delete</button>
+            }
           </div>
         }
       </div>
     </div>
 
     @if (ex.imageUrl) {
-      <img [src]="ex.imageUrl" alt="{{ ex.name }}" class="w-full max-h-80 object-contain bg-white rounded-2xl mb-6 border border-border">
+      <div class="relative w-full max-h-80 mb-6">
+        @if (!imageLoaded()) {
+          <div class="ui-skeleton w-full h-64 rounded-2xl"></div>
+        }
+        <img [src]="ex.imageUrl" alt="{{ ex.name }}" (load)="imageLoaded.set(true)"
+             class="w-full max-h-80 object-contain bg-white rounded-2xl border border-border"
+             [class.hidden]="!imageLoaded()" [class.ui-fade-in]="imageLoaded()">
+      </div>
     }
 
     <!-- Muscle Groups -->
@@ -31,11 +46,11 @@
       <h2 class="text-sm font-heading font-bold uppercase tracking-wider mb-3">Target Muscles</h2>
       <div class="flex flex-wrap gap-2">
         @for (muscle of ex.primaryMuscles; track muscle) {
-          <span class="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg uppercase tracking-wider bg-primary/10 text-primary">{{ muscle }}</span>
+          <span class="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded uppercase tracking-wider bg-primary/10 text-primary">{{ muscle }}</span>
         }
         @if (ex.secondaryMuscles) {
           @for (muscle of ex.secondaryMuscles; track muscle) {
-            <span class="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg uppercase tracking-wider bg-surface-light text-text-muted">{{ muscle }}</span>
+            <span class="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded uppercase tracking-wider bg-surface-light text-text-muted">{{ muscle }}</span>
           }
         }
       </div>
@@ -53,7 +68,7 @@
     @if (ex.recommendedReps || ex.recommendedWeight || ex.recommendedDuration) {
       <div class="gym-card mb-6 border-primary/30">
         <p class="text-text-muted text-xs font-semibold uppercase tracking-wider mb-2">Recommended</p>
-        <div class="flex items-center gap-6">
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
           @if (ex.recommendedReps) {
             <p class="text-2xl font-heading font-extrabold text-primary">{{ ex.recommendedReps }}<span class="text-sm text-text-muted ml-1">reps</span></p>
           }
@@ -74,9 +89,13 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           @for (alt of alternatives(); track alt.id) {
             <a [routerLink]="['/exercises', alt.id]" class="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-light transition-colors group">
-              <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-              </div>
+              @if (alt.imageUrl) {
+                <img [src]="alt.imageUrl" alt="" class="w-8 h-8 rounded-lg object-contain bg-white shrink-0">
+              } @else {
+                <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </div>
+              }
               <div>
                 <p class="text-sm font-semibold group-hover:text-primary transition-colors">{{ alt.name }}</p>
                 <p class="text-xs text-text-muted capitalize">{{ alt.equipment }}</p>
@@ -88,6 +107,9 @@
     }
   } @else {
     <div class="text-center py-24">
+      <div class="w-16 h-16 bg-surface-light rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
       <p class="text-text-muted text-lg font-heading mb-6">Exercise not found</p>
       <a routerLink="/exercises" class="btn-primary">Back to Library</a>
     </div>

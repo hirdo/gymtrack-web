@@ -9,13 +9,13 @@
         <div>
           <h1 class="text-3xl sm:text-4xl font-heading font-bold uppercase tracking-wide">{{ p.name }}</h1>
           <div class="flex items-center gap-3 gap-y-2 mt-3 flex-wrap">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-primary/10 shrink-0 whitespace-nowrap">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-primary shrink-0 whitespace-nowrap" [attr.aria-label]="difficultyLabel(p.difficulty)">
               <span class="inline-flex gap-0.5">
                 @for (n of starRange; track n) {
-                  <svg class="w-3.5 h-3.5" [class]="n <= difficultyStars(p.difficulty) ? 'text-primary' : 'text-primary/20'" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.446a1 1 0 00-.363 1.118l1.287 3.957c.3.922-.755 1.688-1.54 1.118l-3.366-2.446a1 1 0 00-1.176 0l-3.367 2.446c-.784.57-1.838-.196-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.813 9.385c-.783-.57-.38-1.81.588-1.81h4.163a1 1 0 00.95-.69l1.286-3.958z"/></svg>
+                  <svg class="w-3.5 h-3.5" [class]="n <= difficultyStars(p.difficulty) ? 'text-background' : 'text-background/30'" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.446a1 1 0 00-.363 1.118l1.287 3.957c.3.922-.755 1.688-1.54 1.118l-3.366-2.446a1 1 0 00-1.176 0l-3.367 2.446c-.784.57-1.838-.196-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.813 9.385c-.783-.57-.38-1.81.588-1.81h4.163a1 1 0 00.95-.69l1.286-3.958z"/></svg>
                 }
               </span>
-              <span class="text-xs font-semibold uppercase tracking-wider text-primary">{{ difficultyLabel(p.difficulty) }}</span>
+              <span class="text-xs font-semibold uppercase tracking-wider text-background">{{ difficultyLabel(p.difficulty) }}</span>
             </span>
             <span class="text-text-muted text-sm">{{ p.totalDays }} days &middot; {{ p.sessionsPerWeek }} times/week</span>
             @if (p.isActive) {
@@ -35,7 +35,7 @@
               Your Active Program
             </span>
           } @else {
-            <button (click)="chooseProgram()" class="btn-accent text-sm py-2 px-4" [disabled]="choosing()">
+            <button (click)="chooseProgram()" class="btn-accent min-h-11 text-sm px-4" [disabled]="choosing()">
               @if (choosing()) {
                 Choosing...
               } @else {
@@ -46,26 +46,37 @@
           }
           @if (auth.isAdmin()) {
             @if (p.isActive) {
-              <button (click)="unpublish()" class="btn-secondary text-sm py-2 px-4">Unpublish</button>
+              <button (click)="unpublish()" [disabled]="publishing()" class="btn-secondary min-h-11 text-sm px-4 disabled:opacity-60 disabled:cursor-wait">{{ publishing() ? 'Unpublishing…' : 'Unpublish' }}</button>
             } @else {
-              <button (click)="publish()" class="btn-primary text-sm py-2 px-4">Publish</button>
+              <button (click)="publish()" [disabled]="publishing()" class="btn-primary min-h-11 text-sm px-4 disabled:opacity-60 disabled:cursor-wait">{{ publishing() ? 'Publishing…' : 'Publish' }}</button>
             }
-            <a [routerLink]="['/programs', p.id, 'edit']" class="btn-secondary text-sm py-2 px-4">Edit</a>
-            <button (click)="deleteProgram()" class="btn-secondary text-sm py-2 px-4 hover:!text-error hover:!border-error/50">Delete</button>
+            <a [routerLink]="['/programs', p.id, 'edit']" class="btn-secondary min-h-11 text-sm px-4">Edit</a>
+            @if (confirmingDelete()) {
+              <span class="text-error text-sm font-semibold ui-fade-in">Delete this program?</span>
+              <button (click)="deleteProgram()" [disabled]="deleting()" class="btn-secondary min-h-11 text-sm px-4 ui-fade-in !border-error/50 !text-error hover:!bg-error/10 disabled:opacity-60 disabled:cursor-wait">
+                {{ deleting() ? 'Deleting…' : 'Confirm' }}
+              </button>
+              <button (click)="cancelDelete()" [disabled]="deleting()" class="btn-secondary min-h-11 text-sm px-4 ui-fade-in">Cancel</button>
+            } @else {
+              <button (click)="confirmDelete()" class="btn-secondary min-h-11 text-sm px-4 hover:!text-error hover:!border-error/50">Delete</button>
+            }
           }
         </div>
       </div>
     </div>
 
     @if (p.description) {
-      <p class="text-text-muted mb-8 leading-relaxed">{{ p.description }}</p>
+      <div class="mb-8">
+        <h2 class="text-xs font-heading font-semibold uppercase tracking-[0.2em] text-text-muted mb-2">Description</h2>
+        <p class="text-text-muted leading-relaxed whitespace-pre-line">{{ p.description }}</p>
+      </div>
     }
 
     <!-- Days -->
     <div class="space-y-4">
       <h2 class="text-lg font-heading font-bold uppercase tracking-wider">Training Days</h2>
-      @for (day of p.days; track day.dayNumber) {
-        <div class="gym-card" [class]="day.dayNumber === (p.currentDay || 0) ? 'border-primary/30' : ''">
+      @for (day of p.days; track day.dayNumber; let i = $index) {
+        <div class="gym-card ui-slide-up-in" [style.animation-delay.ms]="Math.min(i, 8) * 60" [class]="day.dayNumber === (p.currentDay || 0) ? 'border-primary/30' : ''">
           <div class="flex items-center justify-between mb-3">
             <h3 class="font-heading font-semibold uppercase tracking-wide text-sm">
               <span class="text-primary mr-2">Day {{ day.dayNumber + 1 }}</span>
@@ -82,13 +93,13 @@
           </div>
           <div class="space-y-2">
             @for (ex of day.exercises; track ex.exerciseId) {
-              <div class="bg-background rounded-lg p-3">
+              <div class="bg-background rounded-lg p-3 ui-slide-up-in">
                 <div class="flex items-center gap-3">
                   @if (getExerciseImage(ex.exerciseId); as img) {
                     <img [src]="img" alt="{{ ex.exerciseName }}" class="w-16 h-16 rounded-lg object-contain bg-white shrink-0">
                   }
-                  <div class="flex-1 flex items-center justify-between text-sm">
-                    <span>{{ ex.exerciseName }}</span>
+                  <div class="flex-1 min-w-0 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-sm">
+                    <span class="min-w-0">{{ ex.exerciseName }}</span>
                     <span class="text-text-muted text-xs">
                       @if (ex.trackingType === 'duration') {
                         {{ ex.targetSets }} &times; {{ ex.targetDuration }}s
@@ -124,6 +135,9 @@
     </div>
   } @else {
     <div class="text-center py-24">
+      <div class="w-16 h-16 bg-surface-light rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
       <p class="text-text-muted text-lg font-heading mb-6">Program not found</p>
       <a routerLink="/programs" class="btn-primary">Back to Programs</a>
     </div>
@@ -131,8 +145,11 @@
 
   @if (replaceConfirmProgram(); as current) {
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div class="absolute inset-0 bg-background/80 backdrop-blur-sm" (click)="cancelReplace()"></div>
-      <div class="relative bg-surface border border-border rounded-2xl w-full max-w-md p-6">
+      <div class="absolute inset-0 bg-background/80 backdrop-blur-sm"
+           [class.ui-backdrop-in]="!replaceConfirmClosing()" [class.ui-fade-out]="replaceConfirmClosing()"
+           (click)="cancelReplace()"></div>
+      <div class="relative bg-surface border border-border rounded-2xl w-full max-w-md p-6"
+           [class.ui-scale-in]="!replaceConfirmClosing()" [class.ui-scale-out]="replaceConfirmClosing()">
         <div class="w-12 h-12 bg-warning/10 rounded-xl flex items-center justify-center mb-4">
           <svg class="w-6 h-6 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86l-8.18 14.18A2 2 0 004.11 21h15.78a2 2 0 001.99-2.96L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
         </div>
@@ -141,8 +158,8 @@
           You're currently following <span class="text-text font-semibold">{{ current.name }}</span>. Choosing this program will delete any not-yet-completed workouts from it and generate new ones for this program instead. Workouts you've already completed stay as history.
         </p>
         <div class="flex gap-3">
-          <button (click)="cancelReplace()" class="btn-secondary flex-1 py-2.5">Cancel</button>
-          <button (click)="confirmReplace()" class="btn-accent flex-1 py-2.5">Replace It</button>
+          <button (click)="cancelReplace()" class="btn-secondary flex-1 min-h-11">Cancel</button>
+          <button (click)="confirmReplace()" class="btn-accent flex-1 min-h-11">Replace It</button>
         </div>
       </div>
     </div>

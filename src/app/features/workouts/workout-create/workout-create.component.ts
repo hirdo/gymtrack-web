@@ -12,12 +12,13 @@ import { ExerciseLibraryService } from '../../../core/services/exercise-library.
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
 import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate, Workout } from '../../../core/models/workout.model';
 import { ExercisePickerModalComponent } from '../../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
+import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { toLocalDateString } from '../../../core/utils/date.util';
 
 @Component({
   selector: 'app-workout-create',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, ExercisePickerModalComponent],
+  imports: [ReactiveFormsModule, RouterLink, ExercisePickerModalComponent, FieldErrorComponent],
   templateUrl: './workout-create.component.html',
   styleUrl: './workout-create.component.scss'
 })
@@ -30,6 +31,7 @@ export class WorkoutCreateComponent implements OnInit {
   readonly exerciseService = inject(ExerciseLibraryService);
 
   readonly isEditMode = signal(false);
+  readonly scheduleOnlyMode = signal(false);
   private editId: string | null = null;
 
   readonly pickerOpen = signal(false);
@@ -37,6 +39,7 @@ export class WorkoutCreateComponent implements OnInit {
 
   readonly minDate = toLocalDateString(new Date());
   readonly dateConflictWorkout = signal<Workout | null>(null);
+  readonly submitting = signal(false);
 
   readonly categories: { value: WorkoutCategory; label: string }[] = [
     { value: 'strength', label: 'Strength' },
@@ -62,8 +65,10 @@ export class WorkoutCreateComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       const workout = this.workoutService.getById(id);
-      const locked = !!workout && (!!workout.completedDate || !!workout.programId || this.exerciseLogService.logsForWorkout(id).length > 0);
-      if (workout && !locked) {
+      // Once a workout has been started (has any logged sets) it's fully locked from
+      // editing — including its schedule date — for both program and self-created workouts.
+      const fullyLocked = !!workout && (!!workout.completedDate || this.exerciseLogService.logsForWorkout(id).length > 0);
+      if (workout && !fullyLocked) {
         this.isEditMode.set(true);
         this.editId = id;
         this.form.patchValue({
@@ -88,6 +93,16 @@ export class WorkoutCreateComponent implements OnInit {
             alternativeExerciseIds: ex.alternativeExerciseIds ?? []
           });
           this.exercises.push(group);
+        }
+
+        // Workouts generated from a program keep their name/exercises locked to the
+        // program's definition — only the schedule date can be changed here.
+        if (workout.programId) {
+          this.scheduleOnlyMode.set(true);
+          this.form.controls.name.disable();
+          this.form.controls.description.disable();
+          this.form.controls.category.disable();
+          this.exercises.disable();
         }
       } else if (workout) {
         this.router.navigate(['/workouts', id]);
@@ -231,7 +246,7 @@ export class WorkoutCreateComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.submitting()) return;
 
     const value = this.form.getRawValue();
 
@@ -259,24 +274,35 @@ export class WorkoutCreateComponent implements OnInit {
       alternativeExerciseIds: (e['alternativeExerciseIds'] as string[])?.length ? (e['alternativeExerciseIds'] as string[]) : undefined
     }));
 
-    if (this.isEditMode() && this.editId) {
-      await this.workoutService.update(this.editId, {
-        name: value.name!,
-        description: value.description || undefined,
-        category: value.category as WorkoutCategory,
-        scheduledDate: value.scheduledDate || undefined,
-        exercises
-      });
-      this.router.navigate(['/workouts', this.editId]);
-    } else {
-      const workout = await this.workoutService.add({
-        name: value.name!,
-        description: value.description || undefined,
-        category: value.category as WorkoutCategory,
-        scheduledDate: value.scheduledDate || undefined,
-        exercises
-      });
-      this.router.navigate(['/workouts', workout.id]);
+    this.submitting.set(true);
+    try {
+      if (this.isEditMode() && this.editId) {
+        if (this.scheduleOnlyMode()) {
+          await this.workoutService.update(this.editId, {
+            scheduledDate: value.scheduledDate || undefined
+          });
+        } else {
+          await this.workoutService.update(this.editId, {
+            name: value.name!,
+            description: value.description || undefined,
+            category: value.category as WorkoutCategory,
+            scheduledDate: value.scheduledDate || undefined,
+            exercises
+          });
+        }
+        this.router.navigate(['/workouts', this.editId]);
+      } else {
+        const workout = await this.workoutService.add({
+          name: value.name!,
+          description: value.description || undefined,
+          category: value.category as WorkoutCategory,
+          scheduledDate: value.scheduledDate || undefined,
+          exercises
+        });
+        this.router.navigate(['/workouts', workout.id]);
+      }
+    } finally {
+      this.submitting.set(false);
     }
   }
 

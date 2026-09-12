@@ -5,6 +5,13 @@
     <p class="mt-4 text-text-muted text-lg">Choose the plan that fits your fitness goals.</p>
   </div>
 
+  @if (changeError(); as error) {
+    <div class="max-w-2xl mx-auto mb-8 flex items-start gap-3 bg-error/10 border border-error/30 rounded-xl p-4 ui-fade-in">
+      <svg class="w-5 h-5 text-error shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+      <p class="text-error text-sm">{{ error }}</p>
+    </div>
+  }
+
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <!-- Basic -->
     <div class="gym-card flex flex-col">
@@ -41,7 +48,9 @@
       @if (isCurrentPlan('basic')) {
         <div class="text-center text-sm text-accent font-heading font-semibold uppercase tracking-wider py-3 border border-accent/50 rounded-lg">Current Plan</div>
       } @else {
-        <button (click)="downgrade()" class="btn-secondary w-full">Downgrade to Basic</button>
+        <button (click)="downgrade()" [disabled]="!!changingTo()" class="btn-secondary w-full disabled:opacity-60 disabled:cursor-wait">
+          {{ changingTo() === 'basic' ? 'Downgrading…' : 'Downgrade to Basic' }}
+        </button>
       }
     </div>
 
@@ -82,8 +91,12 @@
       @if (isCurrentPlan('premium')) {
         <div class="text-center text-sm text-primary font-heading font-semibold uppercase tracking-wider py-3 border border-primary/50 rounded-lg">Current Plan</div>
       } @else {
-        <button (click)="upgradeTo('premium')" class="btn-primary w-full">
-          {{ isCurrentPlan('elite') ? 'Switch to Premium' : 'Upgrade to Premium' }}
+        <button (click)="upgradeTo('premium')" [disabled]="!!changingTo()" class="btn-primary w-full disabled:opacity-60 disabled:cursor-wait">
+          @if (changingTo() === 'premium') {
+            Switching…
+          } @else {
+            {{ isCurrentPlan('elite') ? 'Switch to Premium' : 'Upgrade to Premium' }}
+          }
         </button>
       }
     </div>
@@ -124,7 +137,9 @@
       @if (isCurrentPlan('elite')) {
         <div class="text-center text-sm text-warning font-heading font-semibold uppercase tracking-wider py-3 border border-warning/50 rounded-lg">Current Plan</div>
       } @else {
-        <button (click)="upgradeTo('elite')" class="btn-accent w-full">Go Elite</button>
+        <button (click)="upgradeTo('elite')" [disabled]="!!changingTo()" class="btn-accent w-full disabled:opacity-60 disabled:cursor-wait">
+          {{ changingTo() === 'elite' ? 'Switching…' : 'Go Elite' }}
+        </button>
       }
     </div>
   </div>

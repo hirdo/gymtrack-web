@@ -11,7 +11,8 @@
       <div>
         <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Exercise Name</label>
         <input type="text" formControlName="name" placeholder="e.g. Bench Press"
-               class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:outline-none transition-colors">
+               class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
+        <app-field-error [control]="form.controls.name" label="Exercise Name" />
       </div>
 
       <div>
@@ -20,7 +21,7 @@
           <img [src]="preview" alt="Exercise preview" class="w-full h-40 object-contain bg-white rounded-lg mb-2 border border-border">
         }
         <input type="file" accept="image/*" (change)="onFileSelected($event)"
-               class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-primary/10 file:text-primary file:text-xs file:font-semibold file:uppercase file:tracking-wider file:cursor-pointer cursor-pointer">
+               class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-primary/10 file:text-primary file:text-xs file:font-semibold file:uppercase file:tracking-wider file:cursor-pointer cursor-pointer focus:ring-1 focus:ring-primary/50 focus:outline-none">
         @if (uploadError()) {
           <p class="text-xs text-error mt-1.5">{{ uploadError() }}</p>
         }
@@ -30,26 +31,28 @@
         <div>
           <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Category</label>
           <select formControlName="category"
-                  class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:outline-none transition-colors">
+                  class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
             @for (cat of categories; track cat) {
               <option [value]="cat">{{ cat | titlecase }}</option>
             }
           </select>
+          <app-field-error [control]="form.controls.category" label="Category" />
         </div>
         <div>
           <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Equipment</label>
           <select formControlName="equipment"
-                  class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:outline-none transition-colors">
+                  class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
             @for (equip of equipmentList; track equip) {
               <option [value]="equip">{{ equip | titlecase }}</option>
             }
           </select>
+          <app-field-error [control]="form.controls.equipment" label="Equipment" />
         </div>
       </div>
 
       <div>
         <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Tracking Type</label>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <button type="button" (click)="form.patchValue({ trackingType: 'reps' })"
                   class="px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors"
                   [class]="form.value.trackingType === 'reps' ? 'bg-primary text-background' : 'bg-background text-text-muted border border-border hover:text-text'">
@@ -74,13 +77,13 @@
           <div>
             <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Recommended Reps (optional)</label>
             <input type="number" formControlName="recommendedReps" min="1" step="1" placeholder="e.g. 10"
-                   class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:outline-none transition-colors">
+                   class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
           </div>
           @if (form.value.trackingType === 'reps') {
             <div>
               <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Recommended Weight (kg, optional)</label>
               <input type="number" formControlName="recommendedWeight" min="0" step="0.5" placeholder="e.g. 40"
-                     class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:outline-none transition-colors">
+                     class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
             </div>
           }
         </div>
@@ -89,7 +92,7 @@
         <div>
           <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Recommended Duration (seconds, optional)</label>
           <input type="number" formControlName="recommendedDuration" min="1" step="1" placeholder="e.g. 1800"
-                 class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:outline-none transition-colors">
+                 class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
           <p class="text-xs text-text-muted mt-1.5">Shown to everyone as a starting point and used to pre-fill target duration in programs and workouts.</p>
         </div>
       }
@@ -113,19 +116,23 @@
       <div>
         <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Instructions (optional)</label>
         <textarea formControlName="instructions" rows="4" placeholder="Form tips, technique notes..."
-                  class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:outline-none transition-colors resize-none"></textarea>
+                  class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors resize-none"></textarea>
       </div>
     </div>
 
-    <div class="flex gap-3">
-      <button type="submit" class="btn-primary flex-1 py-3" [disabled]="form.invalid || selectedMuscles.size === 0 || uploading()">
+    <div class="sticky bottom-0 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-surface/95 backdrop-blur border-t border-border flex gap-3">
+      <button type="submit" class="btn-primary flex-1 py-3" [disabled]="form.invalid || selectedMuscles.size === 0 || submitting()">
         @if (uploading()) {
-          Uploading...
+          <div class="w-4 h-4 border-2 border-background/40 border-t-background rounded-full animate-spin"></div>
+          Uploading&hellip;
+        } @else if (submitting()) {
+          <div class="w-4 h-4 border-2 border-background/40 border-t-background rounded-full animate-spin"></div>
+          Saving&hellip;
         } @else {
           {{ isEditMode() ? 'Save Changes' : 'Add Exercise' }}
         }
       </button>
-      <a routerLink="/exercises" class="btn-secondary py-3 px-6">Cancel</a>
+      <a routerLink="/exercises" class="btn-secondary py-3 px-6" [class.pointer-events-none]="submitting()" [class.opacity-40]="submitting()">Cancel</a>
     </div>
   </form>
 </div>

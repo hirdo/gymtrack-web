@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -27,11 +27,27 @@ export class ExerciseDetailComponent {
     return this.exerciseService.getAlternatives(ex.id).slice(0, 6);
   });
 
+  readonly confirmingDelete = signal(false);
+  readonly deleting = signal(false);
+  readonly imageLoaded = signal(false);
+
+  confirmDelete(): void {
+    this.confirmingDelete.set(true);
+  }
+
+  cancelDelete(): void {
+    this.confirmingDelete.set(false);
+  }
+
   async deleteExercise(): Promise<void> {
     const ex = this.exercise();
-    if (ex) {
+    if (!ex || this.deleting()) return;
+    this.deleting.set(true);
+    try {
       await this.exerciseService.deleteExercise(ex.id);
       this.router.navigate(['/exercises']);
+    } finally {
+      this.deleting.set(false);
     }
   }
 }
