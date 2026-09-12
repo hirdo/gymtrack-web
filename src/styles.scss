@@ -80,97 +80,223 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .gym-card {
+  position: relative;
   background-color: var(--color-surface);
   border-radius: 1rem;
   padding: 1.5rem;
   border: 1px solid var(--color-border);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 12px 28px -18px rgb(0 0 0 / 0.65);
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+// Thin gradient power-line across the top edge, inset so it stays clear of the
+// border-radius curve — lets cards keep `overflow: visible` for things like the
+// membership "Popular" tag that intentionally pokes out above the card.
+.gym-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 1rem;
+  right: 1rem;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+  opacity: 0;
+  transition: opacity 0.25s;
 }
 
 .gym-card:hover {
   border-color: var(--color-surface-light);
+  box-shadow: 0 16px 36px -16px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(249 115 22 / 0.1);
 }
 
-.btn-primary {
+.gym-card:hover::before {
+  opacity: 1;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-accent {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background-color: var(--color-primary);
-  color: #0f172a;
   font-family: var(--font-heading);
-  font-weight: 700;
   font-size: 0.9375rem;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  border-radius: 0.625rem;
-  border: none;
+  border-radius: 0.5rem;
   cursor: pointer;
+}
+
+.btn-primary,
+.btn-accent {
+  overflow: hidden;
+  font-weight: 800;
+  border: none;
+  color: #0f172a;
   transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 -60%;
+    width: 40%;
+    background: linear-gradient(115deg, transparent, rgb(255 255 255 / 0.35), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.5s ease;
+  }
+
+  &:hover::after {
+    left: 130%;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  box-shadow: 0 4px 20px rgb(249 115 22 / 0.18);
 
   &:hover {
     background-color: var(--color-primary-dark);
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgb(249 115 22 / 0.3);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-}
-
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background-color: transparent;
-  color: var(--color-text);
-  font-family: var(--font-heading);
-  font-weight: 600;
-  font-size: 0.9375rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  border-radius: 0.625rem;
-  border: 1px solid var(--color-border);
-  cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s;
-
-  &:hover {
-    background-color: var(--color-surface-light);
-    border-color: var(--color-surface-light);
+    box-shadow: 0 8px 24px rgb(249 115 22 / 0.35);
   }
 }
 
 .btn-accent {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
   background-color: var(--color-accent);
-  color: #0f172a;
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 0.9375rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  border-radius: 0.625rem;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgb(34 197 94 / 0.18);
 
   &:hover {
     background-color: var(--color-accent-dark);
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgb(34 197 94 / 0.3);
+    box-shadow: 0 8px 24px rgb(34 197 94 / 0.35);
   }
+}
 
-  &:active {
-    transform: translateY(0);
+.btn-secondary {
+  background-color: transparent;
+  color: var(--color-text);
+  font-weight: 700;
+  border: 2px solid var(--color-border);
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    border-color: var(--color-primary);
+    color: var(--color-primary-light);
+    transform: translateY(-1px);
   }
+}
+
+// Small tracked label used above section headings, with a short power-tick to
+// lead the eye — swap-in replacement for the repeated eyebrow-text pattern.
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 1.25rem;
+    height: 2px;
+    border-radius: 1px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    box-shadow: 0 0 8px rgb(249 115 22 / 0.6);
+  }
+}
+
+// Sharp-edged uppercase tag for status/category/difficulty labels.
+.badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-light);
+  color: var(--color-text-muted);
+}
+
+// Gradient, glowing progress bar — used for program/goal completion.
+.progress-track {
+  position: relative;
+  width: 100%;
+  height: 0.5rem;
+  border-radius: 999px;
+  background-color: var(--color-background);
+  overflow: hidden;
+}
+
+// Width is fixed at 100%; --progress (0-100, set inline per instance) drives a
+// scaleX transform instead, so updates animate on the compositor instead of
+// triggering layout.
+.progress-fill {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--color-primary-dark), var(--color-primary));
+  box-shadow: 0 0 12px rgb(249 115 22 / 0.5);
+  transform: scaleX(calc(var(--progress, 0) / 100));
+  transform-origin: left center;
+  transition: transform 0.5s ease-out;
+  overflow: hidden;
+}
+
+// Perpetual light sweep so a filled bar still reads as "live", not static.
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.45), transparent);
+  animation: progress-shimmer-sweep 1.8s ease-in-out infinite;
+}
+
+@keyframes progress-shimmer-sweep {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(350%); }
+}
+
+// Slow radar-ping glow — opt-in accent for the one or two CTAs per page that
+// should visually demand the click (hero + final conversion button).
+@keyframes cta-pulse-ring {
+  0%, 100% { box-shadow: 0 4px 20px rgb(249 115 22 / 0.25), 0 0 0 0 rgb(249 115 22 / 0.35); }
+  50% { box-shadow: 0 4px 20px rgb(249 115 22 / 0.35), 0 0 0 10px rgb(249 115 22 / 0); }
+}
+
+.btn-cta-pulse {
+  animation: cta-pulse-ring 2.4s ease-in-out infinite;
+}
+
+// One-shot celebratory flash — e.g. the instant a set is logged mid-workout.
+@keyframes flash-glow-accent {
+  0% { box-shadow: 0 0 0 0 rgb(34 197 94 / 0.6); }
+  60% { box-shadow: 0 0 24px 4px rgb(34 197 94 / 0.35); }
+  100% { box-shadow: 0 0 0 0 rgb(34 197 94 / 0); }
+}
+
+.flash-glow-accent {
+  animation: flash-glow-accent 0.6s ease-out;
 }
 
 input[type="text"],
@@ -381,7 +507,10 @@ main {
   .ui-drawer-panel-in,
   .ui-drawer-panel-out,
   .ui-backdrop-in,
-  .ui-skeleton {
+  .ui-skeleton,
+  .progress-fill::after,
+  .btn-cta-pulse,
+  .flash-glow-accent {
     animation: none !important;
   }
 

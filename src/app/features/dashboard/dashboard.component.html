@@ -1,8 +1,8 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
   <!-- Welcome -->
   <div class="mb-10">
-    <p class="text-primary font-heading font-semibold text-sm uppercase tracking-[0.2em] mb-1">Welcome back</p>
-    <h1 class="text-3xl sm:text-4xl font-heading font-bold uppercase tracking-wide">
+    <p class="section-eyebrow mb-2">Welcome back</p>
+    <h1 class="text-3xl sm:text-4xl font-heading font-extrabold uppercase tracking-wide">
       {{ auth.getUserName() }}
     </h1>
     <p class="text-text-muted mt-1">Here's your fitness overview</p>
@@ -17,7 +17,8 @@
           <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
         </div>
       </div>
-      <p class="text-3xl sm:text-4xl font-heading font-extrabold text-primary">{{ workoutService.totalWorkouts() }}</p>
+      <div class="h-px bg-gradient-to-r from-primary/40 to-transparent mb-2"></div>
+      <p class="text-3xl sm:text-4xl font-heading font-extrabold text-primary tabular-nums" [appCountUp]="workoutService.totalWorkouts()"></p>
     </div>
     <div class="gym-card group hover:border-accent/30 ui-slide-up-in" style="animation-delay: 60ms">
       <div class="flex items-center justify-between mb-3">
@@ -26,7 +27,8 @@
           <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
         </div>
       </div>
-      <p class="text-3xl sm:text-4xl font-heading font-extrabold text-accent">{{ workoutService.completedWorkouts() }}</p>
+      <div class="h-px bg-gradient-to-r from-accent/40 to-transparent mb-2"></div>
+      <p class="text-3xl sm:text-4xl font-heading font-extrabold text-accent tabular-nums" [appCountUp]="workoutService.completedWorkouts()"></p>
     </div>
     <div class="gym-card group hover:border-warning/30 ui-slide-up-in" style="animation-delay: 120ms">
       <div class="flex items-center justify-between mb-3">
@@ -35,7 +37,8 @@
           <svg class="w-4 h-4 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
         </div>
       </div>
-      <p class="text-3xl sm:text-4xl font-heading font-extrabold text-warning">{{ workoutService.thisWeekCount() }}</p>
+      <div class="h-px bg-gradient-to-r from-warning/40 to-transparent mb-2"></div>
+      <p class="text-3xl sm:text-4xl font-heading font-extrabold text-warning tabular-nums" [appCountUp]="workoutService.thisWeekCount()"></p>
     </div>
     <div class="gym-card group hover:border-primary-light/30 ui-slide-up-in" style="animation-delay: 180ms">
       <div class="flex items-center justify-between mb-3">
@@ -44,7 +47,8 @@
           <svg class="w-4 h-4 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/></svg>
         </div>
       </div>
-      <p class="text-3xl sm:text-4xl font-heading font-extrabold text-primary-light">{{ workoutService.streak() }} <span class="text-base font-body font-normal text-text-muted">days</span></p>
+      <div class="h-px bg-gradient-to-r from-primary-light/40 to-transparent mb-2"></div>
+      <p class="text-3xl sm:text-4xl font-heading font-extrabold text-primary-light tabular-nums"><span [appCountUp]="workoutService.streak()"></span> <span class="text-base font-body font-normal text-text-muted">days</span></p>
     </div>
   </div>
 
@@ -53,7 +57,10 @@
     <div class="gym-card mb-10 border-primary/30">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-lg font-heading font-bold uppercase tracking-wider">Active Program</h2>
-        <a [routerLink]="['/programs', program.id]" class="text-primary text-sm font-heading font-semibold uppercase tracking-wider hover:text-primary-light transition-colors">View</a>
+        <a [routerLink]="['/programs', program.id]" class="group/link inline-flex items-center gap-1 text-primary text-sm font-heading font-semibold uppercase tracking-wider hover:text-primary-light transition-colors">
+          View
+          <svg class="w-3.5 h-3.5 transition-transform duration-200 group-hover/link:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+        </a>
       </div>
       <h3 class="text-xl font-heading font-bold">{{ program.name }}</h3>
       <div class="mt-2">
@@ -71,8 +78,8 @@
         <span>&middot;</span>
         <span>{{ program.sessionsPerWeek }} times/week</span>
       </div>
-      <div class="mt-3 bg-background rounded-full h-2 overflow-hidden">
-        <div class="bg-primary h-full rounded-full transition-all duration-500 ease-out" [style.width.%]="activeProgramProgress()"></div>
+      <div class="mt-3 progress-track">
+        <div class="progress-fill" [style.--progress]="activeProgramProgress()"></div>
       </div>
     </div>
   }
@@ -82,7 +89,7 @@
     <h2 class="text-lg font-heading font-bold uppercase tracking-wider mb-4">Quick Actions</h2>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
       <a routerLink="/workouts/new" class="gym-card ui-card-lift flex items-center gap-4 hover:border-primary/40 transition-all cursor-pointer group">
-        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-primary/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
           <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
@@ -94,7 +101,7 @@
       </a>
 
       <a routerLink="/workouts" class="gym-card ui-card-lift flex items-center gap-4 hover:border-accent/40 transition-all cursor-pointer group">
-        <div class="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
+        <div class="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-accent/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
           <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
           </svg>
@@ -106,7 +113,7 @@
       </a>
 
       <a routerLink="/schedule" class="gym-card ui-card-lift flex items-center gap-4 hover:border-warning/40 transition-all cursor-pointer group">
-        <div class="w-12 h-12 bg-warning/10 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-warning/20 transition-colors">
+        <div class="w-12 h-12 bg-warning/10 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-warning/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
           <svg class="w-6 h-6 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
@@ -118,7 +125,7 @@
       </a>
 
       <a routerLink="/programs" class="gym-card ui-card-lift flex items-center gap-4 hover:border-primary-light/40 transition-all cursor-pointer group">
-        <div class="w-12 h-12 bg-primary-light/10 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-primary-light/20 transition-colors">
+        <div class="w-12 h-12 bg-primary-light/10 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-primary-light/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
           <svg class="w-6 h-6 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
@@ -135,7 +142,10 @@
   <div class="gym-card">
     <div class="flex items-center justify-between mb-5">
       <h2 class="text-lg font-heading font-bold uppercase tracking-wider">Recent Workouts</h2>
-      <a routerLink="/workouts" class="text-primary text-sm font-heading font-semibold uppercase tracking-wider hover:text-primary-light transition-colors">View all</a>
+      <a routerLink="/workouts" class="group/link inline-flex items-center gap-1 text-primary text-sm font-heading font-semibold uppercase tracking-wider hover:text-primary-light transition-colors">
+        View all
+        <svg class="w-3.5 h-3.5 transition-transform duration-200 group-hover/link:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+      </a>
     </div>
 
     @if (workoutService.recentWorkouts().length === 0) {
@@ -153,17 +163,7 @@
              class="flex items-center justify-between p-4 rounded-xl hover:bg-surface-light transition-colors group ui-slide-up-in"
              [style.animation-delay.ms]="Math.min(i, 8) * 60">
             <div class="flex items-center gap-4">
-              @if (workout.exercises.at(0)?.imageUrl; as img) {
-                <img [src]="img" alt="" class="w-10 h-10 rounded-xl object-contain bg-white shrink-0">
-              } @else {
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                     [class]="workout.category === 'strength' ? 'bg-primary/10 text-primary' :
-                              workout.category === 'cardio' ? 'bg-accent/10 text-accent' :
-                              workout.category === 'hiit' ? 'bg-warning/10 text-warning' :
-                              'bg-surface-light text-text-muted'">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                </div>
-              }
+              <app-circular-progress [percent]="workoutCompletionPercent(workout)" [size]="44" [trackWidth]="3" />
               <div>
                 <h3 class="font-semibold text-sm group-hover:text-primary transition-colors">{{ workout.name }}</h3>
                 <p class="text-text-muted text-xs">

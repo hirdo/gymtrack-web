@@ -15,7 +15,7 @@
     <div class="flex items-center gap-12 lg:gap-16">
       <!-- Left column: text content -->
       <div class="flex-1 max-w-2xl">
-        <p class="text-primary font-heading font-semibold text-sm uppercase tracking-[0.2em] mb-3">Your Personal Fitness Companion</p>
+        <p class="section-eyebrow mb-3">Your Personal Fitness Companion</p>
         <div class="hero-accent-line h-0.5 bg-primary rounded-full mb-6"></div>
         <h1 class="text-5xl sm:text-6xl lg:text-7xl font-heading font-extrabold leading-[0.95] tracking-wide uppercase">
           Transform Your
@@ -30,7 +30,7 @@
           @if (auth.isAuthenticated()) {
             <a routerLink="/dashboard" class="btn-primary text-lg py-4 px-10">Go to Dashboard</a>
           } @else {
-            <button (click)="auth.register()" class="btn-primary text-lg py-4 px-10">Get Started Free</button>
+            <button (click)="auth.register()" class="btn-primary btn-cta-pulse text-lg py-4 px-10">Get Started Free</button>
             <button (click)="auth.login()" class="btn-secondary text-lg py-4 px-8">Sign In</button>
           }
         </div>
@@ -181,7 +181,7 @@
 <section class="py-20 sm:py-28 bg-background">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16">
-      <p class="text-primary font-heading font-semibold text-sm uppercase tracking-[0.2em] mb-3">Features</p>
+      <p class="section-eyebrow mb-3">Features</p>
       <h2 class="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold uppercase tracking-wide">Everything You Need to <span class="text-primary">Succeed</span></h2>
       <p class="mt-4 text-text-muted text-lg max-w-2xl mx-auto">
         A complete suite of tools designed to help you reach your fitness goals faster.
@@ -190,7 +190,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
       <div appRevealOnScroll [style.transition-delay.ms]="0" class="gym-card text-center group hover:border-primary/30 transition-all duration-300">
-        <div class="w-16 h-16 mx-auto mb-5 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+        <div class="w-16 h-16 mx-auto mb-5 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300">
           <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
           </svg>
@@ -200,7 +200,7 @@
       </div>
 
       <div appRevealOnScroll [style.transition-delay.ms]="80" class="gym-card text-center group hover:border-accent/30 transition-all duration-300">
-        <div class="w-16 h-16 mx-auto mb-5 bg-accent/10 rounded-2xl flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+        <div class="w-16 h-16 mx-auto mb-5 bg-accent/10 rounded-2xl flex items-center justify-center group-hover:bg-accent/20 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300">
           <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
@@ -210,7 +210,7 @@
       </div>
 
       <div appRevealOnScroll [style.transition-delay.ms]="160" class="gym-card text-center group hover:border-warning/30 transition-all duration-300">
-        <div class="w-16 h-16 mx-auto mb-5 bg-warning/10 rounded-2xl flex items-center justify-center group-hover:bg-warning/20 transition-colors">
+        <div class="w-16 h-16 mx-auto mb-5 bg-warning/10 rounded-2xl flex items-center justify-center group-hover:bg-warning/20 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300">
           <svg class="w-8 h-8 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
           </svg>
@@ -226,7 +226,7 @@
 <section class="py-20 sm:py-28 bg-surface">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16">
-      <p class="text-primary font-heading font-semibold text-sm uppercase tracking-[0.2em] mb-3">Pricing</p>
+      <p class="section-eyebrow mb-3">Pricing</p>
       <h2 class="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold uppercase tracking-wide">Choose Your <span class="text-primary">Plan</span></h2>
       <p class="mt-4 text-text-muted text-lg">Start free and upgrade as you grow.</p>
     </div>
@@ -257,7 +257,7 @@
 
       <!-- Premium -->
       <div appRevealOnScroll [style.transition-delay.ms]="80" class="gym-card !border-primary/50 relative">
-        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-background text-xs font-heading font-bold px-4 py-1 rounded-full uppercase tracking-wider">Popular</span>
+        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-background text-xs font-heading font-bold px-4 py-1 rounded-full uppercase tracking-wider shadow-[0_0_16px_var(--color-primary)]">Popular</span>
         <h3 class="text-sm font-heading font-semibold text-primary uppercase tracking-wider">Premium</h3>
         <div class="mt-4 mb-6">
           <span class="text-4xl font-heading font-extrabold">$9.99</span>
@@ -324,7 +324,7 @@
     <h2 class="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold uppercase tracking-wide mb-4">Ready to Start?</h2>
     <p class="text-text-muted text-lg mb-10 max-w-2xl mx-auto">Plan your training, log every set, and see your progress add up.</p>
     @if (!auth.isAuthenticated()) {
-      <button (click)="auth.register()" class="btn-primary text-lg py-4 px-12">Join GymTrack Now</button>
+      <button (click)="auth.register()" class="btn-primary btn-cta-pulse text-lg py-4 px-12">Join GymTrack Now</button>
     }
   </div>
 </section>

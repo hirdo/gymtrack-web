@@ -2,8 +2,8 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
       <!-- Logo -->
-      <a routerLink="/" class="flex items-center gap-2 group" (click)="closeMobileMenu()">
-        <div class="w-8 h-8 bg-surface ring-1 ring-border rounded-lg flex items-center justify-center">
+      <a routerLink="/" class="flex items-center gap-2.5 group" (click)="closeMobileMenu()">
+        <div class="w-9 h-9 bg-gradient-to-br from-primary/25 to-transparent ring-1 ring-primary/40 rounded-lg flex items-center justify-center transition-shadow duration-300 group-hover:shadow-[0_0_18px_var(--color-primary)]">
           <svg class="w-5 h-5 text-primary" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true">
             <rect x="8" y="24" width="6" height="16" rx="2"/>
             <rect x="16" y="20" width="6" height="24" rx="2"/>
@@ -12,7 +12,7 @@
             <rect x="22" y="29" width="20" height="6" rx="1"/>
           </svg>
         </div>
-        <span class="font-heading text-xl font-bold tracking-wider uppercase">
+        <span class="font-heading text-xl font-extrabold tracking-wider uppercase">
           <span class="text-text">Gym</span><span class="text-primary">Track</span>
         </span>
       </a>
@@ -20,13 +20,13 @@
       <!-- Desktop nav -->
       <div class="hidden md:flex items-center gap-1">
         @if (auth.isAuthenticated()) {
-          <a routerLink="/dashboard" routerLinkActive="!text-primary !bg-primary/10" class="px-4 py-2 text-text-muted hover:text-text text-sm font-heading font-semibold uppercase tracking-wider rounded-lg transition-colors">Dashboard</a>
-          <a routerLink="/workouts" routerLinkActive="!text-primary !bg-primary/10" class="px-4 py-2 text-text-muted hover:text-text text-sm font-heading font-semibold uppercase tracking-wider rounded-lg transition-colors">Workouts</a>
-          <a routerLink="/exercises" routerLinkActive="!text-primary !bg-primary/10" class="px-4 py-2 text-text-muted hover:text-text text-sm font-heading font-semibold uppercase tracking-wider rounded-lg transition-colors">Exercises</a>
-          <a routerLink="/programs" routerLinkActive="!text-primary !bg-primary/10" class="px-4 py-2 text-text-muted hover:text-text text-sm font-heading font-semibold uppercase tracking-wider rounded-lg transition-colors">Programs</a>
-          <a routerLink="/schedule" routerLinkActive="!text-primary !bg-primary/10" class="px-4 py-2 text-text-muted hover:text-text text-sm font-heading font-semibold uppercase tracking-wider rounded-lg transition-colors">Schedule</a>
+          <a routerLink="/dashboard" routerLinkActive="!text-primary after:!scale-x-100 after:!opacity-100" class="relative px-4 py-2 text-text-muted hover:text-text text-sm font-heading font-semibold uppercase tracking-wider rounded-lg transition-colors after:content-[''] after:absolute after:left-3 after:right-3 after:-bottom-px after:h-0.5 after:origin-center after:scale-x-0 after:opacity-0 after:bg-primary after:rounded-full after:shadow-[0_0_8px_var(--color-primary)] after:transition-all after:duration-200">Dashboard</a>
+          <a routerLink="/workouts" routerLinkActive="!text-primary after:!scale-x-100 after:!opacity-100" class="relative px-4 py-2 text-text-muted hover:text-text text-sm font-heading font-semibold uppercase tracking-wider rounded-lg transition-colors after:content-[''] after:absolute after:left-3 after:right-3 after:-bottom-px after:h-0.5 after:origin-center after:scale-x-0 after:opacity-0 after:bg-primary after:rounded-full after:shadow-[0_0_8px_var(--color-primary)] after:transition-all after:duration-200">Workouts</a>
+          <a routerLink="/exercises" routerLinkActive="!text-primary after:!scale-x-100 after:!opacity-100" class="relative px-4 py-2 text-text-muted hover:text-text text-sm font-heading font-semibold uppercase tracking-wider rounded-lg transition-colors after:content-[''] after:absolute after:left-3 after:right-3 after:-bottom-px after:h-0.5 after:origin-center after:scale-x-0 after:opacity-0 after:bg-primary after:rounded-full after:shadow-[0_0_8px_var(--color-primary)] after:transition-all after:duration-200">Exercises</a>
+          <a routerLink="/programs" routerLinkActive="!text-primary after:!scale-x-100 after:!opacity-100" class="relative px-4 py-2 text-text-muted hover:text-text text-sm font-heading font-semibold uppercase tracking-wider rounded-lg transition-colors after:content-[''] after:absolute after:left-3 after:right-3 after:-bottom-px after:h-0.5 after:origin-center after:scale-x-0 after:opacity-0 after:bg-primary after:rounded-full after:shadow-[0_0_8px_var(--color-primary)] after:transition-all after:duration-200">Programs</a>
+          <a routerLink="/schedule" routerLinkActive="!text-primary after:!scale-x-100 after:!opacity-100" class="relative px-4 py-2 text-text-muted hover:text-text text-sm font-heading font-semibold uppercase tracking-wider rounded-lg transition-colors after:content-[''] after:absolute after:left-3 after:right-3 after:-bottom-px after:h-0.5 after:origin-center after:scale-x-0 after:opacity-0 after:bg-primary after:rounded-full after:shadow-[0_0_8px_var(--color-primary)] after:transition-all after:duration-200">Schedule</a>
           @if (auth.isAdmin()) {
-            <a routerLink="/admin" routerLinkActive="!text-primary !bg-primary/10" class="px-4 py-2 text-primary hover:text-primary-light text-sm font-heading font-semibold uppercase tracking-wider rounded-lg transition-colors flex items-center gap-1.5">
+            <a routerLink="/admin" routerLinkActive="!text-primary after:!scale-x-100 after:!opacity-100" class="relative px-4 py-2 text-primary hover:text-primary-light text-sm font-heading font-semibold uppercase tracking-wider rounded-lg transition-colors flex items-center gap-1.5 after:content-[''] after:absolute after:left-3 after:right-3 after:-bottom-px after:h-0.5 after:origin-center after:scale-x-0 after:opacity-0 after:bg-primary after:rounded-full after:shadow-[0_0_8px_var(--color-primary)] after:transition-all after:duration-200">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
               Admin
             </a>
@@ -39,9 +39,9 @@
         @if (auth.isAuthenticated()) {
           <a routerLink="/profile" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface transition-colors group">
             @if (profileService.profile()?.avatarUrl; as avatar) {
-              <img [src]="avatar" alt="" class="w-7 h-7 rounded-full object-cover">
+              <img [src]="avatar" alt="" class="w-7 h-7 rounded-full object-cover shrink-0 ring-2 ring-primary/30 group-hover:ring-primary/60 transition-all">
             } @else {
-              <div class="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+              <div class="w-7 h-7 rounded-full bg-primary/20 shrink-0 ring-2 ring-primary/30 group-hover:ring-primary/60 transition-all flex items-center justify-center text-xs font-bold text-primary">
                 {{ auth.getUserName()[0] }}
               </div>
             }
@@ -102,25 +102,25 @@
           @if (auth.isAuthenticated()) {
             <div class="flex items-center gap-3 px-3 py-3 mb-2">
               @if (profileService.profile()?.avatarUrl; as avatar) {
-                <img [src]="avatar" alt="" class="w-9 h-9 rounded-full object-cover">
+                <img [src]="avatar" alt="" class="w-9 h-9 rounded-full object-cover shrink-0 ring-2 ring-primary/30">
               } @else {
-                <div class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
+                <div class="w-9 h-9 rounded-full bg-primary/20 shrink-0 ring-2 ring-primary/30 flex items-center justify-center text-sm font-bold text-primary">
                   {{ auth.getUserName()[0] }}
                 </div>
               }
-              <div>
-                <p class="font-semibold text-sm">{{ auth.getUserName() }}</p>
+              <div class="min-w-0">
+                <p class="font-semibold text-sm truncate">{{ auth.getUserName() }}</p>
                 <p class="text-text-muted text-xs">Member</p>
               </div>
             </div>
-            <a routerLink="/dashboard" routerLinkActive="!text-primary !bg-primary/10" class="min-h-11 flex items-center px-3 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Dashboard</a>
-            <a routerLink="/workouts" routerLinkActive="!text-primary !bg-primary/10" class="min-h-11 flex items-center px-3 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Workouts</a>
-            <a routerLink="/exercises" routerLinkActive="!text-primary !bg-primary/10" class="min-h-11 flex items-center px-3 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Exercises</a>
-            <a routerLink="/programs" routerLinkActive="!text-primary !bg-primary/10" class="min-h-11 flex items-center px-3 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Programs</a>
-            <a routerLink="/schedule" routerLinkActive="!text-primary !bg-primary/10" class="min-h-11 flex items-center px-3 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Schedule</a>
-            <a routerLink="/profile" routerLinkActive="!text-primary !bg-primary/10" class="min-h-11 flex items-center px-3 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Profile</a>
+            <a routerLink="/dashboard" routerLinkActive="!text-primary !bg-primary/10 !border-primary" class="min-h-11 flex items-center px-3 rounded-lg border-l-2 border-transparent text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Dashboard</a>
+            <a routerLink="/workouts" routerLinkActive="!text-primary !bg-primary/10 !border-primary" class="min-h-11 flex items-center px-3 rounded-lg border-l-2 border-transparent text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Workouts</a>
+            <a routerLink="/exercises" routerLinkActive="!text-primary !bg-primary/10 !border-primary" class="min-h-11 flex items-center px-3 rounded-lg border-l-2 border-transparent text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Exercises</a>
+            <a routerLink="/programs" routerLinkActive="!text-primary !bg-primary/10 !border-primary" class="min-h-11 flex items-center px-3 rounded-lg border-l-2 border-transparent text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Programs</a>
+            <a routerLink="/schedule" routerLinkActive="!text-primary !bg-primary/10 !border-primary" class="min-h-11 flex items-center px-3 rounded-lg border-l-2 border-transparent text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Schedule</a>
+            <a routerLink="/profile" routerLinkActive="!text-primary !bg-primary/10 !border-primary" class="min-h-11 flex items-center px-3 rounded-lg border-l-2 border-transparent text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Profile</a>
             @if (auth.isAdmin()) {
-              <a routerLink="/admin" routerLinkActive="!text-primary !bg-primary/10" class="min-h-11 flex items-center gap-2 px-3 rounded-lg text-primary hover:bg-primary/10 text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">
+              <a routerLink="/admin" routerLinkActive="!text-primary !bg-primary/10 !border-primary" class="min-h-11 flex items-center gap-2 px-3 rounded-lg border-l-2 border-transparent text-primary hover:bg-primary/10 text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                 Admin Panel
               </a>
