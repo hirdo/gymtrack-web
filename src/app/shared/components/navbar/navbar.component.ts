@@ -14,12 +14,26 @@ export class NavbarComponent {
   readonly auth = inject(AuthService);
   readonly profileService = inject(ProfileService);
   readonly mobileMenuOpen = signal(false);
+  readonly mobileMenuClosing = signal(false);
+
+  private static readonly CLOSE_ANIMATION_MS = 200;
 
   toggleMobileMenu(): void {
-    this.mobileMenuOpen.update(v => !v);
+    if (this.mobileMenuOpen()) {
+      this.closeMobileMenu();
+    } else {
+      this.mobileMenuOpen.set(true);
+    }
   }
 
   closeMobileMenu(): void {
-    this.mobileMenuOpen.set(false);
+    if (!this.mobileMenuOpen()) {
+      return;
+    }
+    this.mobileMenuClosing.set(true);
+    setTimeout(() => {
+      this.mobileMenuOpen.set(false);
+      this.mobileMenuClosing.set(false);
+    }, NavbarComponent.CLOSE_ANIMATION_MS);
   }
 }

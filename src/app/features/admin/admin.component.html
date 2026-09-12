@@ -51,6 +51,15 @@
         <div class="w-10 h-10 border-4 border-surface-light border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
         <p class="text-text-muted">Loading users from database...</p>
       </div>
+    } @else if (loadError()) {
+      <div class="gym-card text-center py-12">
+        <div class="w-16 h-16 bg-surface-light rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+        </div>
+        <p class="text-text font-heading font-semibold text-lg uppercase tracking-wide mb-2">Could not load users</p>
+        <p class="text-text-muted text-sm mb-4">Something went wrong fetching the user list.</p>
+        <button (click)="loadUsers()" class="btn-secondary">Try Again</button>
+      </div>
     } @else if (users().length === 0) {
       <div class="gym-card text-center py-12">
         <svg class="w-12 h-12 text-text-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -58,7 +67,81 @@
         <p class="text-text-muted text-sm">Users will appear here after they log in for the first time.</p>
       </div>
     } @else {
-      <div class="gym-card overflow-hidden !p-0">
+      <!-- Mobile card list (below md) -->
+      <div class="md:hidden flex flex-col gap-3">
+        @for (user of users(); track user.id) {
+          <div class="gym-card !p-4">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
+                   [class]="user.role === 'admin' ? 'bg-primary/20 text-primary' : 'bg-accent/15 text-accent'">
+                {{ user.firstName ? user.firstName[0] : user.username[0] || '?' }}
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="font-semibold text-sm truncate">{{ user.firstName || user.username }} {{ user.lastName }}</p>
+                <p class="text-text-muted text-xs truncate">{{ user.email }}</p>
+              </div>
+              <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold uppercase tracking-wider shrink-0"
+                    [class]="user.role === 'admin' ? 'bg-primary/15 text-primary' : 'bg-surface-light text-text-muted'">
+                {{ user.role }}
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold uppercase tracking-wider"
+                      [class]="user.membership === 'elite' ? 'bg-warning/15 text-warning' :
+                               user.membership === 'premium' ? 'bg-primary/15 text-primary' :
+                               'bg-surface-light text-text-muted'">
+                  {{ user.membership }}
+                </span>
+                <select (change)="changeMembership(user.id, $any($event.target).value)"
+                        [disabled]="changingMembershipFor() === user.id"
+                        class="bg-background border border-border rounded text-xs px-2 py-1.5 min-h-9 text-text-muted cursor-pointer focus:border-primary focus:outline-none disabled:opacity-50 disabled:cursor-wait"
+                        [attr.aria-label]="'Change membership for ' + user.firstName">
+                  <option value="" disabled selected>{{ changingMembershipFor() === user.id ? 'Saving…' : 'Change' }}</option>
+                  @if (user.membership !== 'basic') {
+                    <option value="basic">Basic</option>
+                  }
+                  @if (user.membership !== 'premium') {
+                    <option value="premium">Premium</option>
+                  }
+                  @if (user.membership !== 'elite') {
+                    <option value="elite">Elite</option>
+                  }
+                </select>
+              </div>
+              <span class="text-sm font-heading font-semibold shrink-0" [class]="user.workoutCount > 0 ? 'text-accent' : 'text-text-muted'">
+                {{ user.workoutCount }} workouts
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between gap-3 pt-3 border-t border-border/50">
+              <p class="text-text-muted text-xs">Last login: {{ formatDateTime(user.lastLogin) }}</p>
+              @if (confirmingRoleFor() === user.id) {
+                <div class="flex items-center gap-2 ui-fade-in">
+                  <button (click)="toggleUserRole(user.id)" [disabled]="togglingRole() === user.id"
+                          class="min-h-9 px-3 text-xs font-semibold rounded border border-warning/50 text-warning hover:bg-warning/10 transition-colors cursor-pointer uppercase tracking-wider disabled:opacity-60 disabled:cursor-wait">
+                    {{ togglingRole() === user.id ? '…' : 'Confirm' }}
+                  </button>
+                  <button (click)="cancelRoleToggle()" [disabled]="togglingRole() === user.id"
+                          class="min-h-9 px-3 text-xs font-semibold rounded border border-border hover:border-text-muted transition-colors cursor-pointer uppercase tracking-wider">
+                    Cancel
+                  </button>
+                </div>
+              } @else {
+                <button (click)="confirmRoleToggle(user.id)"
+                        class="min-h-9 px-3 text-xs font-semibold rounded border border-border hover:border-primary hover:text-primary transition-colors cursor-pointer uppercase tracking-wider"
+                        [attr.aria-label]="'Toggle role for ' + user.firstName">
+                  {{ user.role === 'admin' ? 'Demote' : 'Promote' }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Table (md and up) -->
+      <div class="hidden md:block gym-card overflow-hidden !p-0">
         <div class="overflow-x-auto">
           <table class="w-full min-w-[800px]">
             <thead>
@@ -87,23 +170,24 @@
                     </div>
                   </td>
                   <td class="px-5 py-4">
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold uppercase tracking-wider"
+                    <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold uppercase tracking-wider"
                           [class]="user.role === 'admin' ? 'bg-primary/15 text-primary' : 'bg-surface-light text-text-muted'">
                       {{ user.role }}
                     </span>
                   </td>
                   <td class="px-5 py-4">
                     <div class="flex items-center gap-2">
-                      <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold uppercase tracking-wider"
+                      <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold uppercase tracking-wider"
                             [class]="user.membership === 'elite' ? 'bg-warning/15 text-warning' :
                                      user.membership === 'premium' ? 'bg-primary/15 text-primary' :
                                      'bg-surface-light text-text-muted'">
                         {{ user.membership }}
                       </span>
                       <select (change)="changeMembership(user.id, $any($event.target).value)"
-                              class="bg-background border border-border rounded-md text-xs px-2 py-1 text-text-muted cursor-pointer focus:border-primary focus:outline-none"
+                              [disabled]="changingMembershipFor() === user.id"
+                              class="bg-background border border-border rounded text-xs px-2 py-1 text-text-muted cursor-pointer focus:border-primary focus:outline-none disabled:opacity-50 disabled:cursor-wait"
                               [attr.aria-label]="'Change membership for ' + user.firstName">
-                        <option value="" disabled selected>Change</option>
+                        <option value="" disabled selected>{{ changingMembershipFor() === user.id ? 'Saving…' : 'Change' }}</option>
                         @if (user.membership !== 'basic') {
                           <option value="basic">Basic</option>
                         }
@@ -124,11 +208,25 @@
                   <td class="px-5 py-4 text-sm text-text-muted">{{ formatDateTime(user.lastLogin) }}</td>
                   <td class="px-5 py-4">
                     <div class="flex items-center justify-end gap-2">
-                      <button (click)="toggleUserRole(user.id)"
-                              class="px-3 py-1.5 text-xs font-semibold rounded-md border border-border hover:border-primary hover:text-primary transition-colors cursor-pointer uppercase tracking-wider"
-                              [attr.aria-label]="'Toggle role for ' + user.firstName">
-                        {{ user.role === 'admin' ? 'Demote' : 'Promote' }}
-                      </button>
+                      @if (confirmingRoleFor() === user.id) {
+                        <span class="text-xs text-warning font-semibold text-right leading-tight ui-fade-in">
+                          {{ isSelf(user.id) ? 'Remove your own admin access?' : (user.role === 'admin' ? 'Demote this admin?' : 'Grant admin access?') }}
+                        </span>
+                        <button (click)="toggleUserRole(user.id)" [disabled]="togglingRole() === user.id"
+                                class="px-3 py-1.5 text-xs font-semibold rounded border border-warning/50 text-warning hover:bg-warning/10 transition-colors cursor-pointer uppercase tracking-wider disabled:opacity-60 disabled:cursor-wait ui-fade-in">
+                          {{ togglingRole() === user.id ? '…' : 'Confirm' }}
+                        </button>
+                        <button (click)="cancelRoleToggle()" [disabled]="togglingRole() === user.id"
+                                class="px-3 py-1.5 text-xs font-semibold rounded border border-border hover:border-text-muted transition-colors cursor-pointer uppercase tracking-wider ui-fade-in">
+                          Cancel
+                        </button>
+                      } @else {
+                        <button (click)="confirmRoleToggle(user.id)"
+                                class="px-3 py-1.5 text-xs font-semibold rounded border border-border hover:border-primary hover:text-primary transition-colors cursor-pointer uppercase tracking-wider"
+                                [attr.aria-label]="'Toggle role for ' + user.firstName">
+                          {{ user.role === 'admin' ? 'Demote' : 'Promote' }}
+                        </button>
+                      }
                     </div>
                   </td>
                 </tr>

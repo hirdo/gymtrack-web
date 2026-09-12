@@ -1,0 +1,98 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/shared/components/navbar/navbar.component.html"
+        ],
+        "createdAt": "2026-09-12T03:48:39.666Z",
+        "reason": "Angular [src] binding guarded by @if (profile avatarUrl); static scanner can't evaluate dynamic bindings/guards, not an actual broken image"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/workouts/workout-train/workout-train.component.html"
+        ],
+        "createdAt": "2026-09-12T03:48:40.413Z",
+        "reason": "Angular [src] binding guarded by @if (currentExerciseImage/alt.imageUrl); static scanner can't evaluate dynamic bindings/guards, not an actual broken image"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/dashboard/dashboard.component.html"
+        ],
+        "createdAt": "2026-09-12T03:48:41.128Z",
+        "reason": "Angular [src] binding guarded by @if (workout.exercises.at(0)?.imageUrl); static scanner can't evaluate dynamic bindings/guards, not an actual broken image"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/exercises/exercise-detail.component.html"
+        ],
+        "createdAt": "2026-09-12T03:48:41.838Z",
+        "reason": "Angular [src] binding guarded by @if (ex.imageUrl), added as part of new skeleton+fade-in loading state; static scanner can't evaluate dynamic bindings/guards, not an actual broken image"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/workouts/workout-create/workout-create.component.html"
+        ],
+        "createdAt": "2026-09-12T09:16:30.215Z",
+        "reason": "Angular [src] bindings guarded by @if (exercise imageUrl / alternative imageUrl); static scanner can't evaluate dynamic bindings/guards, not an actual broken image"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/programs/program-detail.component.html"
+        ],
+        "createdAt": "2026-09-12T09:17:29.228Z",
+        "reason": "Angular [src] bindings guarded by @if (getExerciseImage as img); static scanner can't evaluate dynamic bindings/guards, not an actual broken image"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/workouts/workout-detail/workout-detail.component.html"
+        ],
+        "createdAt": "2026-09-12T09:17:51.347Z",
+        "reason": "Angular [src] bindings guarded by @if (exercise imageUrl); static scanner can't evaluate dynamic bindings/guards, not an actual broken image"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/exercises/exercise-list.component.html"
+        ],
+        "createdAt": "2026-09-12T10:01:49.716Z",
+        "reason": "Angular [src] binding guarded by @if (exercise.imageUrl); static scanner can't evaluate dynamic bindings/guards, not an actual broken image"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/exercises/exercise-create.component.html"
+        ],
+        "createdAt": "2026-09-12T10:01:49.973Z",
+        "reason": "Angular [src] bindings guarded by @if (exercise imageUrl/alternative imageUrl); static scanner can't evaluate dynamic bindings/guards, not an actual broken image"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/programs/program-create.component.html"
+        ],
+        "createdAt": "2026-09-12T10:01:50.273Z",
+        "reason": "Angular [src] bindings guarded by @if (exercise imageUrl/alternative imageUrl); static scanner can't evaluate dynamic bindings/guards, not an actual broken image"
+      }
+    ]
+  }
+}

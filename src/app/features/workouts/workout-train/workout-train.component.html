@@ -1,14 +1,14 @@
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
   @if (completing()) {
-    <div class="flex flex-col items-center justify-center py-24">
+    <div class="flex flex-col items-center justify-center py-24 ui-fade-in">
       <app-loading-spinner />
       <p class="text-text-muted text-sm mt-4">Finishing workout...</p>
     </div>
   } @else {
     @if (workout(); as w) {
       <!-- Header -->
-      <div class="flex items-center justify-between mb-6">
-        <div>
+      <div class="flex items-center justify-between gap-3 mb-6">
+        <div class="min-w-0">
           <h1 class="text-2xl sm:text-3xl font-heading font-bold uppercase tracking-wide">{{ w.name }}</h1>
           <p class="text-text-muted text-sm mt-1">
             <svg class="w-3.5 h-3.5 inline -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -16,7 +16,7 @@
           </p>
         </div>
         <button (click)="completeTraining()" [disabled]="!hasLoggedAnySet()"
-                class="btn-accent text-sm py-2 px-4 disabled:opacity-40 disabled:cursor-not-allowed">
+                class="btn-accent min-h-11 text-sm px-4 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
           Finish
         </button>
@@ -29,15 +29,25 @@
           <p class="text-primary font-heading font-bold">{{ overallProgress() }}%</p>
         </div>
         <div class="bg-background rounded-full h-2.5 overflow-hidden">
-          <div class="bg-primary h-full rounded-full transition-all duration-300" [style.width.%]="overallProgress()"></div>
+          <div class="bg-primary h-full rounded-full transition-all duration-500 ease-out" [style.width.%]="overallProgress()"></div>
         </div>
       </div>
 
+      @if (totalExercises() === 0) {
+        <div class="gym-card text-center py-16">
+          <div class="w-16 h-16 bg-surface-light rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          </div>
+          <p class="text-text-muted mb-4">This workout has no exercises yet, so there&rsquo;s nothing to train.</p>
+          <a [routerLink]="['/workouts', w.id, 'edit']" class="btn-primary">Add Exercises</a>
+        </div>
+      } @else {
       <!-- Exercise Navigation -->
-      <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+      <div class="flex gap-2 mb-6 overflow-x-auto pb-2 snap-x snap-mandatory">
         @for (slot of slots(); track slot.index) {
           <button (click)="navigateExercise(slot.index)"
-                  class="shrink-0 px-3 py-2 rounded-lg text-xs font-heading font-semibold uppercase tracking-wider transition-colors"
+                  [attr.data-active-pill]="slot.index === currentExerciseIndex() ? 'true' : null"
+                  class="shrink-0 min-h-11 px-3 rounded-lg text-xs font-heading font-semibold uppercase tracking-wider transition-colors snap-center"
                   [class]="slot.index === currentExerciseIndex()
                     ? 'bg-primary text-background'
                     : slot.completed >= slot.target
@@ -55,19 +65,23 @@
             <img [src]="img" alt="{{ log.exerciseName }}" class="w-full h-48 object-contain bg-white rounded-xl mb-4">
           }
           <div class="flex items-center justify-between mb-4 gap-2">
-            <h2 class="text-xl font-heading font-bold uppercase tracking-wide">
+            <h2 class="text-xl font-heading font-bold uppercase tracking-wide min-w-0">
               <span class="text-primary mr-2">{{ currentExerciseIndex() + 1 }}/{{ totalExercises() }}</span>
               {{ log.exerciseName }}
             </h2>
             @if (currentExerciseAlternatives().length > 1) {
               <div class="relative shrink-0">
                 <button (click)="toggleAltSwap()" type="button"
-                        class="w-9 h-9 rounded-lg bg-surface-light hover:bg-primary/10 hover:text-primary flex items-center justify-center transition-colors"
-                        aria-label="Swap exercise">
+                        class="w-11 h-11 rounded-lg bg-surface-light hover:bg-primary/10 hover:text-primary flex items-center justify-center transition-colors"
+                        aria-label="Swap exercise" aria-haspopup="true" [attr.aria-expanded]="altSwapOpen()">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                 </button>
-                @if (altSwapOpen()) {
-                  <div class="absolute right-0 top-11 z-20 w-64 bg-surface border border-border rounded-xl shadow-xl p-2 space-y-1">
+                @if (altSwapOpen() || altSwapClosing()) {
+                  <button type="button" class="fixed inset-0 z-10 cursor-default"
+                          [class.ui-backdrop-in]="!altSwapClosing()" [class.ui-fade-out]="altSwapClosing()"
+                          aria-label="Close swap menu" (click)="toggleAltSwap()"></button>
+                  <div class="absolute right-0 top-12 z-20 w-64 bg-surface border border-border rounded-xl shadow-xl p-2 space-y-1"
+                       [class.ui-scale-in]="!altSwapClosing()" [class.ui-scale-out]="altSwapClosing()">
                     <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider px-2 pt-1 pb-1.5">Swap Exercise</p>
                     @for (alt of currentExerciseAlternatives(); track alt.id) {
                       <button type="button" (click)="switchToExercise(alt.id)"
@@ -107,18 +121,19 @@
                 <p class="text-xl font-heading font-extrabold text-accent">{{ log.targetReps }}</p>
               </div>
             }
-            <div class="bg-background rounded-xl p-3 text-center">
+            <div class="bg-background rounded-xl p-3 text-center" [class.ui-scale-in]="justCompletedSet()">
               <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Completed</p>
               <p class="text-xl font-heading font-extrabold" [class]="slotCompletedSets() >= slotTargetSets() ? 'text-accent' : 'text-warning'">{{ slotCompletedSets() }}/{{ slotTargetSets() }}</p>
             </div>
           </div>
 
           <!-- Rest Timer -->
-          @if (isResting()) {
-            <div class="bg-warning/10 border border-warning/30 rounded-xl p-6 mb-6 text-center">
+          @if (isResting() || restClosing()) {
+            <div class="bg-warning/10 border border-warning/30 rounded-xl p-6 mb-6 text-center"
+                 [class.ui-slide-up-in]="!restClosing()" [class.ui-fade-out]="restClosing()">
               <p class="text-warning text-xs font-semibold uppercase tracking-wider mb-2">Rest Timer</p>
               <p class="text-4xl font-heading font-extrabold text-warning">{{ formatTime(restSeconds()) }}</p>
-              <button (click)="skipRest()" class="mt-3 text-sm text-text-muted hover:text-text transition-colors">Skip Rest</button>
+              <button (click)="skipRest()" class="mt-3 min-h-11 px-3 inline-flex items-center justify-center text-sm text-text-muted hover:text-text transition-colors">Skip Rest</button>
             </div>
           }
 
@@ -128,36 +143,33 @@
             @if (log.trackingType === 'duration') {
               <div class="mb-4">
                 <label class="block text-xs text-text-muted mb-1.5">Duration (seconds)</label>
-                <input type="number" [ngModel]="durationInput()" (ngModelChange)="durationInput.set($event)"
-                       class="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors"
-                       min="1" step="1">
+                <app-number-stepper [(value)]="durationInput" [step]="1" [min]="0" inputmode="numeric" />
               </div>
             } @else if (log.trackingType === 'reps_only') {
               <div class="mb-4">
                 <label class="block text-xs text-text-muted mb-1.5">Reps</label>
-                <input type="number" [ngModel]="repsInput()" (ngModelChange)="repsInput.set($event)"
-                       class="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors"
-                       min="1" step="1">
+                <app-number-stepper [(value)]="repsInput" [step]="1" [min]="0" inputmode="numeric" />
               </div>
             } @else {
               <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label class="block text-xs text-text-muted mb-1.5">Weight (kg)</label>
-                  <input type="number" [ngModel]="weightInput()" (ngModelChange)="weightInput.set($event)"
-                         class="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors"
-                         min="0" step="0.5">
+                  <app-number-stepper [(value)]="weightInput" [step]="0.5" [min]="0" inputmode="decimal" />
                 </div>
                 <div>
                   <label class="block text-xs text-text-muted mb-1.5">Reps</label>
-                  <input type="number" [ngModel]="repsInput()" (ngModelChange)="repsInput.set($event)"
-                         class="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors"
-                         min="1" step="1">
+                  <app-number-stepper [(value)]="repsInput" [step]="1" [min]="0" inputmode="numeric" />
                 </div>
               </div>
             }
-            <button (click)="logSet()" class="btn-primary w-full py-3 text-base">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-              Log Set
+            <button (click)="logSet()" [disabled]="loggingSet()" class="btn-primary w-full py-3 text-base disabled:opacity-60 disabled:cursor-wait">
+              @if (loggingSet()) {
+                <div class="w-4 h-4 border-2 border-background/40 border-t-background rounded-full animate-spin"></div>
+                Logging&hellip;
+              } @else {
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Log Set
+              }
             </button>
           </div>
 
@@ -174,7 +186,7 @@
                       }
                       <div class="space-y-2">
                         @for (set of slotLog.sets; track set.setNumber) {
-                          <div class="flex items-center justify-between bg-background rounded-lg px-4 py-2.5">
+                          <div class="flex items-center justify-between bg-background rounded-lg px-4 py-2.5 ui-slide-up-in">
                             <span class="text-text-muted text-sm">Set {{ set.setNumber }}</span>
                             @if (slotLog.trackingType === 'duration') {
                               <span class="font-heading font-bold text-accent">{{ set.duration }}<span class="text-text-muted text-xs ml-0.5">s</span></span>
@@ -202,8 +214,8 @@
             <div class="mt-6 pt-6 border-t border-border/50">
               <p class="text-xs text-text-muted font-semibold uppercase tracking-wider mb-3">History</p>
               <div class="space-y-2">
-                @for (entry of currentExerciseHistory(); track entry.date) {
-                  <div class="bg-background rounded-lg px-3 py-2">
+                @for (entry of currentExerciseHistory(); track entry.date; let i = $index) {
+                  <div class="bg-background rounded-lg px-3 py-2 ui-slide-up-in" [style.animation-delay.ms]="i * 40">
                     <p class="text-xs text-text-muted font-semibold mb-1.5">{{ formatHistoryDate(entry.date) }}</p>
                     <div class="flex flex-wrap gap-1.5">
                       @for (set of entry.sets; track set.setNumber) {
@@ -236,6 +248,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           </button>
         </div>
+      }
       }
     } @else {
       <div class="text-center py-24">

@@ -5,12 +5,13 @@ import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-
 import { ProgramService } from '../../core/services/program.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { ExercisePickerModalComponent } from '../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
+import { FieldErrorComponent } from '../../shared/components/field-error/field-error.component';
 import { ProgramDifficulty, ExerciseTemplate, ExerciseTrackingType, PROGRAM_DIFFICULTIES } from '../../core/models/workout.model';
 
 @Component({
   selector: 'app-program-create',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, RouterLink, ExercisePickerModalComponent, DragDropModule],
+  imports: [ReactiveFormsModule, FormsModule, RouterLink, ExercisePickerModalComponent, DragDropModule, FieldErrorComponent],
   templateUrl: './program-create.component.html',
   styleUrl: './program-create.component.scss'
 })
@@ -32,6 +33,7 @@ export class ProgramCreateComponent implements OnInit {
 
   readonly isEditMode = signal(false);
   private editId: string | null = null;
+  readonly submitting = signal(false);
 
   readonly form = this.fb.group({
     name: ['', Validators.required],
@@ -273,7 +275,7 @@ export class ProgramCreateComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.submitting()) return;
 
     const value = this.form.getRawValue();
     const days = value.days.map((d: Record<string, unknown>, i: number) => {
@@ -295,29 +297,34 @@ export class ProgramCreateComponent implements OnInit {
       };
     });
 
-    if (this.isEditMode() && this.editId) {
-      await this.programService.update(this.editId, {
-        name: value.name!,
-        description: value.description || undefined,
-        difficulty: value.difficulty!,
-        totalDays: days.length,
-        sessionsPerWeek: value.sessionsPerWeek!,
-        days
-      });
-      this.router.navigate(['/programs', this.editId]);
-    } else {
-      const program = await this.programService.create({
-        name: value.name!,
-        description: value.description || undefined,
-        difficulty: value.difficulty!,
-        totalDays: days.length,
-        sessionsPerWeek: value.sessionsPerWeek!,
-        days,
-        isActive: false,
-        currentDay: 0,
-        completedSessions: 0
-      });
-      this.router.navigate(['/programs', program.id]);
+    this.submitting.set(true);
+    try {
+      if (this.isEditMode() && this.editId) {
+        await this.programService.update(this.editId, {
+          name: value.name!,
+          description: value.description || undefined,
+          difficulty: value.difficulty!,
+          totalDays: days.length,
+          sessionsPerWeek: value.sessionsPerWeek!,
+          days
+        });
+        this.router.navigate(['/programs', this.editId]);
+      } else {
+        const program = await this.programService.create({
+          name: value.name!,
+          description: value.description || undefined,
+          difficulty: value.difficulty!,
+          totalDays: days.length,
+          sessionsPerWeek: value.sessionsPerWeek!,
+          days,
+          isActive: false,
+          currentDay: 0,
+          completedSessions: 0
+        });
+        this.router.navigate(['/programs', program.id]);
+      }
+    } finally {
+      this.submitting.set(false);
     }
   }
 }

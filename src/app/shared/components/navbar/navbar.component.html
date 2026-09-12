@@ -3,9 +3,13 @@
     <div class="flex items-center justify-between h-16">
       <!-- Logo -->
       <a routerLink="/" class="flex items-center gap-2 group" (click)="closeMobileMenu()">
-        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-          <svg class="w-5 h-5 text-background" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/>
+        <div class="w-8 h-8 bg-surface ring-1 ring-border rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-primary" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true">
+            <rect x="8" y="24" width="6" height="16" rx="2"/>
+            <rect x="16" y="20" width="6" height="24" rx="2"/>
+            <rect x="42" y="20" width="6" height="24" rx="2"/>
+            <rect x="50" y="24" width="6" height="16" rx="2"/>
+            <rect x="22" y="29" width="20" height="6" rx="1"/>
           </svg>
         </div>
         <span class="font-heading text-xl font-bold tracking-wider uppercase">
@@ -51,56 +55,85 @@
       </div>
 
       <!-- Mobile hamburger -->
-      <button class="md:hidden text-text-muted hover:text-text p-2 -mr-2 transition-colors" (click)="toggleMobileMenu()" aria-label="Toggle menu">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          @if (mobileMenuOpen()) {
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          } @else {
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          }
-        </svg>
+      <button
+        class="md:hidden relative min-h-11 min-w-11 flex items-center justify-center text-text-muted hover:text-text transition-colors"
+        (click)="toggleMobileMenu()"
+        [attr.aria-expanded]="mobileMenuOpen()"
+        aria-label="Toggle menu"
+      >
+        <span class="relative block w-5 h-4">
+          <span
+            class="absolute left-0 w-5 h-0.5 bg-current rounded-full transition-transform duration-300"
+            [class.top-0]="!mobileMenuOpen()"
+            [class.top-[7px]]="mobileMenuOpen()"
+            [class.rotate-45]="mobileMenuOpen()"
+          ></span>
+          <span
+            class="absolute left-0 top-[7px] w-5 h-0.5 bg-current rounded-full transition-opacity duration-200"
+            [class.opacity-0]="mobileMenuOpen()"
+          ></span>
+          <span
+            class="absolute left-0 w-5 h-0.5 bg-current rounded-full transition-transform duration-300"
+            [class.top-[14px]]="!mobileMenuOpen()"
+            [class.top-[7px]]="mobileMenuOpen()"
+            [class.-rotate-45]="mobileMenuOpen()"
+          ></span>
+        </span>
       </button>
     </div>
   </div>
 
   <!-- Mobile menu -->
-  @if (mobileMenuOpen()) {
-    <div class="md:hidden bg-surface border-t border-border">
-      <div class="px-4 py-3 space-y-1">
-        @if (auth.isAuthenticated()) {
-          <div class="flex items-center gap-3 px-3 py-3 mb-2">
-            @if (profileService.profile()?.avatarUrl; as avatar) {
-              <img [src]="avatar" alt="" class="w-9 h-9 rounded-full object-cover">
-            } @else {
-              <div class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
-                {{ auth.getUserName()[0] }}
+  @if (mobileMenuOpen() || mobileMenuClosing()) {
+    <div class="md:hidden fixed inset-x-0 bottom-0 z-40" style="top: calc(4rem + env(safe-area-inset-top))">
+      <div
+        class="absolute inset-0 bg-background/70 backdrop-blur-sm"
+        [class.ui-backdrop-in]="!mobileMenuClosing()"
+        [class.ui-fade-out]="mobileMenuClosing()"
+        (click)="closeMobileMenu()"
+      ></div>
+      <div
+        class="absolute inset-x-0 top-0 bg-surface border-b border-border rounded-b-2xl shadow-2xl overflow-y-auto"
+        style="max-height: calc(100vh - 4rem - env(safe-area-inset-top))"
+        [class.ui-drawer-panel-in]="!mobileMenuClosing()"
+        [class.ui-drawer-panel-out]="mobileMenuClosing()"
+      >
+        <div class="px-4 py-3 space-y-1">
+          @if (auth.isAuthenticated()) {
+            <div class="flex items-center gap-3 px-3 py-3 mb-2">
+              @if (profileService.profile()?.avatarUrl; as avatar) {
+                <img [src]="avatar" alt="" class="w-9 h-9 rounded-full object-cover">
+              } @else {
+                <div class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
+                  {{ auth.getUserName()[0] }}
+                </div>
+              }
+              <div>
+                <p class="font-semibold text-sm">{{ auth.getUserName() }}</p>
+                <p class="text-text-muted text-xs">Member</p>
               </div>
-            }
-            <div>
-              <p class="font-semibold text-sm">{{ auth.getUserName() }}</p>
-              <p class="text-text-muted text-xs">Member</p>
             </div>
-          </div>
-          <a routerLink="/dashboard" routerLinkActive="!text-primary !bg-primary/10" class="block px-3 py-2.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Dashboard</a>
-          <a routerLink="/workouts" routerLinkActive="!text-primary !bg-primary/10" class="block px-3 py-2.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Workouts</a>
-          <a routerLink="/exercises" routerLinkActive="!text-primary !bg-primary/10" class="block px-3 py-2.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Exercises</a>
-          <a routerLink="/programs" routerLinkActive="!text-primary !bg-primary/10" class="block px-3 py-2.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Programs</a>
-          <a routerLink="/schedule" routerLinkActive="!text-primary !bg-primary/10" class="block px-3 py-2.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Schedule</a>
-          <a routerLink="/profile" routerLinkActive="!text-primary !bg-primary/10" class="block px-3 py-2.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Profile</a>
-          @if (auth.isAdmin()) {
-            <a routerLink="/admin" routerLinkActive="!text-primary !bg-primary/10" class="block px-3 py-2.5 rounded-lg text-primary hover:bg-primary/10 text-sm font-heading font-semibold uppercase tracking-wider transition-colors flex items-center gap-2" (click)="closeMobileMenu()">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-              Admin Panel
-            </a>
+            <a routerLink="/dashboard" routerLinkActive="!text-primary !bg-primary/10" class="min-h-11 flex items-center px-3 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Dashboard</a>
+            <a routerLink="/workouts" routerLinkActive="!text-primary !bg-primary/10" class="min-h-11 flex items-center px-3 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Workouts</a>
+            <a routerLink="/exercises" routerLinkActive="!text-primary !bg-primary/10" class="min-h-11 flex items-center px-3 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Exercises</a>
+            <a routerLink="/programs" routerLinkActive="!text-primary !bg-primary/10" class="min-h-11 flex items-center px-3 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Programs</a>
+            <a routerLink="/schedule" routerLinkActive="!text-primary !bg-primary/10" class="min-h-11 flex items-center px-3 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Schedule</a>
+            <a routerLink="/profile" routerLinkActive="!text-primary !bg-primary/10" class="min-h-11 flex items-center px-3 rounded-lg text-text-muted hover:text-text hover:bg-surface-light text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">Profile</a>
+            @if (auth.isAdmin()) {
+              <a routerLink="/admin" routerLinkActive="!text-primary !bg-primary/10" class="min-h-11 flex items-center gap-2 px-3 rounded-lg text-primary hover:bg-primary/10 text-sm font-heading font-semibold uppercase tracking-wider transition-colors" (click)="closeMobileMenu()">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                Admin Panel
+              </a>
+            }
+            <div class="border-t border-border my-2"></div>
+            <button (click)="auth.logout()" class="min-h-11 w-full flex items-center px-3 rounded-lg text-error hover:bg-error/10 text-sm font-heading font-semibold uppercase tracking-wider transition-colors cursor-pointer">Logout</button>
+          } @else {
+            <div class="space-y-2 py-1">
+              <button (click)="auth.login()" class="btn-secondary w-full">Sign In</button>
+              <button (click)="auth.register()" class="btn-primary w-full">Sign Up</button>
+            </div>
           }
-          <div class="border-t border-border my-2"></div>
-          <button (click)="auth.logout()" class="block w-full text-left px-3 py-2.5 rounded-lg text-error hover:bg-error/10 text-sm font-heading font-semibold uppercase tracking-wider transition-colors cursor-pointer">Logout</button>
-        } @else {
-          <div class="space-y-2">
-            <button (click)="auth.login()" class="btn-secondary w-full">Sign In</button>
-            <button (click)="auth.register()" class="btn-primary w-full">Sign Up</button>
-          </div>
-        }
+        </div>
       </div>
     </div>
   }

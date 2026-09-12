@@ -24,9 +24,10 @@
     </div>
   } @else {
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-      @for (program of programService.visiblePrograms(); track program.id) {
+      @for (program of programService.visiblePrograms(); track program.id; let i = $index) {
         <a [routerLink]="['/programs', program.id]"
-           class="gym-card !p-6 sm:!p-8 hover:border-primary/30 transition-colors group"
+           class="gym-card ui-card-lift !p-6 sm:!p-8 hover:border-primary/30 transition-colors group ui-slide-up-in"
+           [style.animation-delay.ms]="Math.min(i, 8) * 60"
            [class]="program.isActive ? 'border-primary/30' : ''">
           <div class="flex items-center justify-between mb-4">
             <h3 class="font-heading font-bold uppercase tracking-wide text-xl sm:text-2xl group-hover:text-primary transition-colors">{{ program.name }}</h3>
@@ -37,22 +38,20 @@
               <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded uppercase tracking-wider bg-accent/10 text-accent shrink-0">Published</span>
             }
           </div>
-          @if (program.description) {
-            <p class="text-text-muted text-sm mb-4 line-clamp-3">{{ program.description }}</p>
-          }
-          <div class="flex items-center gap-3 text-sm text-text-muted">
+          <div class="mb-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-primary shrink-0 whitespace-nowrap" [attr.aria-label]="difficultyLabel(program.difficulty)">
+              <span class="inline-flex gap-0.5">
+                @for (n of starRange; track n) {
+                  <svg class="w-3.5 h-3.5" [class]="n <= difficultyStars(program.difficulty) ? 'text-background' : 'text-background/30'" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.446a1 1 0 00-.363 1.118l1.287 3.957c.3.922-.755 1.688-1.54 1.118l-3.366-2.446a1 1 0 00-1.176 0l-3.367 2.446c-.784.57-1.838-.196-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.813 9.385c-.783-.57-.38-1.81.588-1.81h4.163a1 1 0 00.95-.69l1.286-3.958z"/></svg>
+                }
+              </span>
+              <span class="text-xs font-semibold uppercase tracking-wider text-background">{{ difficultyLabel(program.difficulty) }}</span>
+            </span>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-text-muted">
             <span>{{ program.totalDays }} days</span>
             <span>&middot;</span>
             <span>{{ program.sessionsPerWeek }} times/week</span>
-            <span>&middot;</span>
-            <span class="inline-flex items-center gap-1.5" [attr.aria-label]="difficultyLabel(program.difficulty)">
-              <span class="inline-flex gap-0.5">
-                @for (n of starRange; track n) {
-                  <svg class="w-4 h-4" [class]="n <= difficultyStars(program.difficulty) ? 'text-warning' : 'text-border'" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.446a1 1 0 00-.363 1.118l1.287 3.957c.3.922-.755 1.688-1.54 1.118l-3.366-2.446a1 1 0 00-1.176 0l-3.367 2.446c-.784.57-1.838-.196-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.813 9.385c-.783-.57-.38-1.81.588-1.81h4.163a1 1 0 00.95-.69l1.286-3.958z"/></svg>
-                }
-              </span>
-              {{ difficultyLabel(program.difficulty) }}
-            </span>
           </div>
         </a>
       }

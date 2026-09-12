@@ -13,6 +13,7 @@ import { PROGRAM_DIFFICULTIES, ProgramDifficulty, TrainingProgram, difficultyLab
   styleUrl: './program-detail.component.scss'
 })
 export class ProgramDetailComponent {
+  protected readonly Math = Math;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly programService = inject(ProgramService);
@@ -21,7 +22,11 @@ export class ProgramDetailComponent {
 
   readonly choosing = signal(false);
   readonly replaceConfirmProgram = signal<TrainingProgram | null>(null);
+  readonly replaceConfirmClosing = signal(false);
   readonly starRange = [1, 2, 3, 4, 5];
+  readonly publishing = signal(false);
+  readonly confirmingDelete = signal(false);
+  readonly deleting = signal(false);
 
   readonly program = computed(() => {
     const id = this.route.snapshot.paramMap.get('id');
@@ -37,12 +42,24 @@ export class ProgramDetailComponent {
 
   async publish(): Promise<void> {
     const p = this.program();
-    if (p) await this.programService.setActive(p.id, true);
+    if (!p || this.publishing()) return;
+    this.publishing.set(true);
+    try {
+      await this.programService.setActive(p.id, true);
+    } finally {
+      this.publishing.set(false);
+    }
   }
 
   async unpublish(): Promise<void> {
     const p = this.program();
-    if (p) await this.programService.setActive(p.id, false);
+    if (!p || this.publishing()) return;
+    this.publishing.set(true);
+    try {
+      await this.programService.setActive(p.id, false);
+    } finally {
+      this.publishing.set(false);
+    }
   }
 
   async chooseProgram(): Promise<void> {
@@ -60,12 +77,21 @@ export class ProgramDetailComponent {
 
   async confirmReplace(): Promise<void> {
     const p = this.program();
-    this.replaceConfirmProgram.set(null);
+    this.closeReplaceConfirm();
     if (p) await this.doChooseProgram(p.id);
   }
 
   cancelReplace(): void {
-    this.replaceConfirmProgram.set(null);
+    this.closeReplaceConfirm();
+  }
+
+  private closeReplaceConfirm(): void {
+    if (!this.replaceConfirmProgram()) return;
+    this.replaceConfirmClosing.set(true);
+    setTimeout(() => {
+      this.replaceConfirmProgram.set(null);
+      this.replaceConfirmClosing.set(false);
+    }, 200);
   }
 
   private async doChooseProgram(id: string): Promise<void> {
@@ -92,11 +118,23 @@ export class ProgramDetailComponent {
     return this.exerciseService.getById(exerciseId)?.name;
   }
 
+  confirmDelete(): void {
+    this.confirmingDelete.set(true);
+  }
+
+  cancelDelete(): void {
+    this.confirmingDelete.set(false);
+  }
+
   async deleteProgram(): Promise<void> {
     const p = this.program();
-    if (p) {
+    if (!p || this.deleting()) return;
+    this.deleting.set(true);
+    try {
       await this.programService.delete(p.id);
       this.router.navigate(['/programs']);
+    } finally {
+      this.deleting.set(false);
     }
   }
 }

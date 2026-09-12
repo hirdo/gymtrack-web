@@ -1,7 +1,8 @@
 <!-- Hero Section -->
-<section class="gym-gradient relative overflow-hidden">
-  <!-- Background layers -->
-  <div class="absolute inset-0">
+<section class="gym-gradient relative">
+  <!-- Background layers — overflow-hidden lives here (not on the section) so decorative
+       blur blobs stay contained without risking clipping real content like the mobile badge. -->
+  <div class="absolute inset-0 overflow-hidden">
     <div class="absolute inset-0 hero-grid-pattern"></div>
     <div class="absolute inset-0 hero-diagonal-lines"></div>
     <div class="absolute top-10 right-[15%] w-80 h-80 bg-primary rounded-full blur-[128px] opacity-[0.15]"></div>
@@ -10,7 +11,7 @@
     <div class="absolute bottom-[20%] right-[10%] w-48 h-48 bg-warning rounded-full blur-[100px] opacity-[0.05]"></div>
   </div>
 
-  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 lg:py-40">
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-32 lg:py-40">
     <div class="flex items-center gap-12 lg:gap-16">
       <!-- Left column: text content -->
       <div class="flex-1 max-w-2xl">
@@ -47,77 +48,127 @@
             Track sets, reps & weights
           </span>
         </div>
+
+        <!-- Mobile-only hero visual: same "satellite" concept as desktop (barbell centered,
+             badges floating around it), just scaled and repositioned to fit a phone width
+             instead of stacking the badges in a plain list. -->
+        <div class="lg:hidden mt-10 relative w-full max-w-[320px] h-[280px] mx-auto" aria-hidden="true">
+          <svg class="absolute inset-0 w-full h-full" viewBox="0 0 320 280" fill="none">
+            <circle cx="160" cy="130" r="100" stroke="color-mix(in srgb, var(--color-primary) 10%, transparent)" stroke-width="1" class="hero-float"/>
+            <circle cx="160" cy="130" r="72" stroke="color-mix(in srgb, var(--color-primary) 14%, transparent)" stroke-width="1" stroke-dasharray="6 5" class="hero-float-delayed"/>
+          </svg>
+          <svg class="absolute top-[74px] left-1/2 -translate-x-1/2 w-24 h-24 hero-glow hero-float" viewBox="0 0 200 200" fill="none">
+            <!-- Barbell bar -->
+            <rect x="30" y="96" width="140" height="8" rx="4" fill="color-mix(in srgb, var(--color-primary) 90%, transparent)"/>
+            <!-- Left weight plates -->
+            <rect x="18" y="72" width="16" height="56" rx="4" fill="color-mix(in srgb, var(--color-primary) 70%, transparent)"/>
+            <rect x="8" y="80" width="12" height="40" rx="3" fill="color-mix(in srgb, var(--color-primary) 50%, transparent)"/>
+            <!-- Right weight plates -->
+            <rect x="166" y="72" width="16" height="56" rx="4" fill="color-mix(in srgb, var(--color-primary) 70%, transparent)"/>
+            <rect x="180" y="80" width="12" height="40" rx="3" fill="color-mix(in srgb, var(--color-primary) 50%, transparent)"/>
+            <!-- Left collar -->
+            <rect x="34" y="88" width="6" height="24" rx="2" fill="color-mix(in srgb, var(--color-primary) 60%, transparent)"/>
+            <!-- Right collar -->
+            <rect x="160" y="88" width="6" height="24" rx="2" fill="color-mix(in srgb, var(--color-primary) 60%, transparent)"/>
+          </svg>
+
+          <!-- Feature badge: Real-Time Sync -->
+          <div class="stat-badge !p-2.5 absolute top-0 right-0 hero-float">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 bg-primary/15 rounded-lg flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              </div>
+              <p class="text-sm font-heading font-bold text-text leading-none whitespace-nowrap">Live</p>
+            </div>
+          </div>
+
+          <!-- Feature badge: Smart Alternates -->
+          <div class="stat-badge !p-2.5 absolute bottom-2 left-0 hero-float-delayed">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 bg-accent/15 rounded-lg flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4 4m-4-4l4-4"/></svg>
+              </div>
+              <p class="text-sm font-heading font-bold text-text leading-none whitespace-nowrap">Smart</p>
+            </div>
+          </div>
+
+          <!-- Feature badge: Structured Programs -->
+          <div class="stat-badge !p-2.5 absolute bottom-16 right-0 hero-float-delayed-2">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 bg-warning/15 rounded-lg flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              </div>
+              <p class="text-sm font-heading font-bold text-text leading-none whitespace-nowrap">Built-In</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Right column: SVG illustration + floating stat badges (desktop only) -->
       <div class="hidden lg:block relative w-[420px] h-[480px] shrink-0" aria-hidden="true">
         <!-- Decorative ring elements -->
         <svg class="absolute inset-0 w-full h-full" viewBox="0 0 420 480" fill="none">
-          <circle cx="210" cy="240" r="180" stroke="rgba(249,115,22,0.08)" stroke-width="1" class="hero-float"/>
-          <circle cx="210" cy="240" r="140" stroke="rgba(249,115,22,0.12)" stroke-width="1" stroke-dasharray="8 6" class="hero-float-delayed"/>
-          <circle cx="210" cy="240" r="100" stroke="rgba(249,115,22,0.06)" stroke-width="1" class="hero-float-delayed-2"/>
+          <circle cx="210" cy="240" r="180" stroke="color-mix(in srgb, var(--color-primary) 8%, transparent)" stroke-width="1" class="hero-float"/>
+          <circle cx="210" cy="240" r="140" stroke="color-mix(in srgb, var(--color-primary) 12%, transparent)" stroke-width="1" stroke-dasharray="8 6" class="hero-float-delayed"/>
+          <circle cx="210" cy="240" r="100" stroke="color-mix(in srgb, var(--color-primary) 6%, transparent)" stroke-width="1" class="hero-float-delayed-2"/>
         </svg>
 
         <!-- Barbell SVG illustration -->
         <svg class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 hero-glow hero-float" viewBox="0 0 200 200" fill="none">
           <!-- Barbell bar -->
-          <rect x="30" y="96" width="140" height="8" rx="4" fill="rgba(249,115,22,0.9)"/>
+          <rect x="30" y="96" width="140" height="8" rx="4" fill="color-mix(in srgb, var(--color-primary) 90%, transparent)"/>
           <!-- Left weight plates -->
-          <rect x="18" y="72" width="16" height="56" rx="4" fill="rgba(249,115,22,0.7)"/>
-          <rect x="8" y="80" width="12" height="40" rx="3" fill="rgba(249,115,22,0.5)"/>
+          <rect x="18" y="72" width="16" height="56" rx="4" fill="color-mix(in srgb, var(--color-primary) 70%, transparent)"/>
+          <rect x="8" y="80" width="12" height="40" rx="3" fill="color-mix(in srgb, var(--color-primary) 50%, transparent)"/>
           <!-- Right weight plates -->
-          <rect x="166" y="72" width="16" height="56" rx="4" fill="rgba(249,115,22,0.7)"/>
-          <rect x="180" y="80" width="12" height="40" rx="3" fill="rgba(249,115,22,0.5)"/>
+          <rect x="166" y="72" width="16" height="56" rx="4" fill="color-mix(in srgb, var(--color-primary) 70%, transparent)"/>
+          <rect x="180" y="80" width="12" height="40" rx="3" fill="color-mix(in srgb, var(--color-primary) 50%, transparent)"/>
           <!-- Left collar -->
-          <rect x="34" y="88" width="6" height="24" rx="2" fill="rgba(249,115,22,0.6)"/>
+          <rect x="34" y="88" width="6" height="24" rx="2" fill="color-mix(in srgb, var(--color-primary) 60%, transparent)"/>
           <!-- Right collar -->
-          <rect x="160" y="88" width="6" height="24" rx="2" fill="rgba(249,115,22,0.6)"/>
+          <rect x="160" y="88" width="6" height="24" rx="2" fill="color-mix(in srgb, var(--color-primary) 60%, transparent)"/>
           <!-- Center grip lines -->
-          <line x1="88" y1="96" x2="88" y2="104" stroke="rgba(249,115,22,0.4)" stroke-width="1.5"/>
-          <line x1="96" y1="96" x2="96" y2="104" stroke="rgba(249,115,22,0.4)" stroke-width="1.5"/>
-          <line x1="104" y1="96" x2="104" y2="104" stroke="rgba(249,115,22,0.4)" stroke-width="1.5"/>
-          <line x1="112" y1="96" x2="112" y2="104" stroke="rgba(249,115,22,0.4)" stroke-width="1.5"/>
+          <line x1="88" y1="96" x2="88" y2="104" stroke="color-mix(in srgb, var(--color-primary) 40%, transparent)" stroke-width="1.5"/>
+          <line x1="96" y1="96" x2="96" y2="104" stroke="color-mix(in srgb, var(--color-primary) 40%, transparent)" stroke-width="1.5"/>
+          <line x1="104" y1="96" x2="104" y2="104" stroke="color-mix(in srgb, var(--color-primary) 40%, transparent)" stroke-width="1.5"/>
+          <line x1="112" y1="96" x2="112" y2="104" stroke="color-mix(in srgb, var(--color-primary) 40%, transparent)" stroke-width="1.5"/>
         </svg>
 
-        <!-- Stat badge: Workouts Tracked -->
+        <!-- Feature badge: Real-Time Sync -->
         <div class="stat-badge absolute top-6 right-0 hero-float">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 bg-primary/15 rounded-lg flex items-center justify-center shrink-0">
-              <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             </div>
             <div>
-              <p class="text-lg font-heading font-bold text-text leading-none">1,247</p>
-              <p class="text-xs text-text-muted mt-0.5">Workouts Tracked</p>
+              <p class="text-lg font-heading font-bold text-text leading-none">Live</p>
+              <p class="text-xs text-text-muted mt-0.5">Synced Every Device</p>
             </div>
           </div>
         </div>
 
-        <!-- Stat badge: Goal Completion -->
+        <!-- Feature badge: Smart Alternates -->
         <div class="stat-badge absolute bottom-[30%] -left-10 hero-float-delayed">
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 shrink-0 relative">
-              <svg class="w-9 h-9 -rotate-90" viewBox="0 0 36 36">
-                <circle cx="18" cy="18" r="16" fill="none" class="progress-ring-bg" stroke-width="2.5"/>
-                <circle cx="18" cy="18" r="16" fill="none" class="progress-ring-fill" stroke-width="2.5"
-                  stroke-dasharray="98 100"/>
-              </svg>
+            <div class="w-9 h-9 bg-accent/15 rounded-lg flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4 4m-4-4l4-4"/></svg>
             </div>
             <div>
-              <p class="text-lg font-heading font-bold text-text leading-none">98%</p>
-              <p class="text-xs text-text-muted mt-0.5">Goal Completion</p>
+              <p class="text-lg font-heading font-bold text-text leading-none">Smart</p>
+              <p class="text-xs text-text-muted mt-0.5">Ranked Alternatives</p>
             </div>
           </div>
         </div>
 
-        <!-- Stat badge: Week Streak -->
+        <!-- Feature badge: Structured Programs -->
         <div class="stat-badge absolute bottom-12 right-4 hero-float-delayed-2">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 bg-warning/15 rounded-lg flex items-center justify-center shrink-0">
-              <svg class="w-5 h-5 text-warning" fill="currentColor" viewBox="0 0 24 24"><path d="M12 23a7.5 7.5 0 01-5.138-12.963C8.204 8.774 11.5 6.5 11 1.5c6 4 9 8 3 14 1 0 2.5 0 5-2.47.27.97.5 2.47.5 3.97A7.5 7.5 0 0112 23z"/></svg>
+              <svg class="w-5 h-5 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             </div>
             <div>
-              <p class="text-lg font-heading font-bold text-text leading-none">12 Week</p>
-              <p class="text-xs text-text-muted mt-0.5">Active Streak</p>
+              <p class="text-lg font-heading font-bold text-text leading-none">Built-In</p>
+              <p class="text-xs text-text-muted mt-0.5">Multi-Week Programs</p>
             </div>
           </div>
         </div>
@@ -138,7 +189,7 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-      <div class="gym-card text-center group hover:border-primary/30 transition-all duration-300">
+      <div appRevealOnScroll [style.transition-delay.ms]="0" class="gym-card text-center group hover:border-primary/30 transition-all duration-300">
         <div class="w-16 h-16 mx-auto mb-5 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
           <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -148,7 +199,7 @@
         <p class="text-text-muted leading-relaxed">Log exercises, sets, reps, and weights. Keep a detailed record of every session.</p>
       </div>
 
-      <div class="gym-card text-center group hover:border-accent/30 transition-all duration-300">
+      <div appRevealOnScroll [style.transition-delay.ms]="80" class="gym-card text-center group hover:border-accent/30 transition-all duration-300">
         <div class="w-16 h-16 mx-auto mb-5 bg-accent/10 rounded-2xl flex items-center justify-center group-hover:bg-accent/20 transition-colors">
           <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -158,7 +209,7 @@
         <p class="text-text-muted leading-relaxed">Plan your training week with an intuitive calendar. Never miss a workout again.</p>
       </div>
 
-      <div class="gym-card text-center group hover:border-warning/30 transition-all duration-300">
+      <div appRevealOnScroll [style.transition-delay.ms]="160" class="gym-card text-center group hover:border-warning/30 transition-all duration-300">
         <div class="w-16 h-16 mx-auto mb-5 bg-warning/10 rounded-2xl flex items-center justify-center group-hover:bg-warning/20 transition-colors">
           <svg class="w-8 h-8 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -182,7 +233,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
       <!-- Basic -->
-      <div class="gym-card">
+      <div appRevealOnScroll [style.transition-delay.ms]="0" class="gym-card">
         <h3 class="text-sm font-heading font-semibold text-text-muted uppercase tracking-wider">Basic</h3>
         <div class="mt-4 mb-6">
           <span class="text-4xl font-heading font-extrabold">Free</span>
@@ -205,7 +256,7 @@
       </div>
 
       <!-- Premium -->
-      <div class="gym-card !border-primary/50 relative">
+      <div appRevealOnScroll [style.transition-delay.ms]="80" class="gym-card !border-primary/50 relative">
         <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-background text-xs font-heading font-bold px-4 py-1 rounded-full uppercase tracking-wider">Popular</span>
         <h3 class="text-sm font-heading font-semibold text-primary uppercase tracking-wider">Premium</h3>
         <div class="mt-4 mb-6">
@@ -234,7 +285,7 @@
       </div>
 
       <!-- Elite -->
-      <div class="gym-card !border-warning/30">
+      <div appRevealOnScroll [style.transition-delay.ms]="160" class="gym-card !border-warning/30">
         <h3 class="text-sm font-heading font-semibold text-warning uppercase tracking-wider">Elite</h3>
         <div class="mt-4 mb-6">
           <span class="text-4xl font-heading font-extrabold">$19.99</span>
@@ -269,9 +320,9 @@
   <div class="absolute inset-0 opacity-5">
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary rounded-full blur-[200px]"></div>
   </div>
-  <div class="relative max-w-4xl mx-auto px-4 text-center">
+  <div appRevealOnScroll class="relative max-w-4xl mx-auto px-4 text-center">
     <h2 class="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold uppercase tracking-wide mb-4">Ready to Start?</h2>
-    <p class="text-text-muted text-lg mb-10 max-w-2xl mx-auto">Join thousands of members who have transformed their fitness with GymTrack.</p>
+    <p class="text-text-muted text-lg mb-10 max-w-2xl mx-auto">Plan your training, log every set, and see your progress add up.</p>
     @if (!auth.isAuthenticated()) {
       <button (click)="auth.register()" class="btn-primary text-lg py-4 px-12">Join GymTrack Now</button>
     }

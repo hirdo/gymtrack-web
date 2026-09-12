@@ -4,8 +4,8 @@
 
 .hero-grid-pattern {
   background-image:
-    repeating-linear-gradient(0deg, rgba(249, 115, 22, 0.03) 0px, transparent 1px, transparent 60px),
-    repeating-linear-gradient(90deg, rgba(249, 115, 22, 0.03) 0px, transparent 1px, transparent 60px);
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--color-primary) 3%, transparent) 0px, transparent 1px, transparent 60px),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--color-primary) 3%, transparent) 0px, transparent 1px, transparent 60px);
   background-size: 60px 60px;
 }
 
@@ -14,27 +14,17 @@
     -45deg,
     transparent,
     transparent 40px,
-    rgba(249, 115, 22, 0.02) 40px,
-    rgba(249, 115, 22, 0.02) 41px
+    color-mix(in srgb, var(--color-primary) 2%, transparent) 40px,
+    color-mix(in srgb, var(--color-primary) 2%, transparent) 41px
   );
 }
 
 .stat-badge {
-  background: rgba(26, 31, 46, 0.7);
+  background: color-mix(in srgb, var(--color-surface) 70%, transparent);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(42, 51, 68, 0.6);
+  border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
   border-radius: 0.875rem;
   padding: 0.875rem 1rem;
+  // Pure black shadow — no theme token corresponds to this, kept as a literal.
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-}
-
-.progress-ring-bg {
-  stroke: rgba(249, 115, 22, 0.15);
-}
-
-.progress-ring-fill {
-  stroke: #f97316;
-  stroke-dasharray: 100;
-  stroke-dashoffset: 2;
-  stroke-linecap: round;
 }
