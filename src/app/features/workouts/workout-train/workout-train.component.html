@@ -91,7 +91,7 @@
           </div>
 
           <!-- Target -->
-          <div class="grid grid-cols-3 gap-3 mb-6">
+          <div class="grid grid-cols-3 gap-3 mb-2">
             <div class="bg-background rounded-xl p-3 text-center">
               <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Target Sets</p>
               <p class="text-xl font-heading font-extrabold text-primary">{{ slotTargetSets() }}</p>
@@ -99,7 +99,7 @@
             @if (log.trackingType === 'duration') {
               <div class="bg-background rounded-xl p-3 text-center">
                 <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Target Duration</p>
-                <p class="text-xl font-heading font-extrabold text-accent">{{ log.targetDuration }}s</p>
+                <p class="text-xl font-heading font-extrabold text-accent">{{ formatTime(log.targetDuration || 0) }}</p>
               </div>
             } @else {
               <div class="bg-background rounded-xl p-3 text-center">
@@ -113,12 +113,28 @@
             </div>
           </div>
 
+          @if (log.trackingType === 'reps' && log.targetWeight) {
+            <p class="text-xs text-text-muted text-center mb-6">
+              Recommended weight: <span class="text-text font-semibold">{{ log.targetWeight }}kg</span>
+            </p>
+          } @else {
+            <div class="mb-6"></div>
+          }
+
           <!-- Rest Timer -->
           @if (isResting()) {
-            <div class="bg-warning/10 border border-warning/30 rounded-xl p-6 mb-6 text-center">
-              <p class="text-warning text-xs font-semibold uppercase tracking-wider mb-2">Rest Timer</p>
-              <p class="text-4xl font-heading font-extrabold text-warning">{{ formatTime(restSeconds()) }}</p>
-              <button (click)="skipRest()" class="mt-3 text-sm text-text-muted hover:text-text transition-colors">Skip Rest</button>
+            <div class="bg-warning/10 border border-warning/30 rounded-xl p-6 mb-6 flex flex-col items-center">
+              <p class="text-warning text-xs font-semibold uppercase tracking-wider mb-3">Rest Timer</p>
+              <app-circular-progress [progress]="(restSeconds() / (restTotalSeconds() || 1)) * 100" [size]="160" colorClass="text-warning">
+                @if (restJustFinished()) {
+                  <p class="text-xl font-heading font-extrabold text-warning">Let's go!</p>
+                } @else {
+                  <p class="text-3xl font-heading font-extrabold text-warning">{{ formatTime(restSeconds()) }}</p>
+                }
+              </app-circular-progress>
+              <button (click)="skipRest()" class="mt-4 text-sm text-text-muted hover:text-text transition-colors">
+                {{ restJustFinished() ? 'Got it' : 'Skip Rest' }}
+              </button>
             </div>
           }
 
@@ -126,34 +142,54 @@
           <div class="bg-background rounded-xl p-4">
             <p class="text-xs text-text-muted font-semibold uppercase tracking-wider mb-4">Log Set {{ log.sets.length + 1 }}</p>
             @if (log.trackingType === 'duration') {
-              <div class="mb-4">
-                <label class="block text-xs text-text-muted mb-1.5">Duration (seconds)</label>
-                <input type="number" [ngModel]="durationInput()" (ngModelChange)="durationInput.set($event)"
-                       class="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors"
-                       min="1" step="1">
+              <div class="flex flex-col items-center py-2 mb-4">
+                <app-circular-progress [progress]="(durationRemaining() / (log.targetDuration || 1)) * 100" [size]="180" colorClass="text-accent">
+                  <div class="text-center">
+                    <p class="text-3xl font-heading font-extrabold">{{ formatTime(durationRemaining()) }}</p>
+                    @if (durationJustFinished()) {
+                      <p class="text-accent text-xs font-semibold uppercase mt-1">Done!</p>
+                    }
+                  </div>
+                </app-circular-progress>
+                <div class="flex gap-3 mt-4">
+                  @if (!durationRunning()) {
+                    <button type="button" (click)="startDurationTimer()" class="btn-primary py-2.5 px-6">Start</button>
+                  } @else {
+                    <button type="button" (click)="stopDurationTimer(false)" class="btn-secondary py-2.5 px-6">Stop</button>
+                  }
+                  @if (durationInput() !== null || durationRunning()) {
+                    <button type="button" (click)="resetDurationTimer()" class="text-sm text-text-muted hover:text-text transition-colors">Reset</button>
+                  }
+                </div>
               </div>
             } @else if (log.trackingType === 'reps_only') {
               <div class="mb-4">
                 <label class="block text-xs text-text-muted mb-1.5">Reps</label>
-                <input type="number" [ngModel]="repsInput()" (ngModelChange)="repsInput.set($event)"
-                       class="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors"
-                       min="1" step="1">
+                <input type="number" inputmode="numeric" [ngModel]="repsInput()" (ngModelChange)="repsInput.set($event === '' || $event === null ? null : +$event)"
+                       placeholder="0"
+                       class="w-full bg-surface border border-border rounded-lg px-4 py-3 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                       min="0" step="1">
               </div>
             } @else {
               <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label class="block text-xs text-text-muted mb-1.5">Weight (kg)</label>
-                  <input type="number" [ngModel]="weightInput()" (ngModelChange)="weightInput.set($event)"
-                         class="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors"
+                  <input type="number" inputmode="decimal" [ngModel]="weightInput()" (ngModelChange)="weightInput.set($event === '' || $event === null ? null : +$event)"
+                         placeholder="0"
+                         class="w-full bg-surface border border-border rounded-lg px-4 py-3 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                          min="0" step="0.5">
                 </div>
                 <div>
                   <label class="block text-xs text-text-muted mb-1.5">Reps</label>
-                  <input type="number" [ngModel]="repsInput()" (ngModelChange)="repsInput.set($event)"
-                         class="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors"
-                         min="1" step="1">
+                  <input type="number" inputmode="numeric" [ngModel]="repsInput()" (ngModelChange)="repsInput.set($event === '' || $event === null ? null : +$event)"
+                         placeholder="0"
+                         class="w-full bg-surface border border-border rounded-lg px-4 py-3 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                         min="0" step="1">
                 </div>
               </div>
+            }
+            @if (logSetError(); as err) {
+              <p class="text-error text-xs font-semibold mb-3 text-center">{{ err }}</p>
             }
             <button (click)="logSet()" class="btn-primary w-full py-3 text-base">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -174,20 +210,64 @@
                       }
                       <div class="space-y-2">
                         @for (set of slotLog.sets; track set.setNumber) {
-                          <div class="flex items-center justify-between bg-background rounded-lg px-4 py-2.5">
-                            <span class="text-text-muted text-sm">Set {{ set.setNumber }}</span>
-                            @if (slotLog.trackingType === 'duration') {
-                              <span class="font-heading font-bold text-accent">{{ set.duration }}<span class="text-text-muted text-xs ml-0.5">s</span></span>
-                            } @else if (slotLog.trackingType === 'reps_only') {
-                              <span class="font-heading font-bold text-accent">{{ set.reps }}<span class="text-text-muted text-xs ml-0.5">reps</span></span>
-                            } @else {
-                              <div class="flex items-center gap-4">
-                                <span class="font-heading font-bold">{{ set.weight }}<span class="text-text-muted text-xs ml-0.5">kg</span></span>
-                                <span class="text-text-muted">&times;</span>
-                                <span class="font-heading font-bold text-accent">{{ set.reps }}<span class="text-text-muted text-xs ml-0.5">reps</span></span>
+                          @if (isEditingSet(slotLog.id, set.setNumber)) {
+                            <div class="bg-background rounded-lg p-3 space-y-2">
+                              @if (slotLog.trackingType === 'duration') {
+                                <div class="flex items-center gap-2">
+                                  <span class="text-text-muted text-sm w-14 shrink-0">Set {{ set.setNumber }}</span>
+                                  <input type="number" inputmode="decimal" [ngModel]="editDurationInput()" (ngModelChange)="editDurationInput.set($event === '' || $event === null ? null : +$event)"
+                                         class="flex-1 min-w-0 bg-surface border border-border rounded-lg px-3 py-2 text-text text-sm font-heading font-bold text-center focus:border-primary focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                         min="0" step="1">
+                                  <span class="text-text-muted text-xs shrink-0">sec</span>
+                                </div>
+                              } @else if (slotLog.trackingType === 'reps_only') {
+                                <div class="flex items-center gap-2">
+                                  <span class="text-text-muted text-sm w-14 shrink-0">Set {{ set.setNumber }}</span>
+                                  <input type="number" inputmode="numeric" [ngModel]="editRepsInput()" (ngModelChange)="editRepsInput.set($event === '' || $event === null ? null : +$event)"
+                                         class="flex-1 min-w-0 bg-surface border border-border rounded-lg px-3 py-2 text-text text-sm font-heading font-bold text-center focus:border-primary focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                         min="0" step="1">
+                                  <span class="text-text-muted text-xs shrink-0">reps</span>
+                                </div>
+                              } @else {
+                                <div class="flex items-center gap-2">
+                                  <span class="text-text-muted text-sm w-14 shrink-0">Set {{ set.setNumber }}</span>
+                                  <input type="number" inputmode="decimal" [ngModel]="editWeightInput()" (ngModelChange)="editWeightInput.set($event === '' || $event === null ? null : +$event)"
+                                         class="flex-1 min-w-0 bg-surface border border-border rounded-lg px-3 py-2 text-text text-sm font-heading font-bold text-center focus:border-primary focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                         min="0" step="0.5" placeholder="kg">
+                                  <input type="number" inputmode="numeric" [ngModel]="editRepsInput()" (ngModelChange)="editRepsInput.set($event === '' || $event === null ? null : +$event)"
+                                         class="flex-1 min-w-0 bg-surface border border-border rounded-lg px-3 py-2 text-text text-sm font-heading font-bold text-center focus:border-primary focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                         min="0" step="1" placeholder="reps">
+                                </div>
+                              }
+                              <div class="flex gap-2 justify-end">
+                                <button type="button" (click)="cancelEditSet()" class="text-xs text-text-muted hover:text-text px-3 py-1.5 transition-colors">Cancel</button>
+                                <button type="button" (click)="saveEditSet(slotLog.trackingType || 'reps')" class="text-xs bg-primary text-background font-semibold rounded-md px-3 py-1.5 hover:bg-primary-light transition-colors">Save</button>
                               </div>
-                            }
-                          </div>
+                            </div>
+                          } @else {
+                            <div class="flex items-center justify-between bg-background rounded-lg px-4 py-2.5">
+                              <span class="text-text-muted text-sm">Set {{ set.setNumber }}</span>
+                              @if (slotLog.trackingType === 'duration') {
+                                <span class="font-heading font-bold text-accent">{{ formatTime(set.duration || 0) }}</span>
+                              } @else if (slotLog.trackingType === 'reps_only') {
+                                <span class="font-heading font-bold text-accent">{{ set.reps }}<span class="text-text-muted text-xs ml-0.5">reps</span></span>
+                              } @else {
+                                <div class="flex items-center gap-4">
+                                  <span class="font-heading font-bold">{{ set.weight }}<span class="text-text-muted text-xs ml-0.5">kg</span></span>
+                                  <span class="text-text-muted">&times;</span>
+                                  <span class="font-heading font-bold text-accent">{{ set.reps }}<span class="text-text-muted text-xs ml-0.5">reps</span></span>
+                                </div>
+                              }
+                              <div class="flex items-center gap-1 shrink-0">
+                                <button type="button" (click)="startEditSet(slotLog.id, set)" class="w-8 h-8 rounded-lg hover:bg-surface-light flex items-center justify-center text-text-muted hover:text-primary transition-colors" aria-label="Edit set">
+                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                </button>
+                                <button type="button" (click)="removeSet(slotLog.id, set.setNumber)" class="w-8 h-8 rounded-lg hover:bg-surface-light flex items-center justify-center text-text-muted hover:text-error transition-colors" aria-label="Delete set">
+                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                              </div>
+                            </div>
+                          }
                         }
                       </div>
                     </div>
@@ -208,7 +288,7 @@
                     <div class="flex flex-wrap gap-1.5">
                       @for (set of entry.sets; track set.setNumber) {
                         @if (log.trackingType === 'duration') {
-                          <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-surface-light">{{ set.duration }}s</span>
+                          <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-surface-light">{{ formatTime(set.duration || 0) }}</span>
                         } @else if (log.trackingType === 'reps_only') {
                           <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-surface-light">{{ set.reps }} reps</span>
                         } @else {
