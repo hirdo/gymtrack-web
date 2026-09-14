@@ -139,17 +139,17 @@
           @if (isResting() || restClosing()) {
             <div class="rounded-xl p-6 mb-6 flex flex-col items-center"
                  [class.ui-slide-up-in]="!restClosing()" [class.ui-fade-out]="restClosing()">
-              <p class="text-warning text-xs font-semibold uppercase tracking-wider mb-3">Rest Timer</p>
               @if (restJustFinished()) {
                 <p class="text-2xl font-heading font-extrabold text-warning py-14">Let's go!</p>
               } @else {
+                <p class="text-warning text-xs font-semibold uppercase tracking-wider mb-3">Rest Timer</p>
                 <app-countdown-ring [percent]="(restSeconds() / (restTotalSeconds() || 1)) * 100" [size]="160" colorClass="warning">
                   <p class="text-3xl font-heading font-extrabold text-warning">{{ formatTime(restSeconds()) }}</p>
                 </app-countdown-ring>
+                <button (click)="skipRest()" class="mt-4 min-h-11 px-3 inline-flex items-center justify-center text-sm text-text-muted hover:text-text transition-colors">
+                  Skip Rest
+                </button>
               }
-              <button (click)="skipRest()" class="mt-4 min-h-11 px-3 inline-flex items-center justify-center text-sm text-text-muted hover:text-text transition-colors">
-                {{ restJustFinished() ? 'Got it' : 'Skip Rest' }}
-              </button>
             </div>
           }
 
