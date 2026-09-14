@@ -31,6 +31,8 @@ export class ExerciseListComponent {
     'bodyweight', 'other'
   ];
 
+  protected readonly Math = Math;
+
   readonly filteredExercises = computed(() => {
     let results = this.exerciseService.search(this.searchQuery());
     const muscle = this.selectedMuscle();

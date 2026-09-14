@@ -5,12 +5,13 @@ import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-
 import { ProgramService } from '../../core/services/program.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { ExercisePickerModalComponent } from '../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
+import { FieldErrorComponent } from '../../shared/components/field-error/field-error.component';
 import { ProgramDifficulty, ExerciseTemplate, ExerciseTrackingType, PROGRAM_DIFFICULTIES } from '../../core/models/workout.model';
 
 @Component({
   selector: 'app-program-create',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, RouterLink, ExercisePickerModalComponent, DragDropModule],
+  imports: [ReactiveFormsModule, FormsModule, RouterLink, ExercisePickerModalComponent, DragDropModule, FieldErrorComponent],
   templateUrl: './program-create.component.html',
   styleUrl: './program-create.component.scss'
 })
@@ -32,6 +33,7 @@ export class ProgramCreateComponent implements OnInit {
 
   readonly isEditMode = signal(false);
   private editId: string | null = null;
+  readonly submitting = signal(false);
 
   readonly form = this.fb.group({
     name: ['', Validators.required],
@@ -128,7 +130,15 @@ export class ProgramCreateComponent implements OnInit {
 
   duplicateDay(index: number): void {
     const sourceValue = this.days.at(index).getRawValue();
-    const newDay = this.createDayGroup(index + 1);
+    this.days.push(this.cloneDayGroup(sourceValue));
+    this.renumberDays();
+  }
+
+  // Shared by duplicateDay() and duplicateDayRange() — builds a fresh day
+  // FormGroup with the same name/exercises as the given day's raw value.
+  // dayNumber is left at its placeholder; renumberDays() fixes it afterwards.
+  private cloneDayGroup(sourceValue: Record<string, unknown>): FormGroup {
+    const newDay = this.createDayGroup(0);
     newDay.patchValue({ name: sourceValue['name'] });
     const exercises = newDay.get('exercises') as FormArray;
     exercises.clear();
@@ -137,7 +147,32 @@ export class ProgramCreateComponent implements OnInit {
       exGroup.patchValue(ex);
       exercises.push(exGroup);
     }
-    this.days.insert(index + 1, newDay);
+    return newDay;
+  }
+
+  readonly duplicateRangeStart = signal(1);
+  readonly duplicateRangeEnd = signal(1);
+
+  canDuplicateRange(): boolean {
+    const start = this.duplicateRangeStart();
+    const end = this.duplicateRangeEnd();
+    return start >= 1 && end >= start && end <= this.days.length;
+  }
+
+  // Duplicates Day `start`..`end` as a new block appended to the end, in the
+  // same order, e.g. duplicating Days 1-3 of a 3-day program adds Days 4-6
+  // with identical names/exercises.
+  duplicateDayRange(): void {
+    if (!this.canDuplicateRange()) return;
+    const startIndex = this.duplicateRangeStart() - 1;
+    const endIndex = this.duplicateRangeEnd() - 1;
+    const sourceValues = [];
+    for (let i = startIndex; i <= endIndex; i++) {
+      sourceValues.push(this.days.at(i).getRawValue());
+    }
+    for (const sourceValue of sourceValues) {
+      this.days.push(this.cloneDayGroup(sourceValue));
+    }
     this.renumberDays();
   }
 
@@ -273,7 +308,7 @@ export class ProgramCreateComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.submitting()) return;
 
     const value = this.form.getRawValue();
     const days = value.days.map((d: Record<string, unknown>, i: number) => {
@@ -295,29 +330,34 @@ export class ProgramCreateComponent implements OnInit {
       };
     });
 
-    if (this.isEditMode() && this.editId) {
-      await this.programService.update(this.editId, {
-        name: value.name!,
-        description: value.description || undefined,
-        difficulty: value.difficulty!,
-        totalDays: days.length,
-        sessionsPerWeek: value.sessionsPerWeek!,
-        days
-      });
-      this.router.navigate(['/programs', this.editId]);
-    } else {
-      const program = await this.programService.create({
-        name: value.name!,
-        description: value.description || undefined,
-        difficulty: value.difficulty!,
-        totalDays: days.length,
-        sessionsPerWeek: value.sessionsPerWeek!,
-        days,
-        isActive: false,
-        currentDay: 0,
-        completedSessions: 0
-      });
-      this.router.navigate(['/programs', program.id]);
+    this.submitting.set(true);
+    try {
+      if (this.isEditMode() && this.editId) {
+        await this.programService.update(this.editId, {
+          name: value.name!,
+          description: value.description || undefined,
+          difficulty: value.difficulty!,
+          totalDays: days.length,
+          sessionsPerWeek: value.sessionsPerWeek!,
+          days
+        });
+        this.router.navigate(['/programs', this.editId]);
+      } else {
+        const program = await this.programService.create({
+          name: value.name!,
+          description: value.description || undefined,
+          difficulty: value.difficulty!,
+          totalDays: days.length,
+          sessionsPerWeek: value.sessionsPerWeek!,
+          days,
+          isActive: false,
+          currentDay: 0,
+          completedSessions: 0
+        });
+        this.router.navigate(['/programs', program.id]);
+      }
+    } finally {
+      this.submitting.set(false);
     }
   }
 }

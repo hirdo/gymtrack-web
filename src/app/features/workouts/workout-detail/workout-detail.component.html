@@ -10,7 +10,7 @@
         <div>
           <h1 class="text-3xl sm:text-4xl font-heading font-bold uppercase tracking-wide">{{ w.name }}</h1>
           <div class="flex items-center gap-3 gap-y-2 mt-3 flex-wrap">
-            <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-md uppercase tracking-wider"
+            <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded uppercase tracking-wider"
                   [class]="w.category === 'strength' ? 'bg-primary/10 text-primary' :
                            w.category === 'cardio' ? 'bg-accent/10 text-accent' :
                            w.category === 'hiit' ? 'bg-warning/10 text-warning' :
@@ -23,6 +23,12 @@
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                 Completed on {{ formatCompletedDate(w.completedDate) }}
               </span>
+              @if (w.durationMinutes) {
+                <span class="inline-flex items-center gap-1.5 text-text-muted text-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  {{ formatDuration(w.durationMinutes) }}
+                </span>
+              }
             }
             @if (w.scheduledDate) {
               <span class="text-text-muted text-sm">
@@ -34,49 +40,75 @@
         </div>
         <div class="flex gap-2 flex-wrap shrink-0">
           @if (starting()) {
-            <button class="btn-primary text-sm py-2 px-4 opacity-60 cursor-not-allowed" disabled>Starting...</button>
+            <button class="btn-primary min-h-11 text-sm px-4 opacity-60 cursor-not-allowed" disabled>Starting...</button>
           } @else {
             @if (!hasBeenTrained()) {
-              <button (click)="startTraining()" class="btn-primary text-sm py-2 px-4">
+              <button (click)="startTraining()" class="btn-primary min-h-11 text-sm px-4">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 Start Workout
               </button>
             }
             @if (hasBeenTrained() && !w.completedDate) {
-              <a [routerLink]="['/workouts', w.id, 'train']" class="btn-primary text-sm py-2 px-4">
+              <a [routerLink]="['/workouts', w.id, 'train']" class="btn-primary min-h-11 text-sm px-4">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 Continue Workout
               </a>
             }
           }
-          @if (!w.completedDate && !w.programId && !hasBeenTrained()) {
-            <a [routerLink]="['/workouts', w.id, 'edit']" class="btn-secondary text-sm py-2 px-4">
+          @if (!w.completedDate && !hasBeenTrained()) {
+            <a [routerLink]="['/workouts', w.id, 'edit']" class="btn-secondary min-h-11 text-sm px-4">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
               Edit
             </a>
           }
           @if (!w.completedDate && hasBeenTrained() && !starting()) {
-            <button (click)="markComplete()" class="btn-accent text-sm py-2 px-4">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              Complete
+            <button (click)="markComplete()" [disabled]="completing()" class="btn-accent min-h-11 text-sm px-4 disabled:opacity-60 disabled:cursor-wait">
+              @if (completing()) {
+                <div class="w-3.5 h-3.5 border-2 border-background/40 border-t-background rounded-full animate-spin"></div>
+                Completing&hellip;
+              } @else {
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Complete
+              }
             </button>
           }
           @if (!w.programId) {
-            <button (click)="deleteWorkout()" class="btn-secondary text-sm py-2 px-4 hover:!text-error hover:!border-error/50">Delete</button>
+            @if (confirmingDelete()) {
+              <div class="flex items-center gap-2 flex-wrap ui-fade-in">
+                <span class="text-error text-sm font-semibold self-center">Delete this workout?</span>
+                <button (click)="deleteWorkout()" [disabled]="deleting()" class="btn-secondary min-h-11 text-sm px-4 !border-error/50 !text-error hover:!bg-error/10 disabled:opacity-60 disabled:cursor-wait">
+                  {{ deleting() ? 'Deleting…' : 'Confirm' }}
+                </button>
+                <button (click)="cancelDelete()" [disabled]="deleting()" class="btn-secondary min-h-11 text-sm px-4">Cancel</button>
+              </div>
+            } @else {
+              <button (click)="confirmDelete()" class="btn-secondary min-h-11 text-sm px-4 hover:!text-error hover:!border-error/50">Delete</button>
+            }
           }
         </div>
       </div>
     </div>
 
     @if (w.description) {
-      <p class="text-text-muted mb-8 leading-relaxed">{{ w.description }}</p>
+      <div class="mb-8">
+        <h2 class="text-xs font-heading font-semibold uppercase tracking-[0.2em] text-text-muted mb-2">Description</h2>
+        <p class="text-text-muted leading-relaxed whitespace-pre-line">{{ w.description }}</p>
+      </div>
     }
 
     <!-- Exercises -->
     <div class="space-y-4">
       <h2 class="text-lg font-heading font-bold uppercase tracking-wider">Exercises <span class="text-text-muted font-body font-normal text-sm normal-case">({{ w.exercises.length }})</span></h2>
+      @if (w.exercises.length === 0) {
+        <div class="gym-card text-center py-12">
+          <p class="text-text-muted mb-4">No exercises added yet.</p>
+          @if (!w.completedDate && !w.programId && !hasBeenTrained()) {
+            <a [routerLink]="['/workouts', w.id, 'edit']" class="btn-primary">Add Exercises</a>
+          }
+        </div>
+      }
       @for (exercise of w.exercises; track exercise.id; let i = $index) {
-        <div class="gym-card">
+        <div class="gym-card ui-slide-up-in" [style.animation-delay.ms]="Math.min(i, 8) * 60">
           <div class="flex items-center gap-4 mb-4">
             @if (exercise.imageUrl) {
               <img [src]="exercise.imageUrl" alt="{{ exercise.name }}" class="w-20 h-20 rounded-xl object-contain bg-white shrink-0">
@@ -116,7 +148,10 @@
             </div>
           }
           @if (exercise.notes) {
-            <p class="mt-3 text-sm text-text-muted border-l-2 border-primary/30 pl-3">{{ exercise.notes }}</p>
+            <div class="mt-3 border-l-2 border-primary/30 pl-3">
+              <p class="text-[10px] text-text-muted/70 font-semibold uppercase tracking-wider mb-0.5">Note</p>
+              <p class="text-sm text-text-muted">{{ exercise.notes }}</p>
+            </div>
           }
           @if (w.completedDate) {
             @if (getLogsForExercise(i); as exerciseLogs) {

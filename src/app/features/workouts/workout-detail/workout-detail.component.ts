@@ -55,7 +55,19 @@ export class WorkoutDetailComponent {
     return formatTime(seconds);
   }
 
+  formatDuration(minutes: number): string {
+    if (minutes < 60) return `${minutes} min`;
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m === 0 ? `${h}h` : `${h}h ${m}min`;
+  }
+
+  protected readonly Math = Math;
+
   readonly starting = signal(false);
+  readonly completing = signal(false);
+  readonly confirmingDelete = signal(false);
+  readonly deleting = signal(false);
 
   async startTraining(): Promise<void> {
     const w = this.workout();
@@ -71,17 +83,33 @@ export class WorkoutDetailComponent {
 
   async markComplete(): Promise<void> {
     const w = this.workout();
-    if (w) {
+    if (!w || this.completing()) return;
+    this.completing.set(true);
+    try {
       await this.workoutService.markComplete(w.id);
+    } finally {
+      this.completing.set(false);
     }
+  }
+
+  confirmDelete(): void {
+    this.confirmingDelete.set(true);
+  }
+
+  cancelDelete(): void {
+    this.confirmingDelete.set(false);
   }
 
   async deleteWorkout(): Promise<void> {
     const w = this.workout();
-    if (w) {
+    if (!w || this.deleting()) return;
+    this.deleting.set(true);
+    try {
       await this.exerciseLogService.deleteLogsForWorkout(w.id);
       await this.workoutService.delete(w.id);
       this.router.navigate(['/workouts']);
+    } finally {
+      this.deleting.set(false);
     }
   }
 }

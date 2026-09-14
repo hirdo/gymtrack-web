@@ -47,7 +47,8 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/workouts/workout-train/workout-train.component').then(
             (m) => m.WorkoutTrainComponent
-          )
+          ),
+        data: { hideChrome: true }
       },
       {
         path: ':id',

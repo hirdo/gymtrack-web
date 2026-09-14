@@ -1,46 +1,58 @@
-import { Component, Input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 
+// SVG "percentage ring" trick: viewBox 0 0 36 36 with r=15.9155 gives a
+// circumference of ~100, so stroke-dasharray/-offset can be set directly in
+// percentage units without computing 2*PI*r per instance.
 @Component({
   selector: 'app-circular-progress',
   standalone: true,
   template: `
-    <div class="relative inline-flex items-center justify-center shrink-0" [style.width.px]="size" [style.height.px]="size">
-      <svg [attr.width]="size" [attr.height]="size" class="-rotate-90">
-        <circle [attr.cx]="size / 2" [attr.cy]="size / 2" [attr.r]="radius"
-                fill="none" stroke="currentColor" [attr.stroke-width]="strokeWidth"
-                class="text-surface-light"></circle>
-        <circle [attr.cx]="size / 2" [attr.cy]="size / 2" [attr.r]="radius"
-                fill="none" stroke="currentColor" [attr.stroke-width]="strokeWidth"
-                stroke-linecap="round"
-                [attr.stroke-dasharray]="circumference"
-                [attr.stroke-dashoffset]="dashOffset"
-                class="transition-all duration-1000 ease-linear"
-                [class.text-primary]="colorClass === 'text-primary'"
-                [class.text-accent]="colorClass === 'text-accent'"
-                [class.text-warning]="colorClass === 'text-warning'"></circle>
+    <div class="relative shrink-0" [style.width.px]="size()" [style.height.px]="size()">
+      <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--color-border)" [attr.stroke-width]="trackWidth()" />
+        <circle
+          cx="18" cy="18" r="15.9155" fill="none"
+          [attr.stroke]="ringColor()"
+          [attr.stroke-width]="trackWidth()"
+          stroke-linecap="round"
+          stroke-dasharray="100 100"
+          [attr.stroke-dashoffset]="100 - clampedPercent()"
+          class="ring-arc"
+        />
       </svg>
-      <div class="absolute inset-0 flex items-center justify-center">
-        <ng-content></ng-content>
-      </div>
+      <span
+        class="absolute inset-0 flex items-center justify-center font-heading font-extrabold tabular-nums leading-none"
+        [style.color]="ringColor()"
+        [style.font-size.px]="fontSize()"
+      >{{ clampedPercent() }}</span>
     </div>
+  `,
+  styles: `
+    .ring-arc {
+      transition: stroke-dashoffset 0.7s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.3s ease-out;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ring-arc {
+        transition: none;
+      }
+    }
   `
 })
 export class CircularProgressComponent {
-  @Input() progress = 0;
-  @Input() size = 160;
-  @Input() colorClass: 'text-primary' | 'text-accent' | 'text-warning' = 'text-primary';
-  @Input() strokeWidth = 10;
+  readonly percent = input<number>(0);
+  readonly size = input<number>(44);
+  readonly trackWidth = input<number>(3);
 
-  get radius(): number {
-    return (this.size - this.strokeWidth) / 2;
-  }
+  readonly clampedPercent = computed(() => Math.max(0, Math.min(100, Math.round(this.percent()))));
 
-  get circumference(): number {
-    return 2 * Math.PI * this.radius;
-  }
+  // Stepped red -> yellow -> green as completion crosses the 33 / 67 milestones.
+  readonly ringColor = computed(() => {
+    const p = this.clampedPercent();
+    if (p < 33) return 'var(--color-error)';
+    if (p < 67) return 'var(--color-warning)';
+    return 'var(--color-success)';
+  });
 
-  get dashOffset(): number {
-    const clamped = Math.max(0, Math.min(100, this.progress));
-    return this.circumference * (1 - clamped / 100);
-  }
+  readonly fontSize = computed(() => Math.round(this.size() * 0.32));
 }

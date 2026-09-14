@@ -16,6 +16,7 @@ export class ProgramListComponent {
   readonly auth = inject(AuthService);
 
   readonly starRange = [1, 2, 3, 4, 5];
+  protected readonly Math = Math;
 
   difficultyStars(difficulty: ProgramDifficulty): number {
     return PROGRAM_DIFFICULTIES.find(d => d.value === difficulty)?.stars ?? 0;

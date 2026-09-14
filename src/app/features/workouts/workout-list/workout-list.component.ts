@@ -1,14 +1,15 @@
 import { Component, inject, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ProgramService } from '../../../core/services/program.service';
-import { WorkoutCategory } from '../../../core/models/workout.model';
+import { Workout, WorkoutCategory } from '../../../core/models/workout.model';
 import { parseLocalDate, formatDisplayDate } from '../../../core/utils/date.util';
 
 @Component({
   selector: 'app-workout-list',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, NgTemplateOutlet],
   templateUrl: './workout-list.component.html',
   styleUrl: './workout-list.component.scss'
 })
@@ -16,6 +17,7 @@ export class WorkoutListComponent {
   readonly workoutService = inject(WorkoutService);
   private readonly programService = inject(ProgramService);
   readonly selectedCategory = signal<WorkoutCategory | 'all'>('all');
+  protected readonly Math = Math;
 
   readonly categories: { value: WorkoutCategory | 'all'; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -34,9 +36,22 @@ export class WorkoutListComponent {
     return this.workoutService.workouts().filter(w => !w.programRunId || w.programRunId === activeRunId);
   }
 
-  get filteredWorkouts() {
+  private categoryFiltered(workouts: Workout[]) {
     const cat = this.selectedCategory();
-    const workouts = cat === 'all' ? this.visibleWorkouts : this.visibleWorkouts.filter(w => w.category === cat);
+    return cat === 'all' ? workouts : workouts.filter(w => w.category === cat);
+  }
+
+  /** Workouts generated from a program, shown in their own section, sorted day 1 → N.
+   * Programs create one workout per day sequentially with no scheduledDate assigned yet
+   * (that comes later from the workout itself), so createdAt is the reliable day-order signal. */
+  get programWorkouts() {
+    const workouts = this.categoryFiltered(this.visibleWorkouts.filter(w => !!w.programId));
+    return [...workouts].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  }
+
+  /** Self-created workouts, shown in their own section, sorted by scheduled date. */
+  get selfCreatedWorkouts() {
+    const workouts = this.categoryFiltered(this.visibleWorkouts.filter(w => !w.programId));
     return [...workouts].sort((a, b) =>
       (a.scheduledDate || '9999-99-99').localeCompare(b.scheduledDate || '9999-99-99')
     );
@@ -52,9 +67,5 @@ export class WorkoutListComponent {
 
   formatCompletedDate(iso: string): string {
     return formatDisplayDate(new Date(iso));
-  }
-
-  getProgramName(programId: string): string {
-    return this.programService.getById(programId)?.name || 'Program';
   }
 }

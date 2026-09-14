@@ -33,6 +33,10 @@ export class AdminComponent implements OnInit {
   readonly activeTab = signal<'users' | 'stats'>('users');
   readonly users = signal<AdminUser[]>([]);
   readonly loading = signal(true);
+  readonly loadError = signal(false);
+  readonly confirmingRoleFor = signal<string | null>(null);
+  readonly togglingRole = signal<string | null>(null);
+  readonly changingMembershipFor = signal<string | null>(null);
 
   get activeUsers(): number {
     return this.users().length;
@@ -70,6 +74,7 @@ export class AdminComponent implements OnInit {
 
   async loadUsers(): Promise<void> {
     this.loading.set(true);
+    this.loadError.set(false);
     try {
       const userDocs = await this.firestore.queryDocuments<AdminUser>('users');
       const workoutData = await this.workoutService.getAllWorkoutsForAdmin();
@@ -91,26 +96,51 @@ export class AdminComponent implements OnInit {
       this.users.set(users);
     } catch {
       this.users.set([]);
+      this.loadError.set(true);
     } finally {
       this.loading.set(false);
     }
   }
 
+  isSelf(userId: string): boolean {
+    return this.auth.userId() === userId;
+  }
+
+  confirmRoleToggle(userId: string): void {
+    this.confirmingRoleFor.set(userId);
+  }
+
+  cancelRoleToggle(): void {
+    this.confirmingRoleFor.set(null);
+  }
+
   async toggleUserRole(userId: string): Promise<void> {
     const user = this.users().find(u => u.id === userId);
-    if (!user) return;
-    const newRole = user.role === 'admin' ? 'user' : 'admin';
-    await this.firestore.updateDocument('users', userId, { role: newRole });
-    this.users.update(users =>
-      users.map(u => u.id === userId ? { ...u, role: newRole } : u)
-    );
+    if (!user || this.togglingRole()) return;
+    this.togglingRole.set(userId);
+    try {
+      const newRole = user.role === 'admin' ? 'user' : 'admin';
+      await this.firestore.updateDocument('users', userId, { role: newRole });
+      this.users.update(users =>
+        users.map(u => u.id === userId ? { ...u, role: newRole } : u)
+      );
+    } finally {
+      this.togglingRole.set(null);
+      this.confirmingRoleFor.set(null);
+    }
   }
 
   async changeMembership(userId: string, tier: MembershipTier): Promise<void> {
-    await this.membershipService.setMembershipForUser(userId, tier);
-    this.users.update(users =>
-      users.map(u => u.id === userId ? { ...u, membership: tier } : u)
-    );
+    if (this.changingMembershipFor()) return;
+    this.changingMembershipFor.set(userId);
+    try {
+      await this.membershipService.setMembershipForUser(userId, tier);
+      this.users.update(users =>
+        users.map(u => u.id === userId ? { ...u, membership: tier } : u)
+      );
+    } finally {
+      this.changingMembershipFor.set(null);
+    }
   }
 
   formatDate(dateStr: string): string {

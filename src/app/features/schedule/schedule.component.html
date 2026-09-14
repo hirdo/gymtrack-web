@@ -6,26 +6,26 @@
     </div>
     <div class="flex flex-wrap items-center gap-3">
       <div class="flex items-center gap-1 bg-surface border border-border rounded-lg p-1">
-        <button (click)="dateMode.set('scheduled')"
+        <button (click)="dateMode.set('scheduled')" [attr.aria-pressed]="dateMode() === 'scheduled'"
                 class="px-3 py-1.5 rounded-md text-xs font-heading font-semibold uppercase tracking-wider transition-colors cursor-pointer"
-                [class]="dateMode() === 'scheduled' ? 'bg-primary text-white' : 'text-text-muted hover:text-text'">
+                [class]="dateMode() === 'scheduled' ? 'bg-primary text-background' : 'text-text-muted hover:text-text'">
           Scheduled
         </button>
-        <button (click)="dateMode.set('completed')"
+        <button (click)="dateMode.set('completed')" [attr.aria-pressed]="dateMode() === 'completed'"
                 class="px-3 py-1.5 rounded-md text-xs font-heading font-semibold uppercase tracking-wider transition-colors cursor-pointer"
-                [class]="dateMode() === 'completed' ? 'bg-accent text-white' : 'text-text-muted hover:text-text'">
+                [class]="dateMode() === 'completed' ? 'bg-accent text-background' : 'text-text-muted hover:text-text'">
           Completed
         </button>
       </div>
       <div class="flex items-center gap-1 bg-surface border border-border rounded-lg p-1">
-        <button (click)="viewMode.set('week')"
+        <button (click)="viewMode.set('week')" [attr.aria-pressed]="viewMode() === 'week'"
                 class="px-3 py-1.5 rounded-md text-xs font-heading font-semibold uppercase tracking-wider transition-colors cursor-pointer"
-                [class]="viewMode() === 'week' ? (dateMode() === 'completed' ? 'bg-accent text-white' : 'bg-primary text-white') : 'text-text-muted hover:text-text'">
+                [class]="viewMode() === 'week' ? (dateMode() === 'completed' ? 'bg-accent text-background' : 'bg-primary text-background') : 'text-text-muted hover:text-text'">
           Week
         </button>
-        <button (click)="viewMode.set('month')"
+        <button (click)="viewMode.set('month')" [attr.aria-pressed]="viewMode() === 'month'"
                 class="px-3 py-1.5 rounded-md text-xs font-heading font-semibold uppercase tracking-wider transition-colors cursor-pointer"
-                [class]="viewMode() === 'month' ? (dateMode() === 'completed' ? 'bg-accent text-white' : 'bg-primary text-white') : 'text-text-muted hover:text-text'">
+                [class]="viewMode() === 'month' ? (dateMode() === 'completed' ? 'bg-accent text-background' : 'bg-primary text-background') : 'text-text-muted hover:text-text'">
           Month
         </button>
       </div>
@@ -79,14 +79,14 @@
           </div>
 
           @if (getWorkoutsForDate(date).length === 0) {
-            <p class="text-center text-text-muted/50 text-xs mt-6 font-heading uppercase tracking-wider">Rest</p>
+            <p class="text-center text-text-muted text-xs mt-6 font-heading uppercase tracking-wider">Rest</p>
           }
         </div>
       }
     </div>
   } @else {
-    <!-- Month grid -->
-    <div class="grid grid-cols-7 gap-px bg-border rounded-xl overflow-hidden border border-border">
+    <!-- Month grid (sm and up) -->
+    <div class="hidden sm:grid grid-cols-7 gap-px bg-border rounded-xl overflow-hidden border border-border">
       @for (day of weekDays; track day) {
         <div class="bg-surface text-center py-2">
           <p class="text-[10px] font-heading font-semibold text-text-muted uppercase tracking-widest">{{ day.slice(0, 3) }}</p>
@@ -96,13 +96,13 @@
         <div class="bg-background min-h-24 sm:min-h-28 p-1.5 sm:p-2"
              [class]="!isCurrentMonth(date) ? 'opacity-40' : ''">
           <p class="text-xs sm:text-sm font-heading font-bold mb-1 inline-flex items-center justify-center w-6 h-6 rounded-full"
-             [class]="isToday(date) ? (dateMode() === 'completed' ? 'bg-accent text-white' : 'bg-primary text-white') : 'text-text'">
+             [class]="isToday(date) ? (dateMode() === 'completed' ? 'bg-accent text-background' : 'bg-primary text-background') : 'text-text'">
             {{ date.getDate() }}
           </p>
           <div class="space-y-1">
             @for (workout of getWorkoutsForDate(date).slice(0, 2); track workout.id) {
               <a [routerLink]="['/workouts', workout.id]"
-                 class="block px-1.5 py-0.5 rounded text-[10px] font-semibold hover:opacity-80 transition-colors truncate"
+                 class="block px-1.5 py-0.5 rounded text-[10px] font-semibold hover:opacity-80 transition-colors truncate text-center"
                  [class]="dateMode() === 'completed' ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary'">
                 {{ workout.name }}
               </a>
@@ -112,6 +112,34 @@
             }
           </div>
         </div>
+      }
+    </div>
+
+    <!-- Month agenda (below sm) -->
+    <div class="sm:hidden flex flex-col gap-2">
+      @for (date of monthDates(); track date.getTime()) {
+        @if (isCurrentMonth(date)) {
+          <div class="gym-card !p-3 flex items-start gap-3"
+               [class]="isToday(date) ? (dateMode() === 'completed' ? '!border-accent/50 bg-accent/5' : '!border-primary/50 bg-primary/5') : ''">
+            <div class="shrink-0 w-11 text-center">
+              <p class="text-[10px] font-heading font-semibold text-text-muted uppercase tracking-widest">{{ weekDays[(date.getDay() + 6) % 7].slice(0, 3) }}</p>
+              <p class="text-lg font-heading font-extrabold" [class]="isToday(date) ? (dateMode() === 'completed' ? 'text-accent' : 'text-primary') : 'text-text'">
+                {{ date.getDate() }}
+              </p>
+            </div>
+            <div class="flex-1 min-w-0 space-y-1.5 pt-0.5">
+              @for (workout of getWorkoutsForDate(date); track workout.id) {
+                <a [routerLink]="['/workouts', workout.id]"
+                   class="block px-3 py-2 rounded-lg text-xs font-semibold leading-normal hover:opacity-80 transition-colors truncate"
+                   [class]="dateMode() === 'completed' ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary'">
+                  {{ workout.name }}
+                </a>
+              } @empty {
+                <p class="text-text-muted text-xs font-heading uppercase tracking-wider">Rest</p>
+              }
+            </div>
+          </div>
+        }
       }
     </div>
   }

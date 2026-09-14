@@ -7,23 +7,29 @@
       <div class="flex items-center gap-5">
         <div class="relative shrink-0">
           @if (profile.avatarUrl) {
-            <img [src]="profile.avatarUrl" alt="Avatar" class="w-20 h-20 rounded-2xl object-cover">
+            <img [src]="profile.avatarUrl" alt="Avatar" class="w-20 h-20 rounded-2xl object-cover transition-opacity" [class.opacity-50]="uploading()">
           } @else {
-            <div class="w-20 h-20 bg-gradient-to-br from-primary to-primary-dark rounded-2xl flex items-center justify-center text-3xl font-heading font-extrabold text-background">
+            <div class="w-20 h-20 bg-gradient-to-br from-primary to-primary-dark rounded-2xl flex items-center justify-center text-3xl font-heading font-extrabold text-background transition-opacity" [class.opacity-50]="uploading()">
               {{ profile.firstName ? profile.firstName[0] : 'U' }}
             </div>
           }
-          <label class="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-surface border border-border rounded-full flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
-            <svg class="w-3.5 h-3.5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 17a4 4 0 100-8 4 4 0 000 8z"/></svg>
-            <input type="file" accept="image/*" class="hidden" (change)="onAvatarSelected($event)">
+          @if (uploading()) {
+            <div class="absolute inset-0 flex items-center justify-center ui-fade-in">
+              <div class="w-6 h-6 border-2 border-surface-light border-t-primary rounded-full animate-spin"></div>
+              <span class="sr-only">Uploading&hellip;</span>
+            </div>
+          }
+          <label class="absolute -bottom-2 -right-2 w-11 h-11 bg-surface border border-border rounded-full flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
+            <svg class="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 17a4 4 0 100-8 4 4 0 000 8z"/></svg>
+            <input type="file" accept="image/*" class="hidden" [disabled]="uploading()" (change)="onAvatarSelected($event)">
           </label>
         </div>
-        <div>
+        <div class="min-w-0 flex-1">
           @if (uploading()) {
-            <p class="text-text-muted text-xs mb-1">Uploading...</p>
+            <p class="text-text-muted text-xs mb-1 ui-fade-in">Uploading&hellip;</p>
           }
           @if (uploadError()) {
-            <p class="text-error text-xs mb-1">{{ uploadError() }}</p>
+            <p class="text-error text-xs mb-1 ui-fade-in">{{ uploadError() }}</p>
           }
           <h2 class="text-2xl font-heading font-bold uppercase tracking-wide">{{ profile.firstName }} {{ profile.lastName }}</h2>
           <p class="text-text-muted text-sm mt-0.5">{{ profile.email }}</p>
@@ -34,7 +40,7 @@
             </p>
           }
           @if (auth.isAdmin()) {
-            <span class="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-md text-xs font-semibold bg-primary/15 text-primary uppercase tracking-wider">
+            <span class="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded text-xs font-semibold bg-primary/15 text-primary uppercase tracking-wider">
               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
               Admin
             </span>
@@ -47,7 +53,7 @@
     <div class="gym-card mb-5">
       <h3 class="text-sm font-heading font-semibold uppercase tracking-wider text-text-muted mb-3">Membership</h3>
       <div class="flex items-center justify-between">
-        <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-heading font-bold uppercase tracking-wider"
+        <span class="inline-flex items-center px-3 py-1.5 rounded text-sm font-heading font-bold uppercase tracking-wider"
               [class]="membershipService.membership() === 'elite' ? 'bg-warning/15 text-warning' :
                        membershipService.membership() === 'premium' ? 'bg-primary/15 text-primary' :
                        'bg-accent/15 text-accent'">

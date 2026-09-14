@@ -119,8 +119,11 @@ export class WorkoutService implements OnDestroy {
     await this.firestore.deleteDocument(this.COLLECTION, id);
   }
 
-  async markComplete(id: string): Promise<void> {
-    await this.update(id, { completedDate: new Date().toISOString() });
+  async markComplete(id: string, durationSeconds?: number): Promise<void> {
+    await this.update(id, {
+      completedDate: new Date().toISOString(),
+      ...(durationSeconds !== undefined ? { durationMinutes: Math.round(durationSeconds / 60) } : {})
+    });
   }
 
   async getAllWorkoutsForAdmin(): Promise<{ userId: string; workouts: Workout[] }[]> {

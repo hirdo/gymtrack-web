@@ -5,11 +5,12 @@ import { TitleCasePipe } from '@angular/common';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { StorageService } from '../../core/services/storage.service';
 import { WorkoutCategory, MuscleGroup, Equipment, ExerciseTrackingType } from '../../core/models/workout.model';
+import { FieldErrorComponent } from '../../shared/components/field-error/field-error.component';
 
 @Component({
   selector: 'app-exercise-create',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, TitleCasePipe],
+  imports: [ReactiveFormsModule, RouterLink, TitleCasePipe, FieldErrorComponent],
   templateUrl: './exercise-create.component.html',
   styleUrl: './exercise-create.component.scss'
 })
@@ -39,6 +40,7 @@ export class ExerciseCreateComponent implements OnInit {
   readonly imagePreviewUrl = signal<string | null>(null);
   readonly uploading = signal(false);
   readonly uploadError = signal<string | null>(null);
+  readonly submitting = signal(false);
 
   readonly form = this.fb.group({
     name: ['', Validators.required],
@@ -98,7 +100,7 @@ export class ExerciseCreateComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    if (this.form.invalid || this.selectedMuscles.size === 0) return;
+    if (this.form.invalid || this.selectedMuscles.size === 0 || this.submitting()) return;
 
     const value = this.form.getRawValue();
     const data = {
@@ -113,32 +115,37 @@ export class ExerciseCreateComponent implements OnInit {
       instructions: value.instructions || ''
     };
 
-    let exerciseId: string;
-    if (this.isEditMode() && this.editId) {
-      exerciseId = this.editId;
-      await this.exerciseService.updateExercise(exerciseId, data);
-    } else {
-      const exercise = await this.exerciseService.addExercise({ ...data, isCustom: true });
-      exerciseId = exercise.id;
-    }
-
-    const file = this.selectedFile();
-    if (file) {
-      this.uploading.set(true);
-      this.uploadError.set(null);
-      try {
-        const imageUrl = await this.storageService.uploadImage(exerciseId, file);
-        await this.exerciseService.updateExercise(exerciseId, { imageUrl });
-      } catch (err) {
-        this.uploadError.set(
-          err instanceof Error ? err.message : 'Image upload failed.'
-        );
-        this.uploading.set(false);
-        return;
+    this.submitting.set(true);
+    try {
+      let exerciseId: string;
+      if (this.isEditMode() && this.editId) {
+        exerciseId = this.editId;
+        await this.exerciseService.updateExercise(exerciseId, data);
+      } else {
+        const exercise = await this.exerciseService.addExercise({ ...data, isCustom: true });
+        exerciseId = exercise.id;
       }
-      this.uploading.set(false);
-    }
 
-    this.router.navigate(['/exercises', exerciseId]);
+      const file = this.selectedFile();
+      if (file) {
+        this.uploading.set(true);
+        this.uploadError.set(null);
+        try {
+          const imageUrl = await this.storageService.uploadImage(exerciseId, file);
+          await this.exerciseService.updateExercise(exerciseId, { imageUrl });
+        } catch (err) {
+          this.uploadError.set(
+            err instanceof Error ? err.message : 'Image upload failed.'
+          );
+          return;
+        } finally {
+          this.uploading.set(false);
+        }
+      }
+
+      this.router.navigate(['/exercises', exerciseId]);
+    } finally {
+      this.submitting.set(false);
+    }
   }
 }
