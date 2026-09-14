@@ -140,7 +140,7 @@
             <div class="rounded-xl p-6 mb-6 flex flex-col items-center"
                  [class.ui-slide-up-in]="!restClosing()" [class.ui-fade-out]="restClosing()">
               @if (restJustFinished()) {
-                <p class="text-2xl font-heading font-extrabold text-warning py-3">Let's go!</p>
+                <p class="text-2xl font-heading font-extrabold text-warning py-1">Let's go!</p>
               } @else {
                 <p class="text-warning text-xs font-semibold uppercase tracking-wider mb-3">Rest Timer</p>
                 <app-countdown-ring [percent]="(restSeconds() / (restTotalSeconds() || 1)) * 100" [size]="160" colorClass="warning">
