@@ -112,7 +112,7 @@ export class ProgramCreateComponent implements OnInit {
       targetReps: [12 as number | null, [Validators.min(1)]],
       targetWeight: [null as number | null],
       targetDuration: [null as number | null],
-      restTime: [90 as number | null],
+      restTime: [120 as number | null],
       alternativeExerciseIds: [[] as string[]]
     });
   }

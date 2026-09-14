@@ -4,15 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
-import { ExerciseTemplate, SetRecord } from '../../../core/models/workout.model';
+import { ExerciseTemplate, ExerciseTrackingType, SetRecord } from '../../../core/models/workout.model';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
-import { NumberStepperComponent } from '../../../shared/components/number-stepper/number-stepper.component';
-import { parseLocalDate, formatDisplayDate } from '../../../core/utils/date.util';
+import { CountdownRingComponent } from '../../../shared/components/countdown-ring/countdown-ring.component';
+import { parseLocalDate, formatDisplayDate, formatTime as formatTimeUtil } from '../../../core/utils/date.util';
 
 @Component({
   selector: 'app-workout-train',
   standalone: true,
-  imports: [RouterLink, FormsModule, LoadingSpinnerComponent, NumberStepperComponent],
+  imports: [RouterLink, FormsModule, LoadingSpinnerComponent, CountdownRingComponent],
   templateUrl: './workout-train.component.html',
   styleUrl: './workout-train.component.scss'
 })
@@ -24,22 +24,38 @@ export class WorkoutTrainComponent implements OnDestroy {
   private readonly exerciseLibraryService = inject(ExerciseLibraryService);
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private timerInterval: ReturnType<typeof setInterval> | null = null;
+  private durationInterval: ReturnType<typeof setInterval> | null = null;
+  private elapsedInterval: ReturnType<typeof setInterval> | null = null;
 
   private readonly workoutId = this.route.snapshot.paramMap.get('id') || '';
 
   readonly currentExerciseIndex = signal(0);
-  readonly weightInput = signal<number>(0);
-  readonly repsInput = signal<number>(0);
-  readonly durationInput = signal<number>(0);
+  readonly weightInput = signal<number | null>(null);
+  readonly repsInput = signal<number | null>(null);
+  readonly durationInput = signal<number | null>(null);
+  readonly logSetError = signal<string | null>(null);
+
   readonly restSeconds = signal(0);
+  readonly restTotalSeconds = signal(0);
   readonly isResting = signal(false);
+  readonly restJustFinished = signal(false);
+  readonly restClosing = signal(false);
+
+  readonly durationRemaining = signal(0);
+  readonly durationRunning = signal(false);
+  readonly durationJustFinished = signal(false);
+
   readonly elapsedSeconds = signal(0);
   readonly completing = signal(false);
   readonly loggingSet = signal(false);
   readonly altSwapOpen = signal(false);
   readonly altSwapClosing = signal(false);
-  readonly restClosing = signal(false);
   readonly justCompletedSet = signal(false);
+
+  readonly editingSet = signal<{ logId: string; setNumber: number } | null>(null);
+  readonly editWeightInput = signal<number | null>(null);
+  readonly editRepsInput = signal<number | null>(null);
+  readonly editDurationInput = signal<number | null>(null);
 
   /** Which log is "active" (receiving newly logged sets) per exercise slot, once
    * the user has swapped away from the default (earliest-created) log for that slot. */
@@ -128,7 +144,7 @@ export class WorkoutTrainComponent implements OnDestroy {
     if (w?.completedDate) {
       this.router.navigate(['/workouts', w.id]);
     }
-    this.syncInputsFromCurrentLog();
+    this.resetDurationTimer();
   }
 
   ngOnDestroy(): void {
@@ -137,9 +153,8 @@ export class WorkoutTrainComponent implements OnDestroy {
 
   navigateExercise(index: number): void {
     this.currentExerciseIndex.set(index);
-    this.stopRestTimer();
     this.resetAltSwap();
-    this.syncInputsFromCurrentLog();
+    this.resetForNewSlot();
     queueMicrotask(() => this.scrollActivePillIntoView());
   }
 
@@ -179,7 +194,7 @@ export class WorkoutTrainComponent implements OnDestroy {
     map.set(exerciseIndex, logId);
     this.activeLogId.set(map);
     this.closeAltSwap();
-    this.syncInputsFromCurrentLog();
+    this.resetForNewSlot();
   }
 
   private closeAltSwap(): void {
@@ -200,24 +215,40 @@ export class WorkoutTrainComponent implements OnDestroy {
     const log = this.currentLog();
     if (!log || this.loggingSet()) return;
 
+    if (log.trackingType === 'duration') {
+      if (this.durationInput() === null) {
+        this.logSetError.set('Complete the timer or enter a duration before logging.');
+        return;
+      }
+    } else {
+      if (this.repsInput() === null) {
+        this.logSetError.set('Please enter reps before logging.');
+        return;
+      }
+      if (log.trackingType === 'reps' && this.weightInput() === null) {
+        this.logSetError.set('Please enter weight before logging.');
+        return;
+      }
+    }
+
     let setRecord: SetRecord;
     if (log.trackingType === 'duration') {
       setRecord = {
         setNumber: log.sets.length + 1,
-        duration: this.durationInput(),
+        duration: this.durationInput()!,
         completedAt: new Date().toISOString()
       };
     } else if (log.trackingType === 'reps_only') {
       setRecord = {
         setNumber: log.sets.length + 1,
-        reps: this.repsInput(),
+        reps: this.repsInput()!,
         completedAt: new Date().toISOString()
       };
     } else {
       setRecord = {
         setNumber: log.sets.length + 1,
-        weight: this.weightInput(),
-        reps: this.repsInput(),
+        weight: this.weightInput()!,
+        reps: this.repsInput()!,
         completedAt: new Date().toISOString()
       };
     }
@@ -227,12 +258,104 @@ export class WorkoutTrainComponent implements OnDestroy {
       await this.exerciseLogService.logSet(log.id, setRecord);
       this.flashCompletedTile();
 
-      if (log.restTime && this.slotCompletedSets() + 1 < this.slotTargetSets()) {
-        this.startRestTimer(log.restTime);
+      this.logSetError.set(null);
+      this.weightInput.set(null);
+      this.repsInput.set(null);
+      if (log.trackingType === 'duration') {
+        this.resetDurationTimer();
+      } else {
+        this.durationInput.set(null);
       }
+      this.startRestTimer(log.restTime ?? 120);
     } finally {
       this.loggingSet.set(false);
     }
+  }
+
+  startDurationTimer(): void {
+    const log = this.currentLog();
+    if (!log) return;
+    if (this.durationInterval) {
+      clearInterval(this.durationInterval);
+      this.durationInterval = null;
+    }
+    if (this.durationRemaining() <= 0) {
+      this.durationRemaining.set(log.targetDuration ?? 0);
+    }
+    this.durationRunning.set(true);
+    this.durationJustFinished.set(false);
+    this.durationInterval = setInterval(() => {
+      const remaining = this.durationRemaining() - 1;
+      if (remaining <= 0) {
+        this.durationRemaining.set(0);
+        this.stopDurationTimer(true);
+      } else {
+        this.durationRemaining.set(remaining);
+      }
+    }, 1000);
+  }
+
+  stopDurationTimer(finished: boolean): void {
+    if (this.durationInterval) {
+      clearInterval(this.durationInterval);
+      this.durationInterval = null;
+    }
+    this.durationRunning.set(false);
+    const log = this.currentLog();
+    const target = log?.targetDuration ?? 0;
+    const elapsed = Math.max(0, target - this.durationRemaining());
+    this.durationInput.set(elapsed);
+    if (finished) {
+      this.durationJustFinished.set(true);
+    }
+  }
+
+  resetDurationTimer(): void {
+    if (this.durationInterval) {
+      clearInterval(this.durationInterval);
+      this.durationInterval = null;
+    }
+    this.durationRunning.set(false);
+    this.durationJustFinished.set(false);
+    const log = this.currentLog();
+    this.durationRemaining.set(log?.targetDuration ?? 0);
+    this.durationInput.set(null);
+  }
+
+  startEditSet(logId: string, set: SetRecord): void {
+    this.editingSet.set({ logId, setNumber: set.setNumber });
+    this.editWeightInput.set(set.weight ?? null);
+    this.editRepsInput.set(set.reps ?? null);
+    this.editDurationInput.set(set.duration ?? null);
+  }
+
+  cancelEditSet(): void {
+    this.editingSet.set(null);
+  }
+
+  isEditingSet(logId: string, setNumber: number): boolean {
+    const editing = this.editingSet();
+    return !!editing && editing.logId === logId && editing.setNumber === setNumber;
+  }
+
+  async saveEditSet(trackingType: ExerciseTrackingType): Promise<void> {
+    const editing = this.editingSet();
+    if (!editing) return;
+    const changes: Partial<SetRecord> = {};
+    if (trackingType === 'duration') {
+      changes.duration = this.editDurationInput() ?? 0;
+    } else if (trackingType === 'reps_only') {
+      changes.reps = this.editRepsInput() ?? 0;
+    } else {
+      changes.weight = this.editWeightInput() ?? 0;
+      changes.reps = this.editRepsInput() ?? 0;
+    }
+    await this.exerciseLogService.updateSet(editing.logId, editing.setNumber, changes);
+    this.editingSet.set(null);
+  }
+
+  async removeSet(logId: string, setNumber: number): Promise<void> {
+    await this.exerciseLogService.deleteSet(logId, setNumber);
   }
 
   private flashCompletedTile(): void {
@@ -252,9 +375,7 @@ export class WorkoutTrainComponent implements OnDestroy {
   }
 
   formatTime(seconds: number): string {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    return formatTimeUtil(seconds);
   }
 
   formatHistoryDate(dateStr: string): string {
@@ -270,32 +391,34 @@ export class WorkoutTrainComponent implements OnDestroy {
     pill?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   }
 
-  private syncInputsFromCurrentLog(): void {
-    const log = this.currentLog();
-    if (log) {
-      const lastSet = log.sets[log.sets.length - 1];
-      this.weightInput.set(lastSet?.weight ?? log.targetWeight ?? 0);
-      this.repsInput.set(lastSet?.reps ?? log.targetReps ?? 12);
-      this.durationInput.set(lastSet?.duration ?? log.targetDuration ?? 0);
-    }
+  private resetForNewSlot(): void {
+    this.logSetError.set(null);
+    this.editingSet.set(null);
+    this.weightInput.set(null);
+    this.repsInput.set(null);
+    this.resetDurationTimer();
   }
 
   private startRestTimer(seconds: number): void {
     this.clearRestInterval();
     this.restClosing.set(false);
     this.restSeconds.set(seconds);
+    this.restTotalSeconds.set(seconds);
     this.isResting.set(true);
+    this.restJustFinished.set(false);
     this.timerInterval = setInterval(() => {
       const remaining = this.restSeconds() - 1;
       if (remaining <= 0) {
-        this.finishRestTimer();
+        this.restSeconds.set(0);
+        this.restJustFinished.set(true);
+        this.clearRestInterval();
       } else {
         this.restSeconds.set(remaining);
       }
     }, 1000);
   }
 
-  /** Animated close — countdown expiry or an explicit "Skip Rest" tap. */
+  /** Animated close — countdown "Got it" dismissal or an explicit "Skip Rest" tap. */
   private finishRestTimer(): void {
     this.clearRestInterval();
     if (!this.isResting()) return;
@@ -303,14 +426,16 @@ export class WorkoutTrainComponent implements OnDestroy {
     setTimeout(() => {
       this.isResting.set(false);
       this.restSeconds.set(0);
+      this.restJustFinished.set(false);
       this.restClosing.set(false);
     }, 200);
   }
 
-  /** Hard/immediate reset — navigating away or tearing down, no animation. */
+  /** Hard/immediate reset — tearing down the component, no animation. */
   private stopRestTimer(): void {
     this.clearRestInterval();
     this.isResting.set(false);
+    this.restJustFinished.set(false);
     this.restClosing.set(false);
     this.restSeconds.set(0);
   }
@@ -321,8 +446,6 @@ export class WorkoutTrainComponent implements OnDestroy {
       this.timerInterval = null;
     }
   }
-
-  private elapsedInterval: ReturnType<typeof setInterval> | null = null;
 
   private startElapsedTimer(): void {
     this.elapsedInterval = setInterval(() => {
@@ -336,6 +459,10 @@ export class WorkoutTrainComponent implements OnDestroy {
 
   private stopTimers(): void {
     this.stopRestTimer();
+    if (this.durationInterval) {
+      clearInterval(this.durationInterval);
+      this.durationInterval = null;
+    }
     if (this.elapsedInterval) {
       clearInterval(this.elapsedInterval);
       this.elapsedInterval = null;

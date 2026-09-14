@@ -110,6 +110,26 @@ export class ExerciseLogService implements OnDestroy {
     });
   }
 
+  async updateSet(logId: string, setNumber: number, changes: Partial<SetRecord>): Promise<void> {
+    const log = this.logsSignal().find(l => l.id === logId);
+    if (!log) return;
+    const sets = log.sets.map(s => s.setNumber === setNumber ? { ...s, ...changes } : s);
+    await this.firestore.updateDocument(this.COLLECTION, logId, {
+      sets,
+      updatedAt: new Date().toISOString()
+    });
+  }
+
+  async deleteSet(logId: string, setNumber: number): Promise<void> {
+    const log = this.logsSignal().find(l => l.id === logId);
+    if (!log) return;
+    const sets = log.sets.filter(s => s.setNumber !== setNumber).map((s, i) => ({ ...s, setNumber: i + 1 }));
+    await this.firestore.updateDocument(this.COLLECTION, logId, {
+      sets,
+      updatedAt: new Date().toISOString()
+    });
+  }
+
   async completeWorkoutLogs(workoutId: string): Promise<void> {
     const completedAt = new Date().toISOString();
     for (const log of this.logsForWorkout(workoutId)) {

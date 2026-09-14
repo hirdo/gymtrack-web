@@ -3,7 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
 import { ExerciseLog } from '../../../core/models/workout.model';
-import { formatDisplayDate, parseLocalDate } from '../../../core/utils/date.util';
+import { formatDisplayDate, parseLocalDate, formatTime } from '../../../core/utils/date.util';
 
 @Component({
   selector: 'app-workout-detail',
@@ -49,6 +49,10 @@ export class WorkoutDetailComponent {
 
   formatScheduledDate(dateStr: string): string {
     return formatDisplayDate(parseLocalDate(dateStr));
+  }
+
+  formatSetDuration(seconds: number): string {
+    return formatTime(seconds);
   }
 
   formatDuration(minutes: number): string {
