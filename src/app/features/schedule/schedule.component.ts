@@ -2,11 +2,12 @@ import { Component, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { WorkoutService } from '../../core/services/workout.service';
 import { toLocalDateString, formatDisplayDate } from '../../core/utils/date.util';
+import { FluidFieldBackgroundComponent } from '../../shared/components/fluid-field-background/fluid-field-background.component';
 
 @Component({
   selector: 'app-schedule',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, FluidFieldBackgroundComponent],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss'
 })
