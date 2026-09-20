@@ -76,7 +76,7 @@
             <p class="text-2xl font-heading font-extrabold text-primary">{{ ex.recommendedWeight }}<span class="text-sm text-text-muted ml-1">kg</span></p>
           }
           @if (ex.recommendedDuration) {
-            <p class="text-2xl font-heading font-extrabold text-primary">{{ ex.recommendedDuration }}<span class="text-sm text-text-muted ml-1">s</span></p>
+            <p class="text-2xl font-heading font-extrabold text-primary">{{ formatExerciseMinutes(ex.recommendedDuration) }}</p>
           }
         </div>
       </div>

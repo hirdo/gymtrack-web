@@ -88,7 +88,7 @@ export class WorkoutCreateComponent implements OnInit {
             sets: ex.sets,
             reps: ex.reps ?? null,
             weight: ex.weight || null,
-            duration: ex.duration || null,
+            duration: ex.duration ? ex.duration / 60 : null,
             notes: ex.notes || '',
             alternativeExerciseIds: ex.alternativeExerciseIds ?? []
           });
@@ -155,7 +155,7 @@ export class WorkoutCreateComponent implements OnInit {
         sets: 1,
         reps: null,
         weight: null,
-        duration: exercise.recommendedDuration ?? group.get('duration')?.value,
+        duration: exercise.recommendedDuration != null ? exercise.recommendedDuration / 60 : group.get('duration')?.value,
         alternativeExerciseIds: []
       });
     } else if (trackingType === 'reps_only') {
@@ -269,7 +269,7 @@ export class WorkoutCreateComponent implements OnInit {
       sets: e['sets']!,
       reps: e['reps'] || undefined,
       weight: e['weight'] || undefined,
-      duration: e['duration'] || undefined,
+      duration: e['duration'] ? Math.round((e['duration'] as number) * 60) : undefined,
       notes: e['notes'] || undefined,
       alternativeExerciseIds: (e['alternativeExerciseIds'] as string[])?.length ? (e['alternativeExerciseIds'] as string[]) : undefined
     }));

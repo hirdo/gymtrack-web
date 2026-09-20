@@ -22,3 +22,9 @@ export function formatTime(seconds: number): string {
   const s = Math.floor(seconds % 60);
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
+
+export function formatMinutes(seconds: number): string {
+  const minutes = Math.round((seconds / 60) * 2) / 2;
+  const label = Number.isInteger(minutes) ? minutes.toString() : minutes.toFixed(1);
+  return `${label} min`;
+}

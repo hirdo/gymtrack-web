@@ -81,8 +81,8 @@ export class ProgramCreateComponent implements OnInit {
           targetSets: ex.targetSets,
           targetReps: ex.targetReps ?? null,
           targetWeight: ex.targetWeight ?? null,
-          targetDuration: ex.targetDuration ?? null,
-          restTime: ex.restTime ?? null,
+          targetDuration: ex.targetDuration != null ? ex.targetDuration / 60 : null,
+          restTime: ex.restTime != null ? ex.restTime / 60 : null,
           alternativeExerciseIds: ex.alternativeExerciseIds ?? []
         });
         exercises.push(exGroup);
@@ -112,7 +112,7 @@ export class ProgramCreateComponent implements OnInit {
       targetReps: [12 as number | null, [Validators.min(1)]],
       targetWeight: [null as number | null],
       targetDuration: [null as number | null],
-      restTime: [120 as number | null],
+      restTime: [2 as number | null],
       alternativeExerciseIds: [[] as string[]]
     });
   }
@@ -222,7 +222,7 @@ export class ProgramCreateComponent implements OnInit {
         targetSets: 1,
         targetReps: null,
         targetWeight: null,
-        targetDuration: exercise.recommendedDuration ?? group.get('targetDuration')?.value,
+        targetDuration: exercise.recommendedDuration != null ? exercise.recommendedDuration / 60 : group.get('targetDuration')?.value,
         alternativeExerciseIds: []
       });
     } else if (trackingType === 'reps_only') {
@@ -323,8 +323,8 @@ export class ProgramCreateComponent implements OnInit {
           targetSets: e['targetSets'] as number,
           targetReps: (e['targetReps'] as number) || undefined,
           targetWeight: (e['targetWeight'] as number) || undefined,
-          targetDuration: (e['targetDuration'] as number) || undefined,
-          restTime: (e['restTime'] as number) || undefined,
+          targetDuration: e['targetDuration'] ? Math.round((e['targetDuration'] as number) * 60) : undefined,
+          restTime: e['restTime'] ? Math.round((e['restTime'] as number) * 60) : undefined,
           alternativeExerciseIds: (e['alternativeExerciseIds'] as string[])?.length ? (e['alternativeExerciseIds'] as string[]) : undefined
         }))
       };
