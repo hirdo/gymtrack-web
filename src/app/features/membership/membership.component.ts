@@ -2,10 +2,12 @@ import { Component, inject, computed, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { MembershipService, MembershipTier } from '../../core/services/membership.service';
+import { FluidFieldBackgroundComponent } from '../../shared/components/fluid-field-background/fluid-field-background.component';
 
 @Component({
   selector: 'app-membership',
   standalone: true,
+  imports: [FluidFieldBackgroundComponent],
   templateUrl: './membership.component.html',
   styleUrl: './membership.component.scss'
 })

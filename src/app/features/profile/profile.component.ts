@@ -6,11 +6,12 @@ import { ProfileService } from '../../core/services/profile.service';
 import { WorkoutService } from '../../core/services/workout.service';
 import { MembershipService } from '../../core/services/membership.service';
 import { StorageService } from '../../core/services/storage.service';
+import { FluidFieldBackgroundComponent } from '../../shared/components/fluid-field-background/fluid-field-background.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, FluidFieldBackgroundComponent],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })

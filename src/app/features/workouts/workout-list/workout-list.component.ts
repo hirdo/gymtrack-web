@@ -5,11 +5,12 @@ import { WorkoutService } from '../../../core/services/workout.service';
 import { ProgramService } from '../../../core/services/program.service';
 import { Workout, WorkoutCategory } from '../../../core/models/workout.model';
 import { parseLocalDate, formatDisplayDate } from '../../../core/utils/date.util';
+import { FluidFieldBackgroundComponent } from '../../../shared/components/fluid-field-background/fluid-field-background.component';
 
 @Component({
   selector: 'app-workout-list',
   standalone: true,
-  imports: [RouterLink, NgTemplateOutlet],
+  imports: [RouterLink, NgTemplateOutlet, FluidFieldBackgroundComponent],
   templateUrl: './workout-list.component.html',
   styleUrl: './workout-list.component.scss'
 })
