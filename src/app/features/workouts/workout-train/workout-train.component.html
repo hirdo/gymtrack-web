@@ -158,21 +158,21 @@
           <!-- Log Set Input -->
           @if (log.trackingType === 'duration') {
             <div class="flex flex-col items-center py-2 mb-4">
-              <app-countdown-ring [percent]="(durationRemaining() / (log.targetDuration || 1)) * 100" [size]="180" colorClass="accent">
+              <app-countdown-ring [percent]="(displayDurationRemaining() / (log.targetDuration || 1)) * 100" [size]="180" colorClass="accent">
                 <div class="text-center">
-                  <p class="text-3xl font-heading font-extrabold">{{ formatTime(durationRemaining()) }}</p>
-                  @if (durationJustFinished()) {
+                  <p class="text-3xl font-heading font-extrabold">{{ formatTime(displayDurationRemaining()) }}</p>
+                  @if (displayDurationJustFinished()) {
                     <p class="text-accent text-xs font-semibold uppercase mt-1">Done!</p>
                   }
                 </div>
               </app-countdown-ring>
               <div class="flex gap-3 mt-4">
-                @if (!durationRunning()) {
+                @if (!displayDurationRunning()) {
                   <button type="button" (click)="startDurationTimer()" class="btn-primary py-2.5 px-6">Start</button>
                 } @else {
                   <button type="button" (click)="stopDurationTimer(false)" class="btn-secondary py-2.5 px-6">Stop</button>
                 }
-                @if (durationInput() !== null || durationRunning()) {
+                @if (displayDurationInput() !== null || displayDurationRunning()) {
                   <button type="button" (click)="resetDurationTimer()" class="text-sm text-text-muted hover:text-text transition-colors">Reset</button>
                 }
               </div>

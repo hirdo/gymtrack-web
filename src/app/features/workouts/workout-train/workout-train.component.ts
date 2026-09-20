@@ -26,6 +26,18 @@ export class WorkoutTrainComponent implements OnDestroy {
   private timerInterval: ReturnType<typeof setInterval> | null = null;
   private durationInterval: ReturnType<typeof setInterval> | null = null;
   private elapsedInterval: ReturnType<typeof setInterval> | null = null;
+  /** Absolute epoch-ms timestamps the countdowns are computed from on every
+   * tick, rather than decrementing a counter — keeps them correct even after
+   * the browser throttles/suspends setInterval in a backgrounded tab. */
+  private restEndAt: number | null = null;
+  private durationEndAt: number | null = null;
+  private readonly visibilityHandler = (): void => {
+    if (document.visibilityState === 'visible') {
+      this.tickRestTimer();
+      this.tickDurationTimer();
+      this.tickElapsedTimer();
+    }
+  };
 
   private readonly workoutId = this.route.snapshot.paramMap.get('id') || '';
 
@@ -44,6 +56,10 @@ export class WorkoutTrainComponent implements OnDestroy {
   readonly durationRemaining = signal(0);
   readonly durationRunning = signal(false);
   readonly durationJustFinished = signal(false);
+  /** Which ExerciseLog the running/most-recently-finished duration timer belongs
+   * to — lets the timer keep going in the background while a different exercise
+   * slot is on screen, without showing its state on the wrong slot. */
+  readonly durationTimerLogId = signal<string | null>(null);
 
   readonly elapsedSeconds = signal(0);
   readonly completing = signal(false);
@@ -102,6 +118,31 @@ export class WorkoutTrainComponent implements OnDestroy {
     this.logsForCurrentSlot().reduce((sum, l) => sum + l.sets.length, 0)
   );
 
+  /** Duration-timer state scoped to whichever slot is currently on screen — reads
+   * as "not started" for any slot other than the one the running/finished timer
+   * actually belongs to, without disturbing that timer's real state. */
+  readonly displayDurationRemaining = computed(() => {
+    const log = this.currentLog();
+    if (!log || this.durationTimerLogId() !== log.id) return log?.targetDuration ?? 0;
+    return this.durationRemaining();
+  });
+
+  readonly displayDurationRunning = computed(() => {
+    const log = this.currentLog();
+    return !!log && this.durationTimerLogId() === log.id && this.durationRunning();
+  });
+
+  readonly displayDurationJustFinished = computed(() => {
+    const log = this.currentLog();
+    return !!log && this.durationTimerLogId() === log.id && this.durationJustFinished();
+  });
+
+  readonly displayDurationInput = computed(() => {
+    const log = this.currentLog();
+    if (!log || this.durationTimerLogId() !== log.id) return null;
+    return this.durationInput();
+  });
+
   readonly currentExerciseImage = computed(() => {
     const log = this.currentLog();
     const w = this.workout();
@@ -145,9 +186,11 @@ export class WorkoutTrainComponent implements OnDestroy {
       this.router.navigate(['/workouts', w.id]);
     }
     this.resetDurationTimer();
+    document.addEventListener('visibilitychange', this.visibilityHandler);
   }
 
   ngOnDestroy(): void {
+    document.removeEventListener('visibilitychange', this.visibilityHandler);
     this.stopTimers();
   }
 
@@ -216,7 +259,7 @@ export class WorkoutTrainComponent implements OnDestroy {
     if (!log || this.loggingSet()) return;
 
     if (log.trackingType === 'duration') {
-      if (this.durationInput() === null) {
+      if (this.displayDurationInput() === null) {
         this.logSetError.set('Complete the timer or enter a duration before logging.');
         return;
       }
@@ -235,7 +278,7 @@ export class WorkoutTrainComponent implements OnDestroy {
     if (log.trackingType === 'duration') {
       setRecord = {
         setNumber: log.sets.length + 1,
-        duration: this.durationInput()!,
+        duration: this.displayDurationInput()!,
         completedAt: new Date().toISOString()
       };
     } else if (log.trackingType === 'reps_only') {
@@ -279,20 +322,23 @@ export class WorkoutTrainComponent implements OnDestroy {
       clearInterval(this.durationInterval);
       this.durationInterval = null;
     }
-    if (this.durationRemaining() <= 0) {
-      this.durationRemaining.set(log.targetDuration ?? 0);
-    }
+    const remaining = this.durationTimerLogId() === log.id ? this.durationRemaining() : 0;
+    const baseRemaining = remaining > 0 ? remaining : (log.targetDuration ?? 0);
+    this.durationTimerLogId.set(log.id);
+    this.durationEndAt = Date.now() + baseRemaining * 1000;
     this.durationRunning.set(true);
     this.durationJustFinished.set(false);
-    this.durationInterval = setInterval(() => {
-      const remaining = this.durationRemaining() - 1;
-      if (remaining <= 0) {
-        this.durationRemaining.set(0);
-        this.stopDurationTimer(true);
-      } else {
-        this.durationRemaining.set(remaining);
-      }
-    }, 1000);
+    this.tickDurationTimer();
+    this.durationInterval = setInterval(() => this.tickDurationTimer(), 1000);
+  }
+
+  private tickDurationTimer(): void {
+    if (this.durationEndAt === null) return;
+    const remaining = Math.max(0, Math.round((this.durationEndAt - Date.now()) / 1000));
+    this.durationRemaining.set(remaining);
+    if (remaining <= 0) {
+      this.stopDurationTimer(true);
+    }
   }
 
   stopDurationTimer(finished: boolean): void {
@@ -301,7 +347,7 @@ export class WorkoutTrainComponent implements OnDestroy {
       this.durationInterval = null;
     }
     this.durationRunning.set(false);
-    const log = this.currentLog();
+    const log = this.logs().find(l => l.id === this.durationTimerLogId());
     const target = log?.targetDuration ?? 0;
     const elapsed = Math.max(0, target - this.durationRemaining());
     this.durationInput.set(elapsed);
@@ -317,6 +363,8 @@ export class WorkoutTrainComponent implements OnDestroy {
     }
     this.durationRunning.set(false);
     this.durationJustFinished.set(false);
+    this.durationEndAt = null;
+    this.durationTimerLogId.set(null);
     const log = this.currentLog();
     this.durationRemaining.set(log?.targetDuration ?? 0);
     this.durationInput.set(null);
@@ -396,31 +444,36 @@ export class WorkoutTrainComponent implements OnDestroy {
     this.editingSet.set(null);
     this.weightInput.set(null);
     this.repsInput.set(null);
-    this.resetDurationTimer();
+    // Duration timer is intentionally left untouched — it keeps running in the
+    // background across navigation; display* computeds show it only on the
+    // slot it actually belongs to.
   }
 
   private startRestTimer(seconds: number): void {
     this.clearRestInterval();
     this.restClosing.set(false);
-    this.restSeconds.set(seconds);
     this.restTotalSeconds.set(seconds);
+    this.restEndAt = Date.now() + seconds * 1000;
     this.isResting.set(true);
     this.restJustFinished.set(false);
-    this.timerInterval = setInterval(() => {
-      const remaining = this.restSeconds() - 1;
-      if (remaining <= 0) {
-        this.restSeconds.set(0);
-        this.restJustFinished.set(true);
-        this.clearRestInterval();
-      } else {
-        this.restSeconds.set(remaining);
-      }
-    }, 1000);
+    this.tickRestTimer();
+    this.timerInterval = setInterval(() => this.tickRestTimer(), 1000);
+  }
+
+  private tickRestTimer(): void {
+    if (this.restEndAt === null) return;
+    const remaining = Math.max(0, Math.round((this.restEndAt - Date.now()) / 1000));
+    this.restSeconds.set(remaining);
+    if (remaining <= 0) {
+      this.restJustFinished.set(true);
+      this.clearRestInterval();
+    }
   }
 
   /** Animated close — countdown "Got it" dismissal or an explicit "Skip Rest" tap. */
   private finishRestTimer(): void {
     this.clearRestInterval();
+    this.restEndAt = null;
     if (!this.isResting()) return;
     this.restClosing.set(true);
     setTimeout(() => {
@@ -434,6 +487,7 @@ export class WorkoutTrainComponent implements OnDestroy {
   /** Hard/immediate reset — tearing down the component, no animation. */
   private stopRestTimer(): void {
     this.clearRestInterval();
+    this.restEndAt = null;
     this.isResting.set(false);
     this.restJustFinished.set(false);
     this.restClosing.set(false);
@@ -447,14 +501,17 @@ export class WorkoutTrainComponent implements OnDestroy {
     }
   }
 
+  private tickElapsedTimer(): void {
+    const startedAt = this.logs()[0]?.startedAt;
+    if (startedAt) {
+      const started = new Date(startedAt).getTime();
+      this.elapsedSeconds.set(Math.round((Date.now() - started) / 1000));
+    }
+  }
+
   private startElapsedTimer(): void {
-    this.elapsedInterval = setInterval(() => {
-      const startedAt = this.logs()[0]?.startedAt;
-      if (startedAt) {
-        const started = new Date(startedAt).getTime();
-        this.elapsedSeconds.set(Math.round((Date.now() - started) / 1000));
-      }
-    }, 1000);
+    this.tickElapsedTimer();
+    this.elapsedInterval = setInterval(() => this.tickElapsedTimer(), 1000);
   }
 
   private stopTimers(): void {

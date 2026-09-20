@@ -4,6 +4,7 @@ import { ProgramService } from '../../core/services/program.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PROGRAM_DIFFICULTIES, ProgramDifficulty, TrainingProgram, difficultyLabel } from '../../core/models/workout.model';
+import { formatMinutes } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-program-detail',
@@ -109,6 +110,10 @@ export class ProgramDetailComponent {
   }
 
   readonly difficultyLabel = difficultyLabel;
+
+  formatExerciseMinutes(seconds: number): string {
+    return formatMinutes(seconds);
+  }
 
   getExerciseImage(exerciseId: string): string | undefined {
     return this.exerciseService.getById(exerciseId)?.imageUrl;

@@ -102,13 +102,13 @@
                         <app-field-error [control]="ex.get('targetSets')" label="Sets" />
                       </div>
                       <div>
-                        <label class="block text-[10px] text-text-muted mb-1">Duration (s)</label>
-                        <input type="number" formControlName="targetDuration" min="1"
+                        <label class="block text-[10px] text-text-muted mb-1">Duration (min)</label>
+                        <input type="number" formControlName="targetDuration" min="0.5" step="0.5"
                                class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                       </div>
                       <div>
-                        <label class="block text-[10px] text-text-muted mb-1">Rest (s)</label>
-                        <input type="number" formControlName="restTime" min="0" step="15"
+                        <label class="block text-[10px] text-text-muted mb-1">Rest (min)</label>
+                        <input type="number" formControlName="restTime" min="0" step="0.5"
                                class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                       </div>
                     </div>
@@ -127,8 +127,8 @@
                         <app-field-error [control]="ex.get('targetReps')" label="Reps" />
                       </div>
                       <div>
-                        <label class="block text-[10px] text-text-muted mb-1">Rest (s)</label>
-                        <input type="number" formControlName="restTime" min="0" step="15"
+                        <label class="block text-[10px] text-text-muted mb-1">Rest (min)</label>
+                        <input type="number" formControlName="restTime" min="0" step="0.5"
                                class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                       </div>
                     </div>
@@ -152,8 +152,8 @@
                                class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                       </div>
                       <div>
-                        <label class="block text-[10px] text-text-muted mb-1">Rest (s)</label>
-                        <input type="number" formControlName="restTime" min="0" step="15"
+                        <label class="block text-[10px] text-text-muted mb-1">Rest (min)</label>
+                        <input type="number" formControlName="restTime" min="0" step="0.5"
                                class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                       </div>
                     </div>

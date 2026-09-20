@@ -2,6 +2,7 @@ import { Component, inject, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { AuthService } from '../../core/services/auth.service';
+import { formatMinutes } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-exercise-detail',
@@ -30,6 +31,10 @@ export class ExerciseDetailComponent {
   readonly confirmingDelete = signal(false);
   readonly deleting = signal(false);
   readonly imageLoaded = signal(false);
+
+  formatExerciseMinutes(seconds: number): string {
+    return formatMinutes(seconds);
+  }
 
   confirmDelete(): void {
     this.confirmingDelete.set(true);

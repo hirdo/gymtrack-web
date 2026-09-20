@@ -102,7 +102,7 @@
                     <span class="min-w-0">{{ ex.exerciseName }}</span>
                     <span class="text-text-muted text-xs">
                       @if (ex.trackingType === 'duration') {
-                        {{ ex.targetSets }} &times; {{ ex.targetDuration }}s
+                        {{ ex.targetSets }} &times; {{ formatExerciseMinutes(ex.targetDuration || 0) }}
                       } @else {
                         {{ ex.targetSets }} &times; {{ ex.targetReps }}
                         @if (ex.targetWeight) {

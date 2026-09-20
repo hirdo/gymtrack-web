@@ -72,7 +72,7 @@ export class ExerciseCreateComponent implements OnInit {
       trackingType: exercise.trackingType || 'reps',
       recommendedReps: exercise.recommendedReps ?? null,
       recommendedWeight: exercise.recommendedWeight ?? null,
-      recommendedDuration: exercise.recommendedDuration ?? null,
+      recommendedDuration: exercise.recommendedDuration != null ? exercise.recommendedDuration / 60 : null,
       instructions: exercise.instructions || ''
     });
     for (const muscle of exercise.primaryMuscles) {
@@ -110,7 +110,9 @@ export class ExerciseCreateComponent implements OnInit {
       trackingType: value.trackingType!,
       recommendedReps: value.trackingType !== 'duration' ? (value.recommendedReps || undefined) : undefined,
       recommendedWeight: value.trackingType === 'reps' ? (value.recommendedWeight || undefined) : undefined,
-      recommendedDuration: value.trackingType === 'duration' ? (value.recommendedDuration || undefined) : undefined,
+      recommendedDuration: value.trackingType === 'duration' && value.recommendedDuration
+        ? Math.round(value.recommendedDuration * 60)
+        : undefined,
       primaryMuscles: Array.from(this.selectedMuscles),
       instructions: value.instructions || ''
     };
