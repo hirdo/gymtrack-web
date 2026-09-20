@@ -3,11 +3,12 @@ import { RouterLink } from '@angular/router';
 import { ProgramService } from '../../core/services/program.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PROGRAM_DIFFICULTIES, ProgramDifficulty, difficultyLabel } from '../../core/models/workout.model';
+import { FluidFieldBackgroundComponent } from '../../shared/components/fluid-field-background/fluid-field-background.component';
 
 @Component({
   selector: 'app-program-list',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, FluidFieldBackgroundComponent],
   templateUrl: './program-list.component.html',
   styleUrl: './program-list.component.scss'
 })

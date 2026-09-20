@@ -8,11 +8,12 @@ import { parseLocalDate, formatDisplayDate } from '../../core/utils/date.util';
 import { difficultyLabel, PROGRAM_DIFFICULTIES, ProgramDifficulty, Workout } from '../../core/models/workout.model';
 import { CountUpDirective } from '../../shared/directives/count-up.directive';
 import { CircularProgressComponent } from '../../shared/components/circular-progress/circular-progress.component';
+import { FluidFieldBackgroundComponent } from '../../shared/components/fluid-field-background/fluid-field-background.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, CountUpDirective, CircularProgressComponent],
+  imports: [RouterLink, CountUpDirective, CircularProgressComponent, FluidFieldBackgroundComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })

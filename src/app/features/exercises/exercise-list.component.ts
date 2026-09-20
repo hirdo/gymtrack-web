@@ -5,11 +5,12 @@ import { TitleCasePipe } from '@angular/common';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { AuthService } from '../../core/services/auth.service';
 import { MuscleGroup, Equipment } from '../../core/models/workout.model';
+import { FluidFieldBackgroundComponent } from '../../shared/components/fluid-field-background/fluid-field-background.component';
 
 @Component({
   selector: 'app-exercise-list',
   standalone: true,
-  imports: [RouterLink, FormsModule, TitleCasePipe],
+  imports: [RouterLink, FormsModule, TitleCasePipe, FluidFieldBackgroundComponent],
   templateUrl: './exercise-list.component.html',
   styleUrl: './exercise-list.component.scss'
 })
