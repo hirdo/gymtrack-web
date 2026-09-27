@@ -10,7 +10,7 @@ import {
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
-import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate, Workout } from '../../../core/models/workout.model';
+import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate, MuscleGroup, Workout } from '../../../core/models/workout.model';
 import { ExercisePickerModalComponent } from '../../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { toLocalDateString } from '../../../core/utils/date.util';
@@ -239,6 +239,13 @@ export class WorkoutCreateComponent implements OnInit {
     if (this.altPickerTarget === null) return null;
     const group = this.exercises.at(this.altPickerTarget);
     return (group.get('trackingType')?.value as ExerciseTrackingType) ?? 'reps';
+  }
+
+  altPickerTargetMuscles(): MuscleGroup[] | null {
+    if (this.altPickerTarget === null) return null;
+    const group = this.exercises.at(this.altPickerTarget);
+    const mainId = group.get('exerciseId')?.value as string | undefined;
+    return mainId ? this.exerciseService.getById(mainId)?.primaryMuscles ?? null : null;
   }
 
   closeDateConflict(): void {
