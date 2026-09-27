@@ -20,6 +20,7 @@ export class ExercisePickerModalComponent implements OnChanges {
   readonly excludeIds = input<string[]>([]);
   @Input() preselectedIds: string[] = [];
   readonly requiredTrackingType = input<ExerciseTrackingType | null>(null);
+  readonly requiredMuscleGroups = input<MuscleGroup[] | null>(null);
   @Output() closed = new EventEmitter<void>();
   @Output() exerciseSelected = new EventEmitter<ExerciseTemplate>();
   @Output() multipleSelected = new EventEmitter<ExerciseTemplate[]>();
@@ -56,6 +57,10 @@ export class ExercisePickerModalComponent implements OnChanges {
     const requiredType = this.requiredTrackingType();
     if (requiredType) {
       results = results.filter(e => (e.trackingType ?? 'reps') === requiredType);
+    }
+    const requiredMuscles = this.requiredMuscleGroups();
+    if (requiredMuscles && requiredMuscles.length > 0) {
+      results = results.filter(e => e.primaryMuscles.some(m => requiredMuscles.includes(m)));
     }
     return results;
   });

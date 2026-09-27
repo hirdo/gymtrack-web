@@ -6,7 +6,7 @@ import { ProgramService } from '../../core/services/program.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { ExercisePickerModalComponent } from '../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
 import { FieldErrorComponent } from '../../shared/components/field-error/field-error.component';
-import { ProgramDifficulty, ExerciseTemplate, ExerciseTrackingType, PROGRAM_DIFFICULTIES } from '../../core/models/workout.model';
+import { ProgramDifficulty, ExerciseTemplate, ExerciseTrackingType, MuscleGroup, PROGRAM_DIFFICULTIES } from '../../core/models/workout.model';
 
 @Component({
   selector: 'app-program-create',
@@ -305,6 +305,13 @@ export class ProgramCreateComponent implements OnInit {
     if (!this.altPickerTarget) return null;
     const group = this.getDayExercises(this.altPickerTarget.dayIndex).at(this.altPickerTarget.exerciseIndex);
     return (group.get('trackingType')?.value as ExerciseTrackingType) ?? 'reps';
+  }
+
+  altPickerTargetMuscles(): MuscleGroup[] | null {
+    if (!this.altPickerTarget) return null;
+    const group = this.getDayExercises(this.altPickerTarget.dayIndex).at(this.altPickerTarget.exerciseIndex);
+    const mainId = group.get('exerciseId')?.value as string | undefined;
+    return mainId ? this.exerciseService.getById(mainId)?.primaryMuscles ?? null : null;
   }
 
   async onSubmit(): Promise<void> {
