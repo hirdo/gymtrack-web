@@ -4,16 +4,17 @@ import {
   FormBuilder,
   FormArray,
   FormGroup,
+  AbstractControl,
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
-import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate, MuscleGroup, Workout } from '../../../core/models/workout.model';
+import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate, MuscleGroup, TimeUnit, Workout } from '../../../core/models/workout.model';
 import { ExercisePickerModalComponent } from '../../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
-import { toLocalDateString } from '../../../core/utils/date.util';
+import { toLocalDateString, convertTimeValue } from '../../../core/utils/date.util';
 
 @Component({
   selector: 'app-workout-create',
@@ -80,6 +81,7 @@ export class WorkoutCreateComponent implements OnInit {
         this.exercises.clear();
         for (const ex of workout.exercises) {
           const group = this.createExerciseGroup();
+          const durationUnit: TimeUnit = ex.durationUnit ?? 'min';
           group.patchValue({
             exerciseId: ex.templateId || null,
             trackingType: ex.trackingType || 'reps',
@@ -88,7 +90,8 @@ export class WorkoutCreateComponent implements OnInit {
             sets: ex.sets,
             reps: ex.reps ?? null,
             weight: ex.weight || null,
-            duration: ex.duration ? ex.duration / 60 : null,
+            duration: ex.duration ? (durationUnit === 'sec' ? ex.duration : ex.duration / 60) : null,
+            durationUnit,
             notes: ex.notes || '',
             alternativeExerciseIds: ex.alternativeExerciseIds ?? []
           });
@@ -122,9 +125,18 @@ export class WorkoutCreateComponent implements OnInit {
       reps: [12 as number | null, [Validators.min(1)]],
       weight: [null as number | null],
       duration: [null as number | null],
+      durationUnit: ['min' as TimeUnit],
       notes: [''],
       alternativeExerciseIds: [[] as string[]]
     });
+  }
+
+  setTimeUnit(group: AbstractControl, valueField: string, unitField: string, unit: TimeUnit): void {
+    const currentUnit = (group.get(unitField)?.value as TimeUnit) ?? 'min';
+    if (currentUnit === unit) return;
+    const currentValue = group.get(valueField)?.value as number | null;
+    const newValue = currentValue != null ? convertTimeValue(currentValue, currentUnit, unit) : currentValue;
+    group.patchValue({ [valueField]: newValue, [unitField]: unit });
   }
 
   addExercise(): void {
@@ -147,6 +159,11 @@ export class WorkoutCreateComponent implements OnInit {
     const group = this.exercises.at(this.pickerTarget);
     const trackingType = exercise.trackingType ?? 'reps';
     if (trackingType === 'duration') {
+      const durationUnit: TimeUnit = exercise.recommendedDurationUnit ?? 'min';
+      const durationValue = exercise.recommendedDuration != null
+        ? (durationUnit === 'sec' ? exercise.recommendedDuration : exercise.recommendedDuration / 60)
+        : group.get('duration')?.value;
+      const durationUnitValue = exercise.recommendedDuration != null ? durationUnit : group.get('durationUnit')?.value;
       group.patchValue({
         exerciseId: exercise.id,
         trackingType,
@@ -155,7 +172,8 @@ export class WorkoutCreateComponent implements OnInit {
         sets: 1,
         reps: null,
         weight: null,
-        duration: exercise.recommendedDuration != null ? exercise.recommendedDuration / 60 : group.get('duration')?.value,
+        duration: durationValue,
+        durationUnit: durationUnitValue,
         alternativeExerciseIds: []
       });
     } else if (trackingType === 'reps_only') {
@@ -267,19 +285,25 @@ export class WorkoutCreateComponent implements OnInit {
       }
     }
 
-    const exercises = value.exercises.map((e) => ({
-      id: crypto.randomUUID(),
-      templateId: e['exerciseId'] || undefined,
-      trackingType: e['trackingType'] as ExerciseTrackingType,
-      name: e['name']!,
-      imageUrl: e['imageUrl'] || undefined,
-      sets: e['sets']!,
-      reps: e['reps'] || undefined,
-      weight: e['weight'] || undefined,
-      duration: e['duration'] ? Math.round((e['duration'] as number) * 60) : undefined,
-      notes: e['notes'] || undefined,
-      alternativeExerciseIds: (e['alternativeExerciseIds'] as string[])?.length ? (e['alternativeExerciseIds'] as string[]) : undefined
-    }));
+    const exercises = value.exercises.map((e) => {
+      const durationUnit: TimeUnit = (e['durationUnit'] as TimeUnit) ?? 'min';
+      return {
+        id: crypto.randomUUID(),
+        templateId: e['exerciseId'] || undefined,
+        trackingType: e['trackingType'] as ExerciseTrackingType,
+        name: e['name']!,
+        imageUrl: e['imageUrl'] || undefined,
+        sets: e['sets']!,
+        reps: e['reps'] || undefined,
+        weight: e['weight'] || undefined,
+        duration: e['duration']
+          ? Math.round(durationUnit === 'sec' ? (e['duration'] as number) : (e['duration'] as number) * 60)
+          : undefined,
+        durationUnit: e['duration'] ? durationUnit : undefined,
+        notes: e['notes'] || undefined,
+        alternativeExerciseIds: (e['alternativeExerciseIds'] as string[])?.length ? (e['alternativeExerciseIds'] as string[]) : undefined
+      };
+    });
 
     this.submitting.set(true);
     try {

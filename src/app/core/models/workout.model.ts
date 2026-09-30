@@ -1,6 +1,8 @@
 // 'reps' = sets x reps x weight, 'reps_only' = sets x reps (no weight), 'duration' = sets x duration
 export type ExerciseTrackingType = 'reps' | 'reps_only' | 'duration';
 
+export type TimeUnit = 'sec' | 'min';
+
 export interface Exercise {
   id: string;
   name: string;
@@ -8,7 +10,9 @@ export interface Exercise {
   reps?: number;
   weight?: number;
   duration?: number;
+  durationUnit?: TimeUnit;
   restTime?: number;
+  restTimeUnit?: TimeUnit;
   notes?: string;
   imageUrl?: string;
   templateId?: string;
@@ -58,7 +62,9 @@ export interface ExerciseTemplate {
   recommendedReps?: number;
   recommendedWeight?: number;
   recommendedDuration?: number;
+  recommendedDurationUnit?: TimeUnit;
   recommendedRestTime?: number;
+  recommendedRestTimeUnit?: TimeUnit;
   imageUrl?: string;
   instructions?: string;
   isCustom?: boolean;
@@ -106,7 +112,9 @@ export interface ProgramDay {
     targetReps?: number;
     targetWeight?: number;
     targetDuration?: number;
+    targetDurationUnit?: TimeUnit;
     restTime?: number;
+    restTimeUnit?: TimeUnit;
     alternativeExerciseIds?: string[];
   }[];
 }

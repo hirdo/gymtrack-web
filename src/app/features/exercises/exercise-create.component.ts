@@ -1,10 +1,11 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { StorageService } from '../../core/services/storage.service';
-import { WorkoutCategory, MuscleGroup, Equipment, ExerciseTrackingType } from '../../core/models/workout.model';
+import { WorkoutCategory, MuscleGroup, Equipment, ExerciseTrackingType, TimeUnit } from '../../core/models/workout.model';
+import { convertTimeValue } from '../../core/utils/date.util';
 import { FieldErrorComponent } from '../../shared/components/field-error/field-error.component';
 
 @Component({
@@ -50,7 +51,9 @@ export class ExerciseCreateComponent implements OnInit {
     recommendedReps: [null as number | null],
     recommendedWeight: [null as number | null],
     recommendedDuration: [null as number | null],
+    recommendedDurationUnit: ['min' as TimeUnit],
     recommendedRestTime: [null as number | null],
+    recommendedRestTimeUnit: ['min' as TimeUnit],
     instructions: ['']
   });
 
@@ -66,6 +69,8 @@ export class ExerciseCreateComponent implements OnInit {
 
     this.isEditMode.set(true);
     this.editId = id;
+    const durationUnit: TimeUnit = exercise.recommendedDurationUnit ?? 'min';
+    const restTimeUnit: TimeUnit = exercise.recommendedRestTimeUnit ?? 'min';
     this.form.patchValue({
       name: exercise.name,
       category: exercise.category,
@@ -73,8 +78,14 @@ export class ExerciseCreateComponent implements OnInit {
       trackingType: exercise.trackingType || 'reps',
       recommendedReps: exercise.recommendedReps ?? null,
       recommendedWeight: exercise.recommendedWeight ?? null,
-      recommendedDuration: exercise.recommendedDuration != null ? exercise.recommendedDuration / 60 : null,
-      recommendedRestTime: exercise.recommendedRestTime != null ? exercise.recommendedRestTime / 60 : null,
+      recommendedDuration: exercise.recommendedDuration != null
+        ? (durationUnit === 'sec' ? exercise.recommendedDuration : exercise.recommendedDuration / 60)
+        : null,
+      recommendedDurationUnit: durationUnit,
+      recommendedRestTime: exercise.recommendedRestTime != null
+        ? (restTimeUnit === 'sec' ? exercise.recommendedRestTime : exercise.recommendedRestTime / 60)
+        : null,
+      recommendedRestTimeUnit: restTimeUnit,
       instructions: exercise.instructions || ''
     });
     for (const muscle of exercise.primaryMuscles) {
@@ -83,6 +94,14 @@ export class ExerciseCreateComponent implements OnInit {
     if (exercise.imageUrl) {
       this.imagePreviewUrl.set(exercise.imageUrl);
     }
+  }
+
+  setTimeUnit(group: FormGroup, valueField: string, unitField: string, unit: TimeUnit): void {
+    const currentUnit = (group.get(unitField)?.value as TimeUnit) ?? 'min';
+    if (currentUnit === unit) return;
+    const currentValue = group.get(valueField)?.value as number | null;
+    const newValue = currentValue != null ? convertTimeValue(currentValue, currentUnit, unit) : currentValue;
+    group.patchValue({ [valueField]: newValue, [unitField]: unit });
   }
 
   toggleMuscle(muscle: MuscleGroup): void {
@@ -105,6 +124,8 @@ export class ExerciseCreateComponent implements OnInit {
     if (this.form.invalid || this.selectedMuscles.size === 0 || this.submitting()) return;
 
     const value = this.form.getRawValue();
+    const durationUnit: TimeUnit = value.recommendedDurationUnit ?? 'min';
+    const restTimeUnit: TimeUnit = value.recommendedRestTimeUnit ?? 'min';
     const data = {
       name: value.name!,
       category: value.category!,
@@ -113,9 +134,13 @@ export class ExerciseCreateComponent implements OnInit {
       recommendedReps: value.trackingType !== 'duration' ? (value.recommendedReps || undefined) : undefined,
       recommendedWeight: value.trackingType === 'reps' ? (value.recommendedWeight || undefined) : undefined,
       recommendedDuration: value.trackingType === 'duration' && value.recommendedDuration
-        ? Math.round(value.recommendedDuration * 60)
+        ? Math.round(durationUnit === 'sec' ? value.recommendedDuration : value.recommendedDuration * 60)
         : undefined,
-      recommendedRestTime: value.recommendedRestTime ? Math.round(value.recommendedRestTime * 60) : undefined,
+      recommendedDurationUnit: value.trackingType === 'duration' && value.recommendedDuration ? durationUnit : undefined,
+      recommendedRestTime: value.recommendedRestTime
+        ? Math.round(restTimeUnit === 'sec' ? value.recommendedRestTime : value.recommendedRestTime * 60)
+        : undefined,
+      recommendedRestTimeUnit: value.recommendedRestTime ? restTimeUnit : undefined,
       primaryMuscles: Array.from(this.selectedMuscles),
       instructions: value.instructions || ''
     };

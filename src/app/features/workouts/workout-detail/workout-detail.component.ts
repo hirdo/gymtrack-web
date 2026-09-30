@@ -2,8 +2,8 @@ import { Component, inject, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
-import { ExerciseLog } from '../../../core/models/workout.model';
-import { formatDisplayDate, parseLocalDate, formatTime, formatMinutes } from '../../../core/utils/date.util';
+import { ExerciseLog, TimeUnit } from '../../../core/models/workout.model';
+import { formatDisplayDate, parseLocalDate, formatTime, formatDurationValue } from '../../../core/utils/date.util';
 
 @Component({
   selector: 'app-workout-detail',
@@ -55,8 +55,8 @@ export class WorkoutDetailComponent {
     return formatTime(seconds);
   }
 
-  formatExerciseMinutes(seconds: number): string {
-    return formatMinutes(seconds);
+  formatExerciseDuration(seconds: number, unit?: TimeUnit): string {
+    return formatDurationValue(seconds, unit);
   }
 
   formatDuration(minutes: number): string {

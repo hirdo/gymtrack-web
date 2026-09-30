@@ -1,3 +1,5 @@
+import { TimeUnit } from '../models/workout.model';
+
 export function toLocalDateString(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -27,4 +29,15 @@ export function formatMinutes(seconds: number): string {
   const minutes = Math.round((seconds / 60) * 2) / 2;
   const label = Number.isInteger(minutes) ? minutes.toString() : minutes.toFixed(1);
   return `${label} min`;
+}
+
+export function formatDurationValue(seconds: number, unit?: TimeUnit | null): string {
+  if (unit === 'sec') return `${Math.round(seconds)}s`;
+  return formatMinutes(seconds);
+}
+
+export function convertTimeValue(value: number, fromUnit: TimeUnit, toUnit: TimeUnit): number {
+  if (fromUnit === toUnit) return value;
+  const seconds = fromUnit === 'sec' ? value : value * 60;
+  return toUnit === 'sec' ? Math.round(seconds) : Math.round((seconds / 60) * 2) / 2;
 }

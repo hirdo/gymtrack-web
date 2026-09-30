@@ -128,7 +128,9 @@ export class ProgramService implements OnDestroy {
         reps: e.targetReps,
         weight: e.targetWeight,
         duration: e.targetDuration,
+        durationUnit: e.targetDurationUnit,
         restTime: e.restTime,
+        restTimeUnit: e.restTimeUnit,
         imageUrl: this.exerciseService.getById(e.exerciseId)?.imageUrl,
         templateId: e.exerciseId,
         alternativeExerciseIds: e.alternativeExerciseIds
