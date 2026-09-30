@@ -4,7 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { StorageService } from '../../core/services/storage.service';
-import { WorkoutCategory, MuscleGroup, Equipment, ExerciseTrackingType, isDurationTracking } from '../../core/models/workout.model';
+import { WorkoutCategory, MuscleGroup, Equipment, ExerciseTrackingType } from '../../core/models/workout.model';
 import { FieldErrorComponent } from '../../shared/components/field-error/field-error.component';
 
 @Component({
@@ -24,7 +24,7 @@ export class ExerciseCreateComponent implements OnInit {
   readonly categories: WorkoutCategory[] = ['strength', 'cardio', 'flexibility', 'hiit', 'custom'];
   readonly muscleGroups: MuscleGroup[] = [
     'chest', 'back', 'shoulders', 'biceps', 'triceps',
-    'forearms', 'core', 'legs', 'glutes'
+    'forearms', 'core', 'legs', 'glutes', 'stretch'
   ];
   readonly equipmentList: Equipment[] = [
     'barbell', 'dumbbell', 'machine', 'cable',
@@ -32,7 +32,6 @@ export class ExerciseCreateComponent implements OnInit {
   ];
 
   readonly selectedMuscles = new Set<MuscleGroup>();
-  protected readonly isDurationTracking = isDurationTracking;
 
   readonly isEditMode = signal(false);
   private editId: string | null = null;
@@ -111,9 +110,9 @@ export class ExerciseCreateComponent implements OnInit {
       category: value.category!,
       equipment: value.equipment!,
       trackingType: value.trackingType!,
-      recommendedReps: !isDurationTracking(value.trackingType) ? (value.recommendedReps || undefined) : undefined,
+      recommendedReps: value.trackingType !== 'duration' ? (value.recommendedReps || undefined) : undefined,
       recommendedWeight: value.trackingType === 'reps' ? (value.recommendedWeight || undefined) : undefined,
-      recommendedDuration: isDurationTracking(value.trackingType) && value.recommendedDuration
+      recommendedDuration: value.trackingType === 'duration' && value.recommendedDuration
         ? Math.round(value.recommendedDuration * 60)
         : undefined,
       recommendedRestTime: value.recommendedRestTime ? Math.round(value.recommendedRestTime * 60) : undefined,

@@ -3,7 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProgramService } from '../../core/services/program.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { AuthService } from '../../core/services/auth.service';
-import { PROGRAM_DIFFICULTIES, ProgramDifficulty, TrainingProgram, difficultyLabel, isDurationTracking } from '../../core/models/workout.model';
+import { PROGRAM_DIFFICULTIES, ProgramDifficulty, TrainingProgram, difficultyLabel } from '../../core/models/workout.model';
 import { formatMinutes } from '../../core/utils/date.util';
 
 @Component({
@@ -15,7 +15,6 @@ import { formatMinutes } from '../../core/utils/date.util';
 })
 export class ProgramDetailComponent {
   protected readonly Math = Math;
-  protected readonly isDurationTracking = isDurationTracking;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly programService = inject(ProgramService);

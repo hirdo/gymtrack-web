@@ -1,12 +1,5 @@
-// 'reps' = sets x reps x weight, 'reps_only' = sets x reps (no weight), 'duration' = sets x duration, 'stretch' = sets x duration (flexibility hold)
-export type ExerciseTrackingType = 'reps' | 'reps_only' | 'duration' | 'stretch';
-
-// 'stretch' shares the exact same data shape as 'duration' (targetDuration/duration fields,
-// SetRecord.duration) — it's only a separate label for classifying flexibility holds distinctly
-// from other timed exercises like planks or treadmill runs.
-export function isDurationTracking(type: ExerciseTrackingType | null | undefined): boolean {
-  return type === 'duration' || type === 'stretch';
-}
+// 'reps' = sets x reps x weight, 'reps_only' = sets x reps (no weight), 'duration' = sets x duration
+export type ExerciseTrackingType = 'reps' | 'reps_only' | 'duration';
 
 export interface Exercise {
   id: string;
@@ -48,7 +41,7 @@ export type WorkoutCategory =
 
 export type MuscleGroup =
   | 'chest' | 'back' | 'shoulders' | 'biceps' | 'triceps'
-  | 'forearms' | 'core' | 'legs' | 'glutes';
+  | 'forearms' | 'core' | 'legs' | 'glutes' | 'stretch';
 
 export type Equipment =
   | 'barbell' | 'dumbbell' | 'machine' | 'cable'

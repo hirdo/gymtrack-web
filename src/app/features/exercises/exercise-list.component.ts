@@ -24,7 +24,7 @@ export class ExerciseListComponent {
 
   readonly allMuscleGroups: MuscleGroup[] = [
     'chest', 'back', 'shoulders', 'biceps', 'triceps',
-    'forearms', 'core', 'legs', 'glutes'
+    'forearms', 'core', 'legs', 'glutes', 'stretch'
   ];
 
   readonly allEquipment: Equipment[] = [

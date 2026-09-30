@@ -6,7 +6,7 @@ import { ProgramService } from '../../core/services/program.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { ExercisePickerModalComponent } from '../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
 import { FieldErrorComponent } from '../../shared/components/field-error/field-error.component';
-import { ProgramDifficulty, ExerciseTemplate, ExerciseTrackingType, MuscleGroup, PROGRAM_DIFFICULTIES, isDurationTracking } from '../../core/models/workout.model';
+import { ProgramDifficulty, ExerciseTemplate, ExerciseTrackingType, MuscleGroup, PROGRAM_DIFFICULTIES } from '../../core/models/workout.model';
 
 @Component({
   selector: 'app-program-create',
@@ -23,7 +23,6 @@ export class ProgramCreateComponent implements OnInit {
   readonly exerciseService = inject(ExerciseLibraryService);
 
   readonly difficulties = PROGRAM_DIFFICULTIES;
-  protected readonly isDurationTracking = isDurationTracking;
 
   starLabel(stars: number): string {
     return '★'.repeat(stars) + '☆'.repeat(5 - stars);
@@ -215,7 +214,7 @@ export class ProgramCreateComponent implements OnInit {
     if (!this.pickerTarget) return;
     const group = this.getDayExercises(this.pickerTarget.dayIndex).at(this.pickerTarget.exerciseIndex);
     const trackingType = exercise.trackingType ?? 'reps';
-    if (isDurationTracking(trackingType)) {
+    if (trackingType === 'duration') {
       group.patchValue({
         exerciseId: exercise.id,
         exerciseName: exercise.name,

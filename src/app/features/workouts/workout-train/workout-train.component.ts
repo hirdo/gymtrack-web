@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
-import { ExerciseTemplate, ExerciseTrackingType, SetRecord, isDurationTracking } from '../../../core/models/workout.model';
+import { ExerciseTemplate, ExerciseTrackingType, SetRecord } from '../../../core/models/workout.model';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { CountdownRingComponent } from '../../../shared/components/countdown-ring/countdown-ring.component';
 import { parseLocalDate, formatDisplayDate, formatTime as formatTimeUtil } from '../../../core/utils/date.util';
@@ -40,7 +40,6 @@ export class WorkoutTrainComponent implements OnDestroy {
   };
 
   private readonly workoutId = this.route.snapshot.paramMap.get('id') || '';
-  protected readonly isDurationTracking = isDurationTracking;
 
   readonly currentExerciseIndex = signal(0);
   readonly weightInput = signal<number | null>(null);
@@ -259,7 +258,7 @@ export class WorkoutTrainComponent implements OnDestroy {
     const log = this.currentLog();
     if (!log || this.loggingSet()) return;
 
-    if (isDurationTracking(log.trackingType)) {
+    if (log.trackingType === 'duration') {
       if (this.displayDurationInput() === null) {
         this.logSetError.set('Complete the timer or enter a duration before logging.');
         return;
@@ -276,7 +275,7 @@ export class WorkoutTrainComponent implements OnDestroy {
     }
 
     let setRecord: SetRecord;
-    if (isDurationTracking(log.trackingType)) {
+    if (log.trackingType === 'duration') {
       setRecord = {
         setNumber: log.sets.length + 1,
         duration: this.displayDurationInput()!,
@@ -305,7 +304,7 @@ export class WorkoutTrainComponent implements OnDestroy {
       this.logSetError.set(null);
       this.weightInput.set(null);
       this.repsInput.set(null);
-      if (isDurationTracking(log.trackingType)) {
+      if (log.trackingType === 'duration') {
         this.resetDurationTimer();
       } else {
         this.durationInput.set(null);
@@ -391,7 +390,7 @@ export class WorkoutTrainComponent implements OnDestroy {
     const editing = this.editingSet();
     if (!editing) return;
     const changes: Partial<SetRecord> = {};
-    if (isDurationTracking(trackingType)) {
+    if (trackingType === 'duration') {
       changes.duration = this.editDurationInput() ?? 0;
     } else if (trackingType === 'reps_only') {
       changes.reps = this.editRepsInput() ?? 0;

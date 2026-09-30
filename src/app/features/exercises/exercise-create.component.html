@@ -52,7 +52,7 @@
 
       <div>
         <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Tracking Type</label>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <button type="button" (click)="form.patchValue({ trackingType: 'reps' })"
                   class="px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors"
                   [class]="form.value.trackingType === 'reps' ? 'bg-primary text-background' : 'bg-background text-text-muted border border-border hover:text-text'">
@@ -68,16 +68,11 @@
                   [class]="form.value.trackingType === 'duration' ? 'bg-primary text-background' : 'bg-background text-text-muted border border-border hover:text-text'">
             Sets &times; Duration
           </button>
-          <button type="button" (click)="form.patchValue({ trackingType: 'stretch' })"
-                  class="px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors"
-                  [class]="form.value.trackingType === 'stretch' ? 'bg-primary text-background' : 'bg-background text-text-muted border border-border hover:text-text'">
-            Sets &times; Stretch
-          </button>
         </div>
-        <p class="text-xs text-text-muted mt-1.5">Use "Sets &times; Reps" for bodyweight exercises with no weight, "Sets &times; Duration" for exercises like running or planks, and "Sets &times; Stretch" for flexibility holds.</p>
+        <p class="text-xs text-text-muted mt-1.5">Use "Sets &times; Reps" for bodyweight exercises with no weight, and "Sets &times; Duration" for exercises like running or stretching.</p>
       </div>
 
-      @if (!isDurationTracking(form.value.trackingType)) {
+      @if (form.value.trackingType !== 'duration') {
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Recommended Reps (optional)</label>

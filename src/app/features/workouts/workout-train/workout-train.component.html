@@ -110,7 +110,7 @@
               <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Target Sets</p>
               <p class="text-xl font-heading font-extrabold text-primary">{{ slotTargetSets() }}</p>
             </div>
-            @if (isDurationTracking(log.trackingType)) {
+            @if (log.trackingType === 'duration') {
               <div class="bg-background rounded-xl p-3 text-center">
                 <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Target Duration</p>
                 <p class="text-xl font-heading font-extrabold text-accent">{{ formatTime(log.targetDuration || 0) }}</p>
@@ -156,7 +156,7 @@
           }
 
           <!-- Log Set Input -->
-          @if (isDurationTracking(log.trackingType)) {
+          @if (log.trackingType === 'duration') {
             <div class="flex flex-col items-center py-2 mb-4">
               <app-countdown-ring [percent]="(displayDurationRemaining() / (log.targetDuration || 1)) * 100" [size]="180" colorClass="accent">
                 <div class="text-center">
@@ -179,7 +179,7 @@
             </div>
           }
           <div class="bg-background rounded-xl p-4">
-            @if (!isDurationTracking(log.trackingType)) {
+            @if (log.trackingType !== 'duration') {
               <p class="text-xs text-text-muted font-semibold uppercase tracking-wider mb-4">Log Set {{ log.sets.length + 1 }}</p>
             }
             @if (log.trackingType === 'reps_only') {
@@ -190,7 +190,7 @@
                        class="w-full bg-surface border border-border rounded-lg px-4 py-3 text-text text-lg font-heading font-bold text-center focus:border-primary focus:outline-none transition-colors [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                        min="0" step="1">
               </div>
-            } @else if (!isDurationTracking(log.trackingType)) {
+            } @else if (log.trackingType !== 'duration') {
               <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label class="block text-xs text-text-muted mb-1.5">Weight (kg)</label>
@@ -237,7 +237,7 @@
                         @for (set of slotLog.sets; track set.setNumber) {
                           @if (isEditingSet(slotLog.id, set.setNumber)) {
                             <div class="bg-background rounded-lg p-3 space-y-2">
-                              @if (isDurationTracking(slotLog.trackingType)) {
+                              @if (slotLog.trackingType === 'duration') {
                                 <div class="flex items-center gap-2">
                                   <span class="text-text-muted text-sm w-14 shrink-0">Set {{ set.setNumber }}</span>
                                   <input type="number" inputmode="decimal" [ngModel]="editDurationInput()" (ngModelChange)="editDurationInput.set($event === '' || $event === null ? null : +$event)"
@@ -272,7 +272,7 @@
                           } @else {
                             <div class="flex items-center justify-between bg-background rounded-lg px-4 py-2.5 ui-slide-up-in">
                               <span class="text-text-muted text-sm">Set {{ set.setNumber }}</span>
-                              @if (isDurationTracking(slotLog.trackingType)) {
+                              @if (slotLog.trackingType === 'duration') {
                                 <span class="font-heading font-bold text-accent">{{ formatTime(set.duration || 0) }}</span>
                               } @else if (slotLog.trackingType === 'reps_only') {
                                 <span class="font-heading font-bold text-accent">{{ set.reps }}<span class="text-text-muted text-xs ml-0.5">reps</span></span>
@@ -312,7 +312,7 @@
                     <p class="text-xs text-text-muted font-semibold mb-1.5">{{ formatHistoryDate(entry.date) }}</p>
                     <div class="flex flex-wrap gap-1.5">
                       @for (set of entry.sets; track set.setNumber) {
-                        @if (isDurationTracking(log.trackingType)) {
+                        @if (log.trackingType === 'duration') {
                           <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-surface-light">{{ formatTime(set.duration || 0) }}</span>
                         } @else if (log.trackingType === 'reps_only') {
                           <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-surface-light">{{ set.reps }} reps</span>

@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, input, Input, Output, EventEmitter
 import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
-import { ExerciseTemplate, ExerciseTrackingType, MuscleGroup, Equipment, isDurationTracking } from '../../../core/models/workout.model';
+import { ExerciseTemplate, ExerciseTrackingType, MuscleGroup, Equipment } from '../../../core/models/workout.model';
 
 @Component({
   selector: 'app-exercise-picker-modal',
@@ -32,7 +32,7 @@ export class ExercisePickerModalComponent implements OnChanges {
 
   readonly allMuscleGroups: MuscleGroup[] = [
     'chest', 'back', 'shoulders', 'biceps', 'triceps',
-    'forearms', 'core', 'legs', 'glutes'
+    'forearms', 'core', 'legs', 'glutes', 'stretch'
   ];
 
   readonly allEquipment: Equipment[] = [
@@ -56,10 +56,7 @@ export class ExercisePickerModalComponent implements OnChanges {
     }
     const requiredType = this.requiredTrackingType();
     if (requiredType) {
-      results = results.filter(e => {
-        const t = e.trackingType ?? 'reps';
-        return isDurationTracking(requiredType) ? isDurationTracking(t) : t === requiredType;
-      });
+      results = results.filter(e => (e.trackingType ?? 'reps') === requiredType);
     }
     const requiredMuscles = this.requiredMuscleGroups();
     if (requiredMuscles && requiredMuscles.length > 0) {
