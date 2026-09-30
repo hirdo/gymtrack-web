@@ -41,7 +41,7 @@ export type WorkoutCategory =
 
 export type MuscleGroup =
   | 'chest' | 'back' | 'shoulders' | 'biceps' | 'triceps'
-  | 'forearms' | 'core' | 'legs' | 'glutes';
+  | 'forearms' | 'core' | 'legs' | 'glutes' | 'stretch';
 
 export type Equipment =
   | 'barbell' | 'dumbbell' | 'machine' | 'cable'
@@ -58,6 +58,7 @@ export interface ExerciseTemplate {
   recommendedReps?: number;
   recommendedWeight?: number;
   recommendedDuration?: number;
+  recommendedRestTime?: number;
   imageUrl?: string;
   instructions?: string;
   isCustom?: boolean;

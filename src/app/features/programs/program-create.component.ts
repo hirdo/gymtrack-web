@@ -223,6 +223,7 @@ export class ProgramCreateComponent implements OnInit {
         targetReps: null,
         targetWeight: null,
         targetDuration: exercise.recommendedDuration != null ? exercise.recommendedDuration / 60 : group.get('targetDuration')?.value,
+        restTime: exercise.recommendedRestTime != null ? exercise.recommendedRestTime / 60 : group.get('restTime')?.value,
         alternativeExerciseIds: []
       });
     } else if (trackingType === 'reps_only') {
@@ -233,6 +234,7 @@ export class ProgramCreateComponent implements OnInit {
         targetReps: exercise.recommendedReps ?? group.get('targetReps')?.value,
         targetWeight: null,
         targetDuration: null,
+        restTime: exercise.recommendedRestTime != null ? exercise.recommendedRestTime / 60 : group.get('restTime')?.value,
         alternativeExerciseIds: []
       });
     } else {
@@ -243,6 +245,7 @@ export class ProgramCreateComponent implements OnInit {
         targetReps: exercise.recommendedReps ?? group.get('targetReps')?.value,
         targetWeight: exercise.recommendedWeight ?? group.get('targetWeight')?.value,
         targetDuration: null,
+        restTime: exercise.recommendedRestTime != null ? exercise.recommendedRestTime / 60 : group.get('restTime')?.value,
         alternativeExerciseIds: []
       });
     }

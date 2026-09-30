@@ -24,7 +24,7 @@ export class ExerciseCreateComponent implements OnInit {
   readonly categories: WorkoutCategory[] = ['strength', 'cardio', 'flexibility', 'hiit', 'custom'];
   readonly muscleGroups: MuscleGroup[] = [
     'chest', 'back', 'shoulders', 'biceps', 'triceps',
-    'forearms', 'core', 'legs', 'glutes'
+    'forearms', 'core', 'legs', 'glutes', 'stretch'
   ];
   readonly equipmentList: Equipment[] = [
     'barbell', 'dumbbell', 'machine', 'cable',
@@ -50,6 +50,7 @@ export class ExerciseCreateComponent implements OnInit {
     recommendedReps: [null as number | null],
     recommendedWeight: [null as number | null],
     recommendedDuration: [null as number | null],
+    recommendedRestTime: [null as number | null],
     instructions: ['']
   });
 
@@ -73,6 +74,7 @@ export class ExerciseCreateComponent implements OnInit {
       recommendedReps: exercise.recommendedReps ?? null,
       recommendedWeight: exercise.recommendedWeight ?? null,
       recommendedDuration: exercise.recommendedDuration != null ? exercise.recommendedDuration / 60 : null,
+      recommendedRestTime: exercise.recommendedRestTime != null ? exercise.recommendedRestTime / 60 : null,
       instructions: exercise.instructions || ''
     });
     for (const muscle of exercise.primaryMuscles) {
@@ -113,6 +115,7 @@ export class ExerciseCreateComponent implements OnInit {
       recommendedDuration: value.trackingType === 'duration' && value.recommendedDuration
         ? Math.round(value.recommendedDuration * 60)
         : undefined,
+      recommendedRestTime: value.recommendedRestTime ? Math.round(value.recommendedRestTime * 60) : undefined,
       primaryMuscles: Array.from(this.selectedMuscles),
       instructions: value.instructions || ''
     };
