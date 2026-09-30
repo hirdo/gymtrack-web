@@ -2,7 +2,7 @@ import { Component, inject, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
-import { ExerciseLog } from '../../../core/models/workout.model';
+import { ExerciseLog, isDurationTracking } from '../../../core/models/workout.model';
 import { formatDisplayDate, parseLocalDate, formatTime, formatMinutes } from '../../../core/utils/date.util';
 
 @Component({
@@ -17,6 +17,7 @@ export class WorkoutDetailComponent {
   private readonly router = inject(Router);
   private readonly workoutService = inject(WorkoutService);
   private readonly exerciseLogService = inject(ExerciseLogService);
+  protected readonly isDurationTracking = isDurationTracking;
 
   readonly workout = computed(() => {
     const id = this.route.snapshot.paramMap.get('id');

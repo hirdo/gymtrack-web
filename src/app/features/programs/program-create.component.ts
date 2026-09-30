@@ -6,7 +6,7 @@ import { ProgramService } from '../../core/services/program.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { ExercisePickerModalComponent } from '../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
 import { FieldErrorComponent } from '../../shared/components/field-error/field-error.component';
-import { ProgramDifficulty, ExerciseTemplate, ExerciseTrackingType, MuscleGroup, PROGRAM_DIFFICULTIES } from '../../core/models/workout.model';
+import { ProgramDifficulty, ExerciseTemplate, ExerciseTrackingType, MuscleGroup, PROGRAM_DIFFICULTIES, isDurationTracking } from '../../core/models/workout.model';
 
 @Component({
   selector: 'app-program-create',
@@ -23,6 +23,7 @@ export class ProgramCreateComponent implements OnInit {
   readonly exerciseService = inject(ExerciseLibraryService);
 
   readonly difficulties = PROGRAM_DIFFICULTIES;
+  protected readonly isDurationTracking = isDurationTracking;
 
   starLabel(stars: number): string {
     return '★'.repeat(stars) + '☆'.repeat(5 - stars);
@@ -214,7 +215,7 @@ export class ProgramCreateComponent implements OnInit {
     if (!this.pickerTarget) return;
     const group = this.getDayExercises(this.pickerTarget.dayIndex).at(this.pickerTarget.exerciseIndex);
     const trackingType = exercise.trackingType ?? 'reps';
-    if (trackingType === 'duration') {
+    if (isDurationTracking(trackingType)) {
       group.patchValue({
         exerciseId: exercise.id,
         exerciseName: exercise.name,
@@ -223,6 +224,7 @@ export class ProgramCreateComponent implements OnInit {
         targetReps: null,
         targetWeight: null,
         targetDuration: exercise.recommendedDuration != null ? exercise.recommendedDuration / 60 : group.get('targetDuration')?.value,
+        restTime: exercise.recommendedRestTime != null ? exercise.recommendedRestTime / 60 : group.get('restTime')?.value,
         alternativeExerciseIds: []
       });
     } else if (trackingType === 'reps_only') {
@@ -233,6 +235,7 @@ export class ProgramCreateComponent implements OnInit {
         targetReps: exercise.recommendedReps ?? group.get('targetReps')?.value,
         targetWeight: null,
         targetDuration: null,
+        restTime: exercise.recommendedRestTime != null ? exercise.recommendedRestTime / 60 : group.get('restTime')?.value,
         alternativeExerciseIds: []
       });
     } else {
@@ -243,6 +246,7 @@ export class ProgramCreateComponent implements OnInit {
         targetReps: exercise.recommendedReps ?? group.get('targetReps')?.value,
         targetWeight: exercise.recommendedWeight ?? group.get('targetWeight')?.value,
         targetDuration: null,
+        restTime: exercise.recommendedRestTime != null ? exercise.recommendedRestTime / 60 : group.get('restTime')?.value,
         alternativeExerciseIds: []
       });
     }

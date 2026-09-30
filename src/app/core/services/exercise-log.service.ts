@@ -1,5 +1,5 @@
 import { inject, Injectable, signal, computed, effect, OnDestroy } from '@angular/core';
-import { ExerciseLog, ExerciseTemplate, SetRecord, Workout } from '../models/workout.model';
+import { ExerciseLog, ExerciseTemplate, SetRecord, Workout, isDurationTracking } from '../models/workout.model';
 import { AuthService } from './auth.service';
 import { FirestoreService } from './firestore.service';
 import { toLocalDateString } from '../utils/date.util';
@@ -89,9 +89,9 @@ export class ExerciseLogService implements OnDestroy {
       trackingType,
       date: primary?.date || toLocalDateString(new Date()),
       targetSets: primary?.targetSets ?? 3,
-      targetReps: trackingType !== 'duration' ? (primary?.targetReps ?? alternate.recommendedReps) : undefined,
+      targetReps: !isDurationTracking(trackingType) ? (primary?.targetReps ?? alternate.recommendedReps) : undefined,
       targetWeight: trackingType === 'reps' ? (primary?.targetWeight ?? alternate.recommendedWeight) : undefined,
-      targetDuration: trackingType === 'duration' ? (primary?.targetDuration ?? alternate.recommendedDuration) : undefined,
+      targetDuration: isDurationTracking(trackingType) ? (primary?.targetDuration ?? alternate.recommendedDuration) : undefined,
       restTime: primary?.restTime,
       sets: [],
       startedAt: now,

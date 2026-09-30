@@ -10,7 +10,7 @@ import {
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
-import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate, MuscleGroup, Workout } from '../../../core/models/workout.model';
+import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate, MuscleGroup, Workout, isDurationTracking } from '../../../core/models/workout.model';
 import { ExercisePickerModalComponent } from '../../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { toLocalDateString } from '../../../core/utils/date.util';
@@ -33,6 +33,7 @@ export class WorkoutCreateComponent implements OnInit {
   readonly isEditMode = signal(false);
   readonly scheduleOnlyMode = signal(false);
   private editId: string | null = null;
+  protected readonly isDurationTracking = isDurationTracking;
 
   readonly pickerOpen = signal(false);
   private pickerTarget: number | null = null;
@@ -146,7 +147,7 @@ export class WorkoutCreateComponent implements OnInit {
     if (this.pickerTarget === null) return;
     const group = this.exercises.at(this.pickerTarget);
     const trackingType = exercise.trackingType ?? 'reps';
-    if (trackingType === 'duration') {
+    if (isDurationTracking(trackingType)) {
       group.patchValue({
         exerciseId: exercise.id,
         trackingType,
