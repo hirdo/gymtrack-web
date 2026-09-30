@@ -1,12 +1,13 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { FormBuilder, FormArray, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import { FormBuilder, FormArray, FormGroup, AbstractControl, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ProgramService } from '../../core/services/program.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { ExercisePickerModalComponent } from '../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
 import { FieldErrorComponent } from '../../shared/components/field-error/field-error.component';
-import { ProgramDifficulty, ExerciseTemplate, ExerciseTrackingType, MuscleGroup, PROGRAM_DIFFICULTIES } from '../../core/models/workout.model';
+import { ProgramDifficulty, ExerciseTemplate, ExerciseTrackingType, MuscleGroup, TimeUnit, PROGRAM_DIFFICULTIES } from '../../core/models/workout.model';
+import { convertTimeValue } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-program-create',
@@ -74,6 +75,8 @@ export class ProgramCreateComponent implements OnInit {
       exercises.clear();
       for (const ex of day.exercises) {
         const exGroup = this.createExerciseGroup();
+        const durationUnit: TimeUnit = ex.targetDurationUnit ?? 'min';
+        const restTimeUnit: TimeUnit = ex.restTimeUnit ?? 'min';
         exGroup.patchValue({
           exerciseId: ex.exerciseId,
           exerciseName: ex.exerciseName,
@@ -81,8 +84,14 @@ export class ProgramCreateComponent implements OnInit {
           targetSets: ex.targetSets,
           targetReps: ex.targetReps ?? null,
           targetWeight: ex.targetWeight ?? null,
-          targetDuration: ex.targetDuration != null ? ex.targetDuration / 60 : null,
-          restTime: ex.restTime != null ? ex.restTime / 60 : null,
+          targetDuration: ex.targetDuration != null
+            ? (durationUnit === 'sec' ? ex.targetDuration : ex.targetDuration / 60)
+            : null,
+          targetDurationUnit: durationUnit,
+          restTime: ex.restTime != null
+            ? (restTimeUnit === 'sec' ? ex.restTime : ex.restTime / 60)
+            : null,
+          restTimeUnit,
           alternativeExerciseIds: ex.alternativeExerciseIds ?? []
         });
         exercises.push(exGroup);
@@ -112,9 +121,19 @@ export class ProgramCreateComponent implements OnInit {
       targetReps: [12 as number | null, [Validators.min(1)]],
       targetWeight: [null as number | null],
       targetDuration: [null as number | null],
+      targetDurationUnit: ['min' as TimeUnit],
       restTime: [2 as number | null],
+      restTimeUnit: ['min' as TimeUnit],
       alternativeExerciseIds: [[] as string[]]
     });
+  }
+
+  setTimeUnit(group: AbstractControl, valueField: string, unitField: string, unit: TimeUnit): void {
+    const currentUnit = (group.get(unitField)?.value as TimeUnit) ?? 'min';
+    if (currentUnit === unit) return;
+    const currentValue = group.get(valueField)?.value as number | null;
+    const newValue = currentValue != null ? convertTimeValue(currentValue, currentUnit, unit) : currentValue;
+    group.patchValue({ [valueField]: newValue, [unitField]: unit });
   }
 
   addDay(): void {
@@ -214,6 +233,17 @@ export class ProgramCreateComponent implements OnInit {
     if (!this.pickerTarget) return;
     const group = this.getDayExercises(this.pickerTarget.dayIndex).at(this.pickerTarget.exerciseIndex);
     const trackingType = exercise.trackingType ?? 'reps';
+    const durationUnit: TimeUnit = exercise.recommendedDurationUnit ?? 'min';
+    const restTimeUnit: TimeUnit = exercise.recommendedRestTimeUnit ?? 'min';
+    const targetDurationValue = exercise.recommendedDuration != null
+      ? (durationUnit === 'sec' ? exercise.recommendedDuration : exercise.recommendedDuration / 60)
+      : group.get('targetDuration')?.value;
+    const targetDurationUnitValue = exercise.recommendedDuration != null ? durationUnit : group.get('targetDurationUnit')?.value;
+    const restTimeValue = exercise.recommendedRestTime != null
+      ? (restTimeUnit === 'sec' ? exercise.recommendedRestTime : exercise.recommendedRestTime / 60)
+      : group.get('restTime')?.value;
+    const restTimeUnitValue = exercise.recommendedRestTime != null ? restTimeUnit : group.get('restTimeUnit')?.value;
+
     if (trackingType === 'duration') {
       group.patchValue({
         exerciseId: exercise.id,
@@ -222,8 +252,10 @@ export class ProgramCreateComponent implements OnInit {
         targetSets: 1,
         targetReps: null,
         targetWeight: null,
-        targetDuration: exercise.recommendedDuration != null ? exercise.recommendedDuration / 60 : group.get('targetDuration')?.value,
-        restTime: exercise.recommendedRestTime != null ? exercise.recommendedRestTime / 60 : group.get('restTime')?.value,
+        targetDuration: targetDurationValue,
+        targetDurationUnit: targetDurationUnitValue,
+        restTime: restTimeValue,
+        restTimeUnit: restTimeUnitValue,
         alternativeExerciseIds: []
       });
     } else if (trackingType === 'reps_only') {
@@ -234,7 +266,8 @@ export class ProgramCreateComponent implements OnInit {
         targetReps: exercise.recommendedReps ?? group.get('targetReps')?.value,
         targetWeight: null,
         targetDuration: null,
-        restTime: exercise.recommendedRestTime != null ? exercise.recommendedRestTime / 60 : group.get('restTime')?.value,
+        restTime: restTimeValue,
+        restTimeUnit: restTimeUnitValue,
         alternativeExerciseIds: []
       });
     } else {
@@ -245,7 +278,8 @@ export class ProgramCreateComponent implements OnInit {
         targetReps: exercise.recommendedReps ?? group.get('targetReps')?.value,
         targetWeight: exercise.recommendedWeight ?? group.get('targetWeight')?.value,
         targetDuration: null,
-        restTime: exercise.recommendedRestTime != null ? exercise.recommendedRestTime / 60 : group.get('restTime')?.value,
+        restTime: restTimeValue,
+        restTimeUnit: restTimeUnitValue,
         alternativeExerciseIds: []
       });
     }
@@ -326,17 +360,27 @@ export class ProgramCreateComponent implements OnInit {
       return {
         dayNumber: i,
         name: d['name'] as string,
-        exercises: exercises.map((e: Record<string, unknown>) => ({
-          exerciseId: e['exerciseId'] as string,
-          exerciseName: e['exerciseName'] as string,
-          trackingType: e['trackingType'] as ExerciseTrackingType,
-          targetSets: e['targetSets'] as number,
-          targetReps: (e['targetReps'] as number) || undefined,
-          targetWeight: (e['targetWeight'] as number) || undefined,
-          targetDuration: e['targetDuration'] ? Math.round((e['targetDuration'] as number) * 60) : undefined,
-          restTime: e['restTime'] ? Math.round((e['restTime'] as number) * 60) : undefined,
-          alternativeExerciseIds: (e['alternativeExerciseIds'] as string[])?.length ? (e['alternativeExerciseIds'] as string[]) : undefined
-        }))
+        exercises: exercises.map((e: Record<string, unknown>) => {
+          const durationUnit: TimeUnit = (e['targetDurationUnit'] as TimeUnit) ?? 'min';
+          const restTimeUnit: TimeUnit = (e['restTimeUnit'] as TimeUnit) ?? 'min';
+          return {
+            exerciseId: e['exerciseId'] as string,
+            exerciseName: e['exerciseName'] as string,
+            trackingType: e['trackingType'] as ExerciseTrackingType,
+            targetSets: e['targetSets'] as number,
+            targetReps: (e['targetReps'] as number) || undefined,
+            targetWeight: (e['targetWeight'] as number) || undefined,
+            targetDuration: e['targetDuration']
+              ? Math.round(durationUnit === 'sec' ? (e['targetDuration'] as number) : (e['targetDuration'] as number) * 60)
+              : undefined,
+            targetDurationUnit: e['targetDuration'] ? durationUnit : undefined,
+            restTime: e['restTime']
+              ? Math.round(restTimeUnit === 'sec' ? (e['restTime'] as number) : (e['restTime'] as number) * 60)
+              : undefined,
+            restTimeUnit: e['restTime'] ? restTimeUnit : undefined,
+            alternativeExerciseIds: (e['alternativeExerciseIds'] as string[])?.length ? (e['alternativeExerciseIds'] as string[]) : undefined
+          };
+        })
       };
     });
 

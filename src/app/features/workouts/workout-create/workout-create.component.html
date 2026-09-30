@@ -96,8 +96,14 @@
                     <app-field-error [control]="exercise.get('sets')" label="Sets" />
                   </div>
                   <div>
-                    <label class="block text-xs font-semibold text-text-muted mb-1 uppercase tracking-wider">Duration (min)</label>
-                    <input formControlName="duration" type="number" min="0.5" step="0.5"
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="text-xs font-semibold text-text-muted uppercase tracking-wider">Duration</label>
+                      <button type="button" (click)="setTimeUnit(exercise, 'duration', 'durationUnit', exercise.get('durationUnit')?.value === 'sec' ? 'min' : 'sec')"
+                              class="text-[10px] font-semibold uppercase text-primary px-1 leading-none">{{ exercise.get('durationUnit')?.value === 'sec' ? 'sec' : 'min' }}</button>
+                    </div>
+                    <input formControlName="duration" type="number"
+                           [attr.min]="exercise.get('durationUnit')?.value === 'sec' ? 1 : 0.5"
+                           [attr.step]="exercise.get('durationUnit')?.value === 'sec' ? 1 : 0.5"
                            class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text text-center font-semibold focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                   </div>
                 </div>

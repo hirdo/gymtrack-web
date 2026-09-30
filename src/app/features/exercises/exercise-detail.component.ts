@@ -2,7 +2,8 @@ import { Component, inject, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { AuthService } from '../../core/services/auth.service';
-import { formatMinutes } from '../../core/utils/date.util';
+import { formatDurationValue } from '../../core/utils/date.util';
+import { TimeUnit } from '../../core/models/workout.model';
 
 @Component({
   selector: 'app-exercise-detail',
@@ -32,8 +33,8 @@ export class ExerciseDetailComponent {
   readonly deleting = signal(false);
   readonly imageLoaded = signal(false);
 
-  formatExerciseMinutes(seconds: number): string {
-    return formatMinutes(seconds);
+  formatExerciseDuration(seconds: number, unit?: TimeUnit): string {
+    return formatDurationValue(seconds, unit);
   }
 
   confirmDelete(): void {

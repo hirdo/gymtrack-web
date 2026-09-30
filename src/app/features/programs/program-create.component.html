@@ -102,13 +102,25 @@
                         <app-field-error [control]="ex.get('targetSets')" label="Sets" />
                       </div>
                       <div>
-                        <label class="block text-[10px] text-text-muted mb-1">Duration (min)</label>
-                        <input type="number" formControlName="targetDuration" min="0.5" step="0.5"
+                        <div class="flex items-center justify-between mb-1">
+                          <label class="text-[10px] text-text-muted">Duration</label>
+                          <button type="button" (click)="setTimeUnit(ex, 'targetDuration', 'targetDurationUnit', ex.get('targetDurationUnit')?.value === 'sec' ? 'min' : 'sec')"
+                                  class="text-[9px] font-semibold uppercase text-primary px-1 leading-none">{{ ex.get('targetDurationUnit')?.value === 'sec' ? 'sec' : 'min' }}</button>
+                        </div>
+                        <input type="number" formControlName="targetDuration"
+                               [attr.min]="ex.get('targetDurationUnit')?.value === 'sec' ? 1 : 0.5"
+                               [attr.step]="ex.get('targetDurationUnit')?.value === 'sec' ? 1 : 0.5"
                                class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                       </div>
                       <div>
-                        <label class="block text-[10px] text-text-muted mb-1">Rest (min)</label>
-                        <input type="number" formControlName="restTime" min="0" step="0.5"
+                        <div class="flex items-center justify-between mb-1">
+                          <label class="text-[10px] text-text-muted">Rest</label>
+                          <button type="button" (click)="setTimeUnit(ex, 'restTime', 'restTimeUnit', ex.get('restTimeUnit')?.value === 'sec' ? 'min' : 'sec')"
+                                  class="text-[9px] font-semibold uppercase text-primary px-1 leading-none">{{ ex.get('restTimeUnit')?.value === 'sec' ? 'sec' : 'min' }}</button>
+                        </div>
+                        <input type="number" formControlName="restTime"
+                               [attr.min]="0"
+                               [attr.step]="ex.get('restTimeUnit')?.value === 'sec' ? 1 : 0.5"
                                class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                       </div>
                     </div>
@@ -127,8 +139,14 @@
                         <app-field-error [control]="ex.get('targetReps')" label="Reps" />
                       </div>
                       <div>
-                        <label class="block text-[10px] text-text-muted mb-1">Rest (min)</label>
-                        <input type="number" formControlName="restTime" min="0" step="0.5"
+                        <div class="flex items-center justify-between mb-1">
+                          <label class="text-[10px] text-text-muted">Rest</label>
+                          <button type="button" (click)="setTimeUnit(ex, 'restTime', 'restTimeUnit', ex.get('restTimeUnit')?.value === 'sec' ? 'min' : 'sec')"
+                                  class="text-[9px] font-semibold uppercase text-primary px-1 leading-none">{{ ex.get('restTimeUnit')?.value === 'sec' ? 'sec' : 'min' }}</button>
+                        </div>
+                        <input type="number" formControlName="restTime"
+                               [attr.min]="0"
+                               [attr.step]="ex.get('restTimeUnit')?.value === 'sec' ? 1 : 0.5"
                                class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                       </div>
                     </div>
@@ -152,8 +170,14 @@
                                class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                       </div>
                       <div>
-                        <label class="block text-[10px] text-text-muted mb-1">Rest (min)</label>
-                        <input type="number" formControlName="restTime" min="0" step="0.5"
+                        <div class="flex items-center justify-between mb-1">
+                          <label class="text-[10px] text-text-muted">Rest</label>
+                          <button type="button" (click)="setTimeUnit(ex, 'restTime', 'restTimeUnit', ex.get('restTimeUnit')?.value === 'sec' ? 'min' : 'sec')"
+                                  class="text-[9px] font-semibold uppercase text-primary px-1 leading-none">{{ ex.get('restTimeUnit')?.value === 'sec' ? 'sec' : 'min' }}</button>
+                        </div>
+                        <input type="number" formControlName="restTime"
+                               [attr.min]="0"
+                               [attr.step]="ex.get('restTimeUnit')?.value === 'sec' ? 1 : 0.5"
                                class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-text text-sm text-center focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
                       </div>
                     </div>

@@ -3,8 +3,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProgramService } from '../../core/services/program.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { AuthService } from '../../core/services/auth.service';
-import { PROGRAM_DIFFICULTIES, ProgramDifficulty, TrainingProgram, difficultyLabel } from '../../core/models/workout.model';
-import { formatMinutes } from '../../core/utils/date.util';
+import { PROGRAM_DIFFICULTIES, ProgramDifficulty, TrainingProgram, TimeUnit, difficultyLabel } from '../../core/models/workout.model';
+import { formatDurationValue } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-program-detail',
@@ -111,8 +111,8 @@ export class ProgramDetailComponent {
 
   readonly difficultyLabel = difficultyLabel;
 
-  formatExerciseMinutes(seconds: number): string {
-    return formatMinutes(seconds);
+  formatExerciseDuration(seconds: number, unit?: TimeUnit): string {
+    return formatDurationValue(seconds, unit);
   }
 
   getExerciseImage(exerciseId: string): string | undefined {

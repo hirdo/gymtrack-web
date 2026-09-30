@@ -118,7 +118,7 @@
             <div>
               <h3 class="font-heading font-semibold text-lg uppercase tracking-wide">{{ exercise.name }}</h3>
               @if (exercise.restTime) {
-                <p class="text-xs text-text-muted mt-0.5">Rest {{ formatExerciseMinutes(exercise.restTime) }}</p>
+                <p class="text-xs text-text-muted mt-0.5">Rest {{ formatExerciseDuration(exercise.restTime, exercise.restTimeUnit) }}</p>
               }
             </div>
           </div>
@@ -130,7 +130,7 @@
             @if (exercise.trackingType === 'duration') {
               <div class="bg-background rounded-xl p-3 text-center">
                 <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1">Duration</p>
-                <p class="text-2xl font-heading font-extrabold text-accent">{{ formatExerciseMinutes(exercise.duration || 0) }}</p>
+                <p class="text-2xl font-heading font-extrabold text-accent">{{ formatExerciseDuration(exercise.duration || 0, exercise.durationUnit) }}</p>
               </div>
             } @else {
               <div class="bg-background rounded-xl p-3 text-center">

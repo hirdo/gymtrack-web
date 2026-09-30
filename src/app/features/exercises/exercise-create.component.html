@@ -90,16 +90,42 @@
         <p class="text-xs text-text-muted -mt-3">Shown to everyone as a starting point and used to pre-fill targets in programs and workouts.</p>
       } @else {
         <div>
-          <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Recommended Duration (minutes, optional)</label>
-          <input type="number" formControlName="recommendedDuration" min="0.5" step="0.5" placeholder="e.g. 30"
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider">Recommended Duration (optional)</label>
+            <div class="flex bg-background border border-border rounded-md overflow-hidden text-[10px] font-semibold uppercase shrink-0">
+              <button type="button" (click)="setTimeUnit(form, 'recommendedDuration', 'recommendedDurationUnit', 'sec')"
+                      class="px-2 py-1 transition-colors"
+                      [class]="form.value.recommendedDurationUnit === 'sec' ? 'bg-primary text-background' : 'text-text-muted hover:text-text'">Sec</button>
+              <button type="button" (click)="setTimeUnit(form, 'recommendedDuration', 'recommendedDurationUnit', 'min')"
+                      class="px-2 py-1 transition-colors"
+                      [class]="form.value.recommendedDurationUnit === 'min' ? 'bg-primary text-background' : 'text-text-muted hover:text-text'">Min</button>
+            </div>
+          </div>
+          <input type="number" formControlName="recommendedDuration"
+                 [attr.min]="form.value.recommendedDurationUnit === 'sec' ? 1 : 0.5"
+                 [attr.step]="form.value.recommendedDurationUnit === 'sec' ? 1 : 0.5"
+                 [placeholder]="form.value.recommendedDurationUnit === 'sec' ? 'e.g. 20' : 'e.g. 30'"
                  class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
           <p class="text-xs text-text-muted mt-1.5">Shown to everyone as a starting point and used to pre-fill target duration in programs and workouts.</p>
         </div>
       }
 
       <div>
-        <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Recommended Rest Time (minutes, optional)</label>
-        <input type="number" formControlName="recommendedRestTime" min="0" step="0.5" placeholder="e.g. 2"
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider">Recommended Rest Time (optional)</label>
+          <div class="flex bg-background border border-border rounded-md overflow-hidden text-[10px] font-semibold uppercase shrink-0">
+            <button type="button" (click)="setTimeUnit(form, 'recommendedRestTime', 'recommendedRestTimeUnit', 'sec')"
+                    class="px-2 py-1 transition-colors"
+                    [class]="form.value.recommendedRestTimeUnit === 'sec' ? 'bg-primary text-background' : 'text-text-muted hover:text-text'">Sec</button>
+            <button type="button" (click)="setTimeUnit(form, 'recommendedRestTime', 'recommendedRestTimeUnit', 'min')"
+                    class="px-2 py-1 transition-colors"
+                    [class]="form.value.recommendedRestTimeUnit === 'min' ? 'bg-primary text-background' : 'text-text-muted hover:text-text'">Min</button>
+          </div>
+        </div>
+        <input type="number" formControlName="recommendedRestTime"
+               [attr.min]="0"
+               [attr.step]="form.value.recommendedRestTimeUnit === 'sec' ? 1 : 0.5"
+               [placeholder]="form.value.recommendedRestTimeUnit === 'sec' ? 'e.g. 15' : 'e.g. 2'"
                class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
         <p class="text-xs text-text-muted mt-1.5">Used to pre-fill rest time when this exercise is added to a program.</p>
       </div>
