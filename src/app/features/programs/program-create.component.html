@@ -82,16 +82,23 @@
                   }
                 </div>
                 <div class="space-y-2">
-                  <button type="button" (click)="openExercisePicker(di, ei)"
-                          class="w-full bg-surface border border-border rounded-lg px-3 py-2 text-left text-sm hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors flex items-center gap-2 cursor-pointer">
-                    @if (getExerciseImage(ex.get('exerciseId')?.value); as img) {
-                      <img [src]="img" alt="" class="w-8 h-8 rounded object-contain bg-white shrink-0">
-                    }
-                    <span class="flex-1" [class]="ex.get('exerciseName')?.value ? '' : 'text-text-muted'">
-                      {{ ex.get('exerciseName')?.value || 'Choose exercise…' }}
-                    </span>
-                    <svg class="w-4 h-4 text-text-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                  </button>
+                  <div class="flex gap-2">
+                    <button type="button" (click)="openExercisePicker(di, ei)"
+                            class="flex-1 min-w-0 bg-surface border border-border rounded-lg px-3 py-2 text-left text-sm hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors flex items-center gap-2 cursor-pointer">
+                      @if (getExerciseImage(ex.get('exerciseId')?.value); as img) {
+                        <img [src]="img" alt="" class="w-8 h-8 rounded object-contain bg-white shrink-0">
+                      }
+                      <span class="flex-1 truncate" [class]="ex.get('exerciseName')?.value ? '' : 'text-text-muted'">
+                        {{ ex.get('exerciseName')?.value || 'Choose exercise…' }}
+                      </span>
+                      <svg class="w-4 h-4 text-text-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <button type="button" (click)="openBundlePicker(di, ei)" title="Use a saved bundle (main exercise + alternates)"
+                            class="shrink-0 bg-surface border border-border rounded-lg px-3 py-2 text-sm text-text-muted hover:border-primary/50 hover:text-primary focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors flex items-center gap-1.5 cursor-pointer">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7h-9m3-3l-3 3 3 3M4 17h9m-3 3l3-3-3-3"/></svg>
+                      <span class="hidden sm:inline">Use Bundle</span>
+                    </button>
+                  </div>
                   <app-field-error [control]="ex.get('exerciseName')" label="Exercise" />
                   @if (ex.get('trackingType')?.value === 'duration') {
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -270,6 +277,11 @@
     [open]="pickerOpen()"
     (closed)="closeExercisePicker()"
     (exerciseSelected)="onExercisePicked($event)" />
+
+  <app-bundle-picker-modal
+    [open]="bundlePickerOpen()"
+    (closed)="closeBundlePicker()"
+    (bundleSelected)="onBundlePicked($event)" />
 
   <app-exercise-picker-modal
     [open]="altPickerOpen()"

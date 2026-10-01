@@ -71,6 +71,16 @@ export interface ExerciseTemplate {
   createdBy?: string;
 }
 
+export interface ExerciseBundle {
+  id: string;
+  name: string;
+  mainExerciseId: string;
+  alternativeExerciseIds: string[];
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface SetRecord {
   setNumber: number;
   weight?: number;

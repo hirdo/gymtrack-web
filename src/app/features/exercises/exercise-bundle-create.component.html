@@ -1,0 +1,104 @@
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+  <a routerLink="/exercises" [queryParams]="{ tab: 'bundles' }" class="text-text-muted hover:text-primary text-sm inline-flex items-center gap-1 transition-colors mb-6">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Back to Bundles
+  </a>
+
+  <h1 class="text-3xl font-heading font-bold uppercase tracking-wide mb-8">{{ isEditMode() ? 'Edit Bundle' : 'Create Bundle' }}</h1>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+    <div class="gym-card space-y-5">
+      <div>
+        <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Bundle Name</label>
+        <input type="text" formControlName="name" placeholder="e.g. Chest - Beginner"
+               class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors">
+        <app-field-error [control]="form.controls.name" label="Bundle Name" />
+      </div>
+
+      <div>
+        <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Main Exercise</label>
+        <button type="button" (click)="openMainPicker()"
+                class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-left text-sm hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors flex items-center gap-2 cursor-pointer">
+          @if (getExerciseImage(form.value.mainExerciseId); as img) {
+            <img [src]="img" alt="" class="w-8 h-8 rounded object-contain bg-white shrink-0">
+          }
+          <span class="flex-1" [class]="form.value.mainExerciseName ? '' : 'text-text-muted'">
+            {{ form.value.mainExerciseName || 'Choose main exercise…' }}
+          </span>
+          <svg class="w-4 h-4 text-text-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <app-field-error [control]="form.controls.mainExerciseId" label="Main Exercise" />
+      </div>
+
+      <div class="pt-1">
+        <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Alternative Exercises (optional, max 5)</label>
+        <div class="flex flex-wrap gap-2 mb-1.5">
+          @for (altId of form.value.alternativeExerciseIds; track altId) {
+            <span class="inline-flex items-center gap-2 bg-surface border border-border rounded-lg pl-1 pr-2 py-1.5">
+              @if (getExerciseImage(altId); as img) {
+                <img [src]="img" alt="" class="w-8 h-8 rounded object-contain bg-white shrink-0">
+              }
+              <span class="text-xs text-text truncate max-w-[8rem]">{{ getExerciseName(altId) }}</span>
+              <button type="button" (click)="removeAlternative(altId)" class="text-text-muted hover:text-error transition-colors shrink-0" aria-label="Remove alternative">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </span>
+          }
+        </div>
+        @if (!form.value.mainExerciseId) {
+          <p class="text-xs text-text-muted">Choose a main exercise first.</p>
+        } @else if ((form.value.alternativeExerciseIds?.length || 0) < 5) {
+          <button type="button" (click)="openAltPicker()" class="text-xs text-primary hover:text-primary-light transition-colors inline-flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Add Alternative
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (isEditMode()) {
+      <div class="gym-card border-error/30">
+        <h2 class="text-sm font-heading font-bold uppercase tracking-wider mb-2 text-error">Danger Zone</h2>
+        @if (confirmingDelete()) {
+          <div class="flex items-center gap-3">
+            <span class="text-error text-sm font-semibold">Delete this bundle?</span>
+            <button type="button" (click)="deleteBundle()" [disabled]="deleting()" class="btn-secondary text-sm py-2 px-4 !border-error/50 !text-error hover:!bg-error/10 disabled:opacity-60 disabled:cursor-wait">
+              {{ deleting() ? 'Deleting…' : 'Confirm' }}
+            </button>
+            <button type="button" (click)="cancelDelete()" [disabled]="deleting()" class="btn-secondary text-sm py-2 px-4">Cancel</button>
+          </div>
+        } @else {
+          <button type="button" (click)="confirmDelete()" class="btn-secondary text-sm py-2 px-4 hover:!text-error hover:!border-error/50">Delete Bundle</button>
+        }
+      </div>
+    }
+
+    <div class="sticky bottom-0 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-surface/95 backdrop-blur border-t border-border flex gap-3">
+      <button type="submit" class="btn-primary flex-1 py-3" [disabled]="form.invalid || submitting()">
+        @if (submitting()) {
+          <div class="w-4 h-4 border-2 border-background/40 border-t-background rounded-full animate-spin"></div>
+          {{ isEditMode() ? 'Saving…' : 'Creating…' }}
+        } @else {
+          {{ isEditMode() ? 'Save Changes' : 'Create Bundle' }}
+        }
+      </button>
+      <a routerLink="/exercises" [queryParams]="{ tab: 'bundles' }" class="btn-secondary py-3 px-6" [class.pointer-events-none]="submitting()" [class.opacity-40]="submitting()">Cancel</a>
+    </div>
+  </form>
+
+  <app-exercise-picker-modal
+    [open]="mainPickerOpen()"
+    (closed)="closeMainPicker()"
+    (exerciseSelected)="onMainExercisePicked($event)" />
+
+  <app-exercise-picker-modal
+    [open]="altPickerOpen()"
+    [multiple]="true"
+    [maxSelect]="5"
+    [excludeIds]="altExcludeIds()"
+    [preselectedIds]="altPreselectedIds()"
+    [requiredTrackingType]="altTrackingType()"
+    [requiredMuscleGroups]="altMuscles()"
+    (closed)="closeAltPicker()"
+    (multipleSelected)="onAlternativesPicked($event)" />
+</div>

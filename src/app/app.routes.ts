@@ -71,6 +71,22 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'bundles/new',
+        loadComponent: () =>
+          import('./features/exercises/exercise-bundle-create.component').then(
+            (m) => m.ExerciseBundleCreateComponent
+          ),
+        data: { roles: ['admin'] }
+      },
+      {
+        path: 'bundles/:id/edit',
+        loadComponent: () =>
+          import('./features/exercises/exercise-bundle-create.component').then(
+            (m) => m.ExerciseBundleCreateComponent
+          ),
+        data: { roles: ['admin'] }
+      },
+      {
         path: 'new',
         loadComponent: () =>
           import('./features/exercises/exercise-create.component').then(

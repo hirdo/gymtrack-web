@@ -10,16 +10,18 @@ import {
 } from '@angular/forms';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
+import { ExerciseBundleService } from '../../../core/services/exercise-bundle.service';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
-import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate, MuscleGroup, TimeUnit, Workout } from '../../../core/models/workout.model';
+import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate, ExerciseBundle, MuscleGroup, TimeUnit, Workout } from '../../../core/models/workout.model';
 import { ExercisePickerModalComponent } from '../../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
+import { BundlePickerModalComponent } from '../../../shared/components/bundle-picker-modal/bundle-picker-modal.component';
 import { FieldErrorComponent } from '../../../shared/components/field-error/field-error.component';
 import { toLocalDateString, convertTimeValue } from '../../../core/utils/date.util';
 
 @Component({
   selector: 'app-workout-create',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, ExercisePickerModalComponent, FieldErrorComponent],
+  imports: [ReactiveFormsModule, RouterLink, ExercisePickerModalComponent, BundlePickerModalComponent, FieldErrorComponent],
   templateUrl: './workout-create.component.html',
   styleUrl: './workout-create.component.scss'
 })
@@ -30,6 +32,7 @@ export class WorkoutCreateComponent implements OnInit {
   private readonly workoutService = inject(WorkoutService);
   private readonly exerciseLogService = inject(ExerciseLogService);
   readonly exerciseService = inject(ExerciseLibraryService);
+  private readonly bundleService = inject(ExerciseBundleService);
 
   readonly isEditMode = signal(false);
   readonly scheduleOnlyMode = signal(false);
@@ -154,9 +157,9 @@ export class WorkoutCreateComponent implements OnInit {
     this.pickerOpen.set(true);
   }
 
-  onExercisePicked(exercise: ExerciseTemplate): void {
-    if (this.pickerTarget === null) return;
-    const group = this.exercises.at(this.pickerTarget);
+  onExercisePicked(exercise: ExerciseTemplate, target: number | null = this.pickerTarget): void {
+    if (target === null) return;
+    const group = this.exercises.at(target);
     const trackingType = exercise.trackingType ?? 'reps';
     if (trackingType === 'duration') {
       const durationUnit: TimeUnit = exercise.recommendedDurationUnit ?? 'min';
@@ -205,6 +208,29 @@ export class WorkoutCreateComponent implements OnInit {
   closeExercisePicker(): void {
     this.pickerOpen.set(false);
     this.pickerTarget = null;
+  }
+
+  readonly bundlePickerOpen = signal(false);
+  private bundlePickerTarget: number | null = null;
+
+  openBundlePicker(index: number): void {
+    this.bundlePickerTarget = index;
+    this.bundlePickerOpen.set(true);
+  }
+
+  closeBundlePicker(): void {
+    this.bundlePickerOpen.set(false);
+    this.bundlePickerTarget = null;
+  }
+
+  onBundlePicked(bundle: ExerciseBundle): void {
+    if (this.bundlePickerTarget === null) return;
+    const target = this.bundlePickerTarget;
+    this.bundlePickerTarget = null;
+    const mainExercise = this.exerciseService.getById(bundle.mainExerciseId);
+    if (!mainExercise) return;
+    this.onExercisePicked(mainExercise, target);
+    this.exercises.at(target).patchValue({ alternativeExerciseIds: bundle.alternativeExerciseIds });
   }
 
   readonly altPickerOpen = signal(false);
