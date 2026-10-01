@@ -1,19 +1,45 @@
 <app-fluid-field-background />
 
 <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
     <div>
       <h1 class="text-3xl sm:text-4xl font-heading font-bold uppercase tracking-wide">Exercise Library</h1>
-      <p class="text-text-muted mt-1">{{ filteredExercises().length }} exercises</p>
+      <p class="text-text-muted mt-1">
+        {{ activeTab() === 'exercises' ? (filteredExercises().length + ' exercises') : (filteredBundles().length + ' bundles') }}
+      </p>
     </div>
-    @if (auth.isAdmin()) {
-      <a routerLink="/exercises/new" class="btn-primary text-sm py-2 px-4 shrink-0">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        Add Exercise
-      </a>
+    @if (activeTab() === 'exercises') {
+      @if (auth.isAdmin()) {
+        <a routerLink="/exercises/new" class="btn-primary text-sm py-2 px-4 shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Add Exercise
+        </a>
+      }
+    } @else {
+      @if (auth.isAdmin()) {
+        <a routerLink="/exercises/bundles/new" class="btn-primary text-sm py-2 px-4 shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Add Bundle
+        </a>
+      }
     }
   </div>
 
+  <!-- Tabs -->
+  <div class="flex gap-2 mb-8 border-b border-border">
+    <button type="button" (click)="activeTab.set('exercises')"
+            class="px-4 py-2.5 text-sm font-heading font-semibold uppercase tracking-wider transition-colors border-b-2 -mb-px"
+            [class]="activeTab() === 'exercises' ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-text'">
+      Exercises
+    </button>
+    <button type="button" (click)="activeTab.set('bundles')"
+            class="px-4 py-2.5 text-sm font-heading font-semibold uppercase tracking-wider transition-colors border-b-2 -mb-px"
+            [class]="activeTab() === 'bundles' ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-text'">
+      Bundles
+    </button>
+  </div>
+
+  @if (activeTab() === 'exercises') {
   <!-- Filters -->
   <div class="gym-card mb-8">
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -87,5 +113,80 @@
         </a>
       }
     </div>
+  }
+  } @else {
+  <!-- Bundles -->
+  <div class="gym-card mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Search</label>
+        <input type="text" [ngModel]="bundleSearchQuery()" (ngModelChange)="bundleSearchQuery.set($event)"
+               placeholder="Search bundles..."
+               class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text text-sm focus:border-primary focus:outline-none transition-colors">
+      </div>
+      <div>
+        <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Muscle Group</label>
+        <select [ngModel]="selectedBundleMuscle()" (ngModelChange)="selectedBundleMuscle.set($event)"
+                class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text text-sm focus:border-primary focus:outline-none transition-colors">
+          <option value="">All Muscles</option>
+          @for (muscle of allMuscleGroups; track muscle) {
+            <option [value]="muscle">{{ muscle | titlecase }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  @if (filteredBundles().length === 0) {
+    <div class="gym-card text-center py-16">
+      <div class="w-16 h-16 bg-surface-light rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7h-9m3-3l-3 3 3 3M4 17h9m-3 3l3-3-3-3"/></svg>
+      </div>
+      @if (bundleService.bundles().length === 0) {
+        <p class="text-text-muted mb-4">No bundles yet — a bundle groups a main exercise with its alternates for reuse across programs</p>
+        @if (auth.isAdmin()) {
+          <a routerLink="/exercises/bundles/new" class="btn-primary">Add Your First Bundle</a>
+        }
+      } @else {
+        <p class="text-text-muted">No bundles match your search</p>
+      }
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (bundle of filteredBundles(); track bundle.id; let i = $index) {
+        <div class="gym-card ui-slide-up-in" [style.animation-delay.ms]="Math.min(i, 8) * 60">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-heading font-semibold uppercase tracking-wide text-sm">{{ bundle.name }}</h3>
+            @if (auth.isAdmin()) {
+              <a [routerLink]="['/exercises/bundles', bundle.id, 'edit']" class="text-text-muted hover:text-primary transition-colors shrink-0" aria-label="Edit bundle">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              </a>
+            }
+          </div>
+          <div class="flex items-center gap-3">
+            @if (getExerciseImage(bundle.mainExerciseId); as img) {
+              <img [src]="img" alt="" class="w-14 h-14 rounded-lg object-contain bg-white shrink-0">
+            }
+            <span class="text-sm">{{ getExerciseName(bundle.mainExerciseId) }}</span>
+          </div>
+          @if (bundle.alternativeExerciseIds.length > 0) {
+            <div class="mt-3 pt-3 border-t border-border/50">
+              <p class="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-2">Alternatives</p>
+              <div class="flex flex-wrap gap-2">
+                @for (altId of bundle.alternativeExerciseIds; track altId) {
+                  <div class="flex items-center gap-2 bg-surface rounded-lg pl-1 pr-3 py-1.5">
+                    @if (getExerciseImage(altId); as img) {
+                      <img [src]="img" alt="" class="w-10 h-10 rounded-lg object-contain bg-white shrink-0">
+                    }
+                    <span class="text-xs text-text-muted">{{ getExerciseName(altId) }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
   }
 </div>

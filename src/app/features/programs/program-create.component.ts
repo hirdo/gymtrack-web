@@ -4,15 +4,17 @@ import { FormBuilder, FormArray, FormGroup, AbstractControl, ReactiveFormsModule
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ProgramService } from '../../core/services/program.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
+import { ExerciseBundleService } from '../../core/services/exercise-bundle.service';
 import { ExercisePickerModalComponent } from '../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
+import { BundlePickerModalComponent } from '../../shared/components/bundle-picker-modal/bundle-picker-modal.component';
 import { FieldErrorComponent } from '../../shared/components/field-error/field-error.component';
-import { ProgramDifficulty, ExerciseTemplate, ExerciseTrackingType, MuscleGroup, TimeUnit, PROGRAM_DIFFICULTIES } from '../../core/models/workout.model';
+import { ProgramDifficulty, ExerciseTemplate, ExerciseBundle, ExerciseTrackingType, MuscleGroup, TimeUnit, PROGRAM_DIFFICULTIES } from '../../core/models/workout.model';
 import { convertTimeValue } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-program-create',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, RouterLink, ExercisePickerModalComponent, DragDropModule, FieldErrorComponent],
+  imports: [ReactiveFormsModule, FormsModule, RouterLink, ExercisePickerModalComponent, BundlePickerModalComponent, DragDropModule, FieldErrorComponent],
   templateUrl: './program-create.component.html',
   styleUrl: './program-create.component.scss'
 })
@@ -22,6 +24,7 @@ export class ProgramCreateComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly programService = inject(ProgramService);
   readonly exerciseService = inject(ExerciseLibraryService);
+  private readonly bundleService = inject(ExerciseBundleService);
 
   readonly difficulties = PROGRAM_DIFFICULTIES;
 
@@ -229,9 +232,12 @@ export class ProgramCreateComponent implements OnInit {
     this.pickerOpen.set(true);
   }
 
-  onExercisePicked(exercise: ExerciseTemplate): void {
-    if (!this.pickerTarget) return;
-    const group = this.getDayExercises(this.pickerTarget.dayIndex).at(this.pickerTarget.exerciseIndex);
+  onExercisePicked(
+    exercise: ExerciseTemplate,
+    target: { dayIndex: number; exerciseIndex: number } | null = this.pickerTarget
+  ): void {
+    if (!target) return;
+    const group = this.getDayExercises(target.dayIndex).at(target.exerciseIndex);
     const trackingType = exercise.trackingType ?? 'reps';
     const durationUnit: TimeUnit = exercise.recommendedDurationUnit ?? 'min';
     const restTimeUnit: TimeUnit = exercise.recommendedRestTimeUnit ?? 'min';
@@ -289,6 +295,30 @@ export class ProgramCreateComponent implements OnInit {
   closeExercisePicker(): void {
     this.pickerOpen.set(false);
     this.pickerTarget = null;
+  }
+
+  readonly bundlePickerOpen = signal(false);
+  private bundlePickerTarget: { dayIndex: number; exerciseIndex: number } | null = null;
+
+  openBundlePicker(dayIndex: number, exerciseIndex: number): void {
+    this.bundlePickerTarget = { dayIndex, exerciseIndex };
+    this.bundlePickerOpen.set(true);
+  }
+
+  closeBundlePicker(): void {
+    this.bundlePickerOpen.set(false);
+    this.bundlePickerTarget = null;
+  }
+
+  onBundlePicked(bundle: ExerciseBundle): void {
+    if (!this.bundlePickerTarget) return;
+    const target = this.bundlePickerTarget;
+    this.bundlePickerTarget = null;
+    const mainExercise = this.exerciseService.getById(bundle.mainExerciseId);
+    if (!mainExercise) return;
+    this.onExercisePicked(mainExercise, target);
+    this.getDayExercises(target.dayIndex).at(target.exerciseIndex)
+      .patchValue({ alternativeExerciseIds: bundle.alternativeExerciseIds });
   }
 
   getExerciseImage(exerciseId: string): string | undefined {
