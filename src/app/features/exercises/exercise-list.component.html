@@ -117,10 +117,24 @@
   } @else {
   <!-- Bundles -->
   <div class="gym-card mb-8">
-    <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Search</label>
-    <input type="text" [ngModel]="bundleSearchQuery()" (ngModelChange)="bundleSearchQuery.set($event)"
-           placeholder="Search bundles..."
-           class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text text-sm focus:border-primary focus:outline-none transition-colors">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Search</label>
+        <input type="text" [ngModel]="bundleSearchQuery()" (ngModelChange)="bundleSearchQuery.set($event)"
+               placeholder="Search bundles..."
+               class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text text-sm focus:border-primary focus:outline-none transition-colors">
+      </div>
+      <div>
+        <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Muscle Group</label>
+        <select [ngModel]="selectedBundleMuscle()" (ngModelChange)="selectedBundleMuscle.set($event)"
+                class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text text-sm focus:border-primary focus:outline-none transition-colors">
+          <option value="">All Muscles</option>
+          @for (muscle of allMuscleGroups; track muscle) {
+            <option [value]="muscle">{{ muscle | titlecase }}</option>
+          }
+        </select>
+      </div>
+    </div>
   </div>
 
   @if (filteredBundles().length === 0) {

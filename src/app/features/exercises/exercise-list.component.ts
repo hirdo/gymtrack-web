@@ -30,7 +30,15 @@ export class ExerciseListComponent {
   readonly selectedEquipment = signal<Equipment | ''>('');
 
   readonly bundleSearchQuery = signal('');
-  readonly filteredBundles = computed(() => this.bundleService.search(this.bundleSearchQuery()));
+  readonly selectedBundleMuscle = signal<MuscleGroup | ''>('');
+  readonly filteredBundles = computed(() => {
+    let results = this.bundleService.search(this.bundleSearchQuery());
+    const muscle = this.selectedBundleMuscle();
+    if (muscle) {
+      results = results.filter(b => (this.exerciseService.getById(b.mainExerciseId)?.primaryMuscles ?? []).includes(muscle));
+    }
+    return results;
+  });
 
   readonly allMuscleGroups: MuscleGroup[] = [
     'chest', 'back', 'shoulders', 'biceps', 'triceps',

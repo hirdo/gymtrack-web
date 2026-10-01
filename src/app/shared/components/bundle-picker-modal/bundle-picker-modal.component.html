@@ -10,10 +10,17 @@
         </button>
       </div>
 
-      <div class="p-5 border-b border-border shrink-0">
+      <div class="p-5 border-b border-border shrink-0 space-y-3">
         <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
                placeholder="Search bundles..."
                class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text text-sm focus:border-primary focus:outline-none transition-colors">
+        <select [ngModel]="selectedMuscle()" (ngModelChange)="selectedMuscle.set($event)"
+                class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-text text-sm focus:border-primary focus:outline-none transition-colors">
+          <option value="">All Muscles</option>
+          @for (m of allMuscleGroups; track m) {
+            <option [value]="m">{{ m | titlecase }}</option>
+          }
+        </select>
       </div>
 
       <div class="overflow-y-auto p-3 space-y-1.5 flex-1">
