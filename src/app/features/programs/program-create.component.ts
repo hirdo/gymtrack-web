@@ -388,12 +388,6 @@ export class ProgramCreateComponent implements OnInit {
     return (group.get('alternativeExerciseIds')?.value as string[]) || [];
   }
 
-  altPickerTargetTrackingType(): ExerciseTrackingType | null {
-    if (!this.altPickerTarget) return null;
-    const group = this.getDayExercises(this.altPickerTarget.dayIndex).at(this.altPickerTarget.exerciseIndex);
-    return (group.get('trackingType')?.value as ExerciseTrackingType) ?? 'reps';
-  }
-
   altPickerTargetMuscles(): MuscleGroup | null {
     if (!this.altPickerTarget) return null;
     const group = this.getDayExercises(this.altPickerTarget.dayIndex).at(this.altPickerTarget.exerciseIndex);

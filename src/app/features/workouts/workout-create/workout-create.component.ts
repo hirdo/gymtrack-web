@@ -281,12 +281,6 @@ export class WorkoutCreateComponent implements OnInit {
     return this.exerciseService.getById(id)?.name;
   }
 
-  altPickerTargetTrackingType(): ExerciseTrackingType | null {
-    if (this.altPickerTarget === null) return null;
-    const group = this.exercises.at(this.altPickerTarget);
-    return (group.get('trackingType')?.value as ExerciseTrackingType) ?? 'reps';
-  }
-
   altPickerTargetMuscles(): MuscleGroup | null {
     if (this.altPickerTarget === null) return null;
     const group = this.exercises.at(this.altPickerTarget);
