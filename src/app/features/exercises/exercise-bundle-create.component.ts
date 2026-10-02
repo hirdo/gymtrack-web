@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { ExerciseBundleService } from '../../core/services/exercise-bundle.service';
+import { ImageLightboxService } from '../../core/services/image-lightbox.service';
 import { ExerciseTemplate, ExerciseTrackingType, MuscleGroup } from '../../core/models/workout.model';
 import { ExercisePickerModalComponent } from '../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
 import { FieldErrorComponent } from '../../shared/components/field-error/field-error.component';
@@ -20,6 +21,7 @@ export class ExerciseBundleCreateComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly bundleService = inject(ExerciseBundleService);
   readonly exerciseService = inject(ExerciseLibraryService);
+  readonly lightbox = inject(ImageLightboxService);
 
   readonly isEditMode = signal(false);
   private editId: string | null = null;
@@ -108,9 +110,9 @@ export class ExerciseBundleCreateComponent implements OnInit {
     return mainId ? (this.exerciseService.getById(mainId)?.trackingType ?? 'reps') : null;
   }
 
-  altMuscles(): MuscleGroup[] | null {
+  altMuscles(): MuscleGroup | null {
     const mainId = this.form.value.mainExerciseId;
-    return mainId ? this.exerciseService.getById(mainId)?.primaryMuscles ?? null : null;
+    return mainId ? this.exerciseService.getById(mainId)?.primaryMuscles?.[0] ?? null : null;
   }
 
   getExerciseImage(exerciseId: string | null | undefined): string | undefined {

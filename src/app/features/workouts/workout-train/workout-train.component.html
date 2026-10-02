@@ -62,7 +62,8 @@
       @if (currentLog(); as log) {
         <div class="gym-card mb-6">
           @if (currentExerciseImage(); as img) {
-            <img [src]="img" alt="{{ log.exerciseName }}" class="w-full h-48 object-contain bg-white rounded-xl mb-4">
+            <img [src]="img" alt="{{ log.exerciseName }}" (click)="lightbox.open(img, log.exerciseName)"
+                 class="w-full h-48 object-contain bg-white rounded-xl mb-4 cursor-zoom-in">
           }
           <div class="flex items-center justify-between mb-4 gap-2">
             <h2 class="text-xl font-heading font-bold uppercase tracking-wide min-w-0">
@@ -88,7 +89,8 @@
                               class="w-full flex items-center gap-2.5 p-2 rounded-lg text-left transition-colors"
                               [class]="log.exerciseTemplateId === alt.id ? 'bg-primary/10 border border-primary/40' : 'hover:bg-surface-light border border-transparent'">
                         @if (alt.imageUrl) {
-                          <img [src]="alt.imageUrl" alt="" class="w-8 h-8 rounded object-contain bg-white shrink-0">
+                          <img [src]="alt.imageUrl" alt="" (click)="$event.stopPropagation(); lightbox.open(alt.imageUrl, alt.name)"
+                               class="w-8 h-8 rounded object-contain bg-white shrink-0 cursor-zoom-in">
                         } @else {
                           <div class="w-8 h-8 rounded bg-surface-light shrink-0"></div>
                         }

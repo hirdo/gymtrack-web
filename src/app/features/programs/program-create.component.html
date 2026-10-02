@@ -86,7 +86,8 @@
                     <button type="button" (click)="openExercisePicker(di, ei)"
                             class="flex-1 min-w-0 bg-surface border border-border rounded-lg px-3 py-2 text-left text-sm hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors flex items-center gap-2 cursor-pointer">
                       @if (getExerciseImage(ex.get('exerciseId')?.value); as img) {
-                        <img [src]="img" alt="" class="w-8 h-8 rounded object-contain bg-white shrink-0">
+                        <img [src]="img" alt="" (click)="$event.stopPropagation(); lightbox.open(img, ex.get('exerciseName')?.value)"
+                             class="w-8 h-8 rounded object-contain bg-white shrink-0 cursor-zoom-in">
                       }
                       <span class="flex-1 truncate" [class]="ex.get('exerciseName')?.value ? '' : 'text-text-muted'">
                         {{ ex.get('exerciseName')?.value || 'Choose exercise…' }}
@@ -197,7 +198,8 @@
                       @for (altId of ex.get('alternativeExerciseIds')?.value; track altId) {
                         <span class="inline-flex items-center gap-2 bg-surface border border-border rounded-lg pl-1 pr-2 py-1.5">
                           @if (getExerciseImage(altId); as img) {
-                            <img [src]="img" alt="" class="w-8 h-8 rounded object-contain bg-white shrink-0">
+                            <img [src]="img" alt="" (click)="$event.stopPropagation(); lightbox.open(img, getExerciseName(altId))"
+                                 class="w-8 h-8 rounded object-contain bg-white shrink-0 cursor-zoom-in">
                           }
                           <span class="text-xs text-text truncate max-w-[8rem]">{{ getExerciseName(altId) }}</span>
                           <button type="button" (click)="removeAlternative(di, ei, altId)" class="text-text-muted hover:text-error transition-colors shrink-0" aria-label="Remove alternative">
@@ -290,7 +292,7 @@
     [excludeIds]="altPickerTargetExcludeIds()"
     [preselectedIds]="altPreselectedIds()"
     [requiredTrackingType]="altPickerTargetTrackingType()"
-    [requiredMuscleGroups]="altPickerTargetMuscles()"
+    [defaultMuscle]="altPickerTargetMuscles()"
     (closed)="closeAlternativesPicker()"
     (multipleSelected)="onAlternativesPicked($event)" />
 </div>

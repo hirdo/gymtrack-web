@@ -2,6 +2,7 @@ import { Component, inject, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProgramService } from '../../core/services/program.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
+import { ImageLightboxService } from '../../core/services/image-lightbox.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PROGRAM_DIFFICULTIES, ProgramDifficulty, TrainingProgram, TimeUnit, difficultyLabel } from '../../core/models/workout.model';
 import { formatDurationValue } from '../../core/utils/date.util';
@@ -20,6 +21,7 @@ export class ProgramDetailComponent {
   private readonly programService = inject(ProgramService);
   private readonly exerciseService = inject(ExerciseLibraryService);
   readonly auth = inject(AuthService);
+  readonly lightbox = inject(ImageLightboxService);
 
   readonly choosing = signal(false);
   readonly replaceConfirmProgram = signal<TrainingProgram | null>(null);

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
 import { ExerciseBundleService } from '../../../core/services/exercise-bundle.service';
+import { ImageLightboxService } from '../../../core/services/image-lightbox.service';
 import { ExerciseBundle, MuscleGroup } from '../../../core/models/workout.model';
 
 @Component({
@@ -15,6 +16,7 @@ import { ExerciseBundle, MuscleGroup } from '../../../core/models/workout.model'
 export class BundlePickerModalComponent {
   readonly bundleService = inject(ExerciseBundleService);
   private readonly exerciseService = inject(ExerciseLibraryService);
+  readonly lightbox = inject(ImageLightboxService);
 
   @Input() open = false;
   @Output() closed = new EventEmitter<void>();

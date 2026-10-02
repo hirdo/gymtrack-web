@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, input, Input, Output, EventEmitter
 import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
+import { ImageLightboxService } from '../../../core/services/image-lightbox.service';
 import { ExerciseTemplate, ExerciseTrackingType, MuscleGroup, Equipment } from '../../../core/models/workout.model';
 
 @Component({
@@ -13,6 +14,7 @@ import { ExerciseTemplate, ExerciseTrackingType, MuscleGroup, Equipment } from '
 })
 export class ExercisePickerModalComponent implements OnChanges {
   readonly exerciseService = inject(ExerciseLibraryService);
+  readonly lightbox = inject(ImageLightboxService);
 
   @Input() open = false;
   @Input() multiple = false;
@@ -20,7 +22,7 @@ export class ExercisePickerModalComponent implements OnChanges {
   readonly excludeIds = input<string[]>([]);
   @Input() preselectedIds: string[] = [];
   readonly requiredTrackingType = input<ExerciseTrackingType | null>(null);
-  readonly requiredMuscleGroups = input<MuscleGroup[] | null>(null);
+  readonly defaultMuscle = input<MuscleGroup | null>(null);
   @Output() closed = new EventEmitter<void>();
   @Output() exerciseSelected = new EventEmitter<ExerciseTemplate>();
   @Output() multipleSelected = new EventEmitter<ExerciseTemplate[]>();
@@ -58,16 +60,15 @@ export class ExercisePickerModalComponent implements OnChanges {
     if (requiredType) {
       results = results.filter(e => (e.trackingType ?? 'reps') === requiredType);
     }
-    const requiredMuscles = this.requiredMuscleGroups();
-    if (requiredMuscles && requiredMuscles.length > 0) {
-      results = results.filter(e => e.primaryMuscles.some(m => requiredMuscles.includes(m)));
-    }
     return results;
   });
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['open'] && this.open && this.multiple) {
-      this.selectedIds.set([...this.preselectedIds]);
+    if (changes['open'] && this.open) {
+      this.selectedMuscle.set(this.defaultMuscle() ?? '');
+      if (this.multiple) {
+        this.selectedIds.set([...this.preselectedIds]);
+      }
     }
   }
 
