@@ -37,7 +37,7 @@
       }
     </div>
   } @else {
-    @if (programWorkouts.length > 0) {
+    @if (programWorkoutsAll.length > 0) {
       <div class="mb-10">
         <h2 class="text-lg font-heading font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
           <svg class="w-4 h-4 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
@@ -48,9 +48,10 @@
             <ng-container [ngTemplateOutlet]="workoutCard" [ngTemplateOutletContext]="{ $implicit: workout, index: i }" />
           }
         </div>
+        <app-pagination [page]="programPage()" [totalItems]="programWorkoutsAll.length" [pageSize]="8" (pageChange)="programPage.set($event)" />
       </div>
     }
-    @if (selfCreatedWorkouts.length > 0) {
+    @if (selfCreatedWorkoutsAll.length > 0) {
       <div>
         <h2 class="text-lg font-heading font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
           <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
@@ -61,6 +62,7 @@
             <ng-container [ngTemplateOutlet]="workoutCard" [ngTemplateOutletContext]="{ $implicit: workout, index: i }" />
           }
         </div>
+        <app-pagination [page]="selfPage()" [totalItems]="selfCreatedWorkoutsAll.length" [pageSize]="8" (pageChange)="selfPage.set($event)" />
       </div>
     }
   }

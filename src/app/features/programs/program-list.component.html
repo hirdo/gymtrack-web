@@ -26,7 +26,7 @@
     </div>
   } @else {
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-      @for (program of programService.visiblePrograms(); track program.id; let i = $index) {
+      @for (program of pagedPrograms(); track program.id; let i = $index) {
         <a [routerLink]="['/programs', program.id]"
            class="gym-card ui-card-lift !p-6 sm:!p-8 hover:border-primary/30 transition-colors group ui-slide-up-in"
            [style.animation-delay.ms]="Math.min(i, 8) * 60"
@@ -58,5 +58,6 @@
         </a>
       }
     </div>
+    <app-pagination [page]="page()" [totalItems]="programService.visiblePrograms().length" [pageSize]="10" (pageChange)="page.set($event)" />
   }
 </div>

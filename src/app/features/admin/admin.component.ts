@@ -1,9 +1,10 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { MembershipService, MembershipTier } from '../../core/services/membership.service';
 import { WorkoutService } from '../../core/services/workout.service';
 import { FirestoreService } from '../../core/services/firestore.service';
 import { formatDisplayDate } from '../../core/utils/date.util';
+import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 
 interface AdminUser {
   id: string;
@@ -21,7 +22,7 @@ interface AdminUser {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [],
+  imports: [PaginationComponent],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss'
 })
@@ -37,6 +38,14 @@ export class AdminComponent implements OnInit {
   readonly confirmingRoleFor = signal<string | null>(null);
   readonly togglingRole = signal<string | null>(null);
   readonly changingMembershipFor = signal<string | null>(null);
+
+  readonly page = signal(1);
+  private readonly pageSize = 15;
+
+  readonly pagedUsers = computed(() => {
+    const start = (this.page() - 1) * this.pageSize;
+    return this.users().slice(start, start + this.pageSize);
+  });
 
   get activeUsers(): number {
     return this.users().length;
@@ -75,6 +84,7 @@ export class AdminComponent implements OnInit {
   async loadUsers(): Promise<void> {
     this.loading.set(true);
     this.loadError.set(false);
+    this.page.set(1);
     try {
       const userDocs = await this.firestore.queryDocuments<AdminUser>('users');
       const workoutData = await this.workoutService.getAllWorkoutsForAdmin();

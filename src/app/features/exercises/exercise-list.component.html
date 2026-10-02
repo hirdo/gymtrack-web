@@ -92,7 +92,7 @@
     </div>
   } @else {
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      @for (exercise of filteredExercises(); track exercise.id; let i = $index) {
+      @for (exercise of pagedExercises(); track exercise.id; let i = $index) {
         <a [routerLink]="['/exercises', exercise.id]"
            class="gym-card ui-card-lift hover:border-primary/30 transition-colors group ui-slide-up-in"
            [style.animation-delay.ms]="Math.min(i, 8) * 60">
@@ -113,6 +113,7 @@
         </a>
       }
     </div>
+    <app-pagination [page]="exercisePage()" [totalItems]="filteredExercises().length" [pageSize]="12" (pageChange)="exercisePage.set($event)" />
   }
   } @else {
   <!-- Bundles -->
@@ -153,7 +154,7 @@
     </div>
   } @else {
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      @for (bundle of filteredBundles(); track bundle.id; let i = $index) {
+      @for (bundle of pagedBundles(); track bundle.id; let i = $index) {
         <div class="gym-card ui-slide-up-in" [style.animation-delay.ms]="Math.min(i, 8) * 60">
           <div class="flex items-center justify-between mb-3">
             <h3 class="font-heading font-semibold uppercase tracking-wide text-sm">{{ bundle.name }}</h3>
@@ -189,6 +190,7 @@
         </div>
       }
     </div>
+    <app-pagination [page]="bundlePage()" [totalItems]="filteredBundles().length" [pageSize]="12" (pageChange)="bundlePage.set($event)" />
   }
   }
 </div>

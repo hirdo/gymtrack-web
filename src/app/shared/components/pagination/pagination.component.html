@@ -1,0 +1,18 @@
+@if (totalPages > 1) {
+  <div class="flex items-center justify-between mt-4 gym-card !py-3 !px-4">
+    <button type="button" (click)="prev()" [disabled]="page <= 1"
+            class="p-2 rounded-lg hover:bg-surface-light text-text-muted hover:text-text transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+            aria-label="Previous page">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <div class="text-center">
+      <p class="font-heading font-semibold uppercase tracking-wider text-sm sm:text-base">Page {{ page }} / {{ totalPages }}</p>
+      <p class="text-text-muted text-xs mt-0.5">Showing {{ rangeStart }}&ndash;{{ rangeEnd }} of {{ totalItems }}</p>
+    </div>
+    <button type="button" (click)="next()" [disabled]="page >= totalPages"
+            class="p-2 rounded-lg hover:bg-surface-light text-text-muted hover:text-text transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+            aria-label="Next page">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+}

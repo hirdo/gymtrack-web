@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, effect } from '@angular/core';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
@@ -8,11 +8,12 @@ import { ImageLightboxService } from '../../core/services/image-lightbox.service
 import { AuthService } from '../../core/services/auth.service';
 import { MuscleGroup, Equipment } from '../../core/models/workout.model';
 import { FluidFieldBackgroundComponent } from '../../shared/components/fluid-field-background/fluid-field-background.component';
+import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 
 @Component({
   selector: 'app-exercise-list',
   standalone: true,
-  imports: [RouterLink, FormsModule, TitleCasePipe, FluidFieldBackgroundComponent],
+  imports: [RouterLink, FormsModule, TitleCasePipe, FluidFieldBackgroundComponent, PaginationComponent],
   templateUrl: './exercise-list.component.html',
   styleUrl: './exercise-list.component.scss'
 })
@@ -41,6 +42,31 @@ export class ExerciseListComponent {
     }
     return results;
   });
+
+  readonly exercisePage = signal(1);
+  readonly bundlePage = signal(1);
+  private readonly pageSize = 12;
+
+  readonly pagedExercises = computed(() => {
+    const start = (this.exercisePage() - 1) * this.pageSize;
+    return this.filteredExercises().slice(start, start + this.pageSize);
+  });
+
+  readonly pagedBundles = computed(() => {
+    const start = (this.bundlePage() - 1) * this.pageSize;
+    return this.filteredBundles().slice(start, start + this.pageSize);
+  });
+
+  constructor() {
+    effect(() => {
+      this.filteredExercises();
+      this.exercisePage.set(1);
+    });
+    effect(() => {
+      this.filteredBundles();
+      this.bundlePage.set(1);
+    });
+  }
 
   readonly allMuscleGroups: MuscleGroup[] = [
     'chest', 'back', 'shoulders', 'biceps', 'triceps',
