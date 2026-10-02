@@ -4,7 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { ExerciseBundleService } from '../../core/services/exercise-bundle.service';
 import { ImageLightboxService } from '../../core/services/image-lightbox.service';
-import { ExerciseTemplate, ExerciseTrackingType, MuscleGroup } from '../../core/models/workout.model';
+import { ExerciseTemplate, MuscleGroup } from '../../core/models/workout.model';
 import { ExercisePickerModalComponent } from '../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
 import { FieldErrorComponent } from '../../shared/components/field-error/field-error.component';
 
@@ -103,11 +103,6 @@ export class ExerciseBundleCreateComponent implements OnInit {
 
   altPreselectedIds(): string[] {
     return (this.form.value.alternativeExerciseIds as string[]) || [];
-  }
-
-  altTrackingType(): ExerciseTrackingType | null {
-    const mainId = this.form.value.mainExerciseId;
-    return mainId ? (this.exerciseService.getById(mainId)?.trackingType ?? 'reps') : null;
   }
 
   altMuscles(): MuscleGroup | null {

@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
 import { ImageLightboxService } from '../../../core/services/image-lightbox.service';
-import { ExerciseTemplate, ExerciseTrackingType, MuscleGroup, Equipment } from '../../../core/models/workout.model';
+import { ExerciseTemplate, MuscleGroup, Equipment } from '../../../core/models/workout.model';
 
 @Component({
   selector: 'app-exercise-picker-modal',
@@ -21,7 +21,6 @@ export class ExercisePickerModalComponent implements OnChanges {
   @Input() maxSelect = 5;
   readonly excludeIds = input<string[]>([]);
   @Input() preselectedIds: string[] = [];
-  readonly requiredTrackingType = input<ExerciseTrackingType | null>(null);
   readonly defaultMuscle = input<MuscleGroup | null>(null);
   @Output() closed = new EventEmitter<void>();
   @Output() exerciseSelected = new EventEmitter<ExerciseTemplate>();
@@ -55,10 +54,6 @@ export class ExercisePickerModalComponent implements OnChanges {
     const exclude = this.excludeIds();
     if (exclude.length > 0) {
       results = results.filter(e => !exclude.includes(e.id));
-    }
-    const requiredType = this.requiredTrackingType();
-    if (requiredType) {
-      results = results.filter(e => (e.trackingType ?? 'reps') === requiredType);
     }
     return results;
   });
