@@ -44,21 +44,25 @@
     <div formArrayName="days" class="space-y-4" cdkDropList (cdkDropListDropped)="dropDay($event)">
       @for (day of days.controls; track day; let di = $index) {
         <div [formGroupName]="di" class="gym-card border-primary/20" cdkDrag [cdkDragData]="di">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-sm font-heading font-bold uppercase tracking-wider flex items-center gap-2">
-              <span cdkDragHandle class="cursor-grab active:cursor-grabbing text-text-muted hover:text-text" title="Drag to reorder">
+          <div class="flex items-center justify-between gap-3 cursor-pointer" [class.mb-4]="isDayExpanded(day)" (click)="toggleDayExpanded(day)">
+            <h2 class="text-sm font-heading font-bold uppercase tracking-wider flex items-center gap-2 min-w-0">
+              <span cdkDragHandle (click)="$event.stopPropagation()" class="cursor-grab active:cursor-grabbing text-text-muted hover:text-text shrink-0" title="Drag to reorder">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a1 1 0 11-2 0 1 1 0 012 0zM7 10a1 1 0 11-2 0 1 1 0 012 0zM7 16a1 1 0 11-2 0 1 1 0 012 0zM15 4a1 1 0 11-2 0 1 1 0 012 0zM15 10a1 1 0 11-2 0 1 1 0 012 0zM15 16a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
               </span>
-              <span class="text-primary">Day {{ di + 1 }}</span>
+              <span class="text-primary shrink-0">Day {{ di + 1 }}</span>
+              <span class="text-text-muted normal-case font-normal truncate">{{ day.get('name')?.value || 'Untitled day' }}</span>
+              <span class="text-text-muted normal-case font-normal text-[11px] shrink-0">&middot; {{ getDayExercises(di).length }} exercise{{ getDayExercises(di).length === 1 ? '' : 's' }}</span>
             </h2>
-            <div class="flex items-center gap-3">
-              <button type="button" (click)="duplicateDay(di)" class="text-text-muted hover:text-primary text-xs transition-colors">Duplicate</button>
+            <div class="flex items-center gap-3 shrink-0">
+              <button type="button" (click)="$event.stopPropagation(); duplicateDay(di)" class="text-text-muted hover:text-primary text-xs transition-colors">Duplicate</button>
               @if (days.length > 1) {
-                <button type="button" (click)="removeDay(di)" class="text-text-muted hover:text-error text-xs transition-colors">Remove Day</button>
+                <button type="button" (click)="$event.stopPropagation(); removeDay(di)" class="text-text-muted hover:text-error text-xs transition-colors">Remove Day</button>
               }
+              <svg class="w-4 h-4 text-text-muted transition-transform" [class.rotate-180]="isDayExpanded(day)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </div>
           </div>
 
+          @if (isDayExpanded(day)) {
           <div class="mb-4">
             <label class="block text-xs text-text-muted font-semibold uppercase tracking-wider mb-1.5">Day Name</label>
             <input type="text" formControlName="name" placeholder="e.g. Chest + Triceps"
@@ -224,6 +228,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Add Exercise
           </button>
+          }
         </div>
       }
     </div>

@@ -75,7 +75,7 @@
     <!-- Days -->
     <div class="space-y-4">
       <h2 class="text-lg font-heading font-bold uppercase tracking-wider">Training Days</h2>
-      @for (day of p.days; track day.dayNumber; let i = $index) {
+      @for (day of pagedDays(); track day.dayNumber; let i = $index) {
         <div class="gym-card ui-slide-up-in" [style.animation-delay.ms]="Math.min(i, 8) * 60" [class]="day.dayNumber === (p.currentDay || 0) ? 'border-primary/30' : ''">
           <div class="flex items-center justify-between mb-3">
             <h3 class="font-heading font-semibold uppercase tracking-wide text-sm">
@@ -134,6 +134,7 @@
           </div>
         </div>
       }
+      <app-pagination [page]="page()" [totalItems]="p.days.length" [pageSize]="5" (pageChange)="page.set($event)" />
     </div>
   } @else {
     <div class="text-center py-24">

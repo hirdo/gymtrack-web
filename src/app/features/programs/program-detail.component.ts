@@ -6,11 +6,12 @@ import { ImageLightboxService } from '../../core/services/image-lightbox.service
 import { AuthService } from '../../core/services/auth.service';
 import { PROGRAM_DIFFICULTIES, ProgramDifficulty, TrainingProgram, TimeUnit, difficultyLabel } from '../../core/models/workout.model';
 import { formatDurationValue } from '../../core/utils/date.util';
+import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 
 @Component({
   selector: 'app-program-detail',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, PaginationComponent],
   templateUrl: './program-detail.component.html',
   styleUrl: './program-detail.component.scss'
 })
@@ -37,6 +38,23 @@ export class ProgramDetailComponent {
     if (p && !p.isActive && !this.auth.isAdmin()) return undefined;
     return p;
   });
+
+  private readonly pageSize = 5;
+  readonly page = signal(this.initialPage());
+
+  readonly pagedDays = computed(() => {
+    const p = this.program();
+    if (!p) return [];
+    const start = (this.page() - 1) * this.pageSize;
+    return p.days.slice(start, start + this.pageSize);
+  });
+
+  private initialPage(): number {
+    const id = this.route.snapshot.paramMap.get('id');
+    const p = id ? this.programService.getById(id) : undefined;
+    if (!p) return 1;
+    return Math.floor((p.currentDay ?? 0) / this.pageSize) + 1;
+  }
 
   readonly isMyActiveProgram = computed(() => {
     const p = this.program();

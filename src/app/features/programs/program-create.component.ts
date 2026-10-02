@@ -141,8 +141,26 @@ export class ProgramCreateComponent implements OnInit {
     group.patchValue({ [valueField]: newValue, [unitField]: unit });
   }
 
+  readonly expandedDays = signal<Set<AbstractControl>>(new Set());
+
+  isDayExpanded(day: AbstractControl): boolean {
+    return this.expandedDays().has(day);
+  }
+
+  toggleDayExpanded(day: AbstractControl): void {
+    const next = new Set(this.expandedDays());
+    if (next.has(day)) {
+      next.delete(day);
+    } else {
+      next.add(day);
+    }
+    this.expandedDays.set(next);
+  }
+
   addDay(): void {
-    this.days.push(this.createDayGroup(this.days.length));
+    const dayGroup = this.createDayGroup(this.days.length);
+    this.days.push(dayGroup);
+    this.toggleDayExpanded(dayGroup);
   }
 
   removeDay(index: number): void {
