@@ -40,7 +40,7 @@ export class ProgramDetailComponent {
   });
 
   private readonly pageSize = 5;
-  readonly page = signal(this.initialPage());
+  readonly page = signal(1);
 
   readonly pagedDays = computed(() => {
     const p = this.program();
@@ -49,11 +49,20 @@ export class ProgramDetailComponent {
     return p.days.slice(start, start + this.pageSize);
   });
 
-  private initialPage(): number {
-    const id = this.route.snapshot.paramMap.get('id');
-    const p = id ? this.programService.getById(id) : undefined;
-    if (!p) return 1;
-    return Math.floor((p.currentDay ?? 0) / this.pageSize) + 1;
+  readonly expandedDays = signal<Set<number>>(new Set());
+
+  isDayExpanded(dayNumber: number): boolean {
+    return this.expandedDays().has(dayNumber);
+  }
+
+  toggleDayExpanded(dayNumber: number): void {
+    const next = new Set(this.expandedDays());
+    if (next.has(dayNumber)) {
+      next.delete(dayNumber);
+    } else {
+      next.add(dayNumber);
+    }
+    this.expandedDays.set(next);
   }
 
   readonly isMyActiveProgram = computed(() => {
