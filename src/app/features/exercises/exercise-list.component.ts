@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { ExerciseBundleService } from '../../core/services/exercise-bundle.service';
+import { ImageLightboxService } from '../../core/services/image-lightbox.service';
 import { AuthService } from '../../core/services/auth.service';
 import { MuscleGroup, Equipment } from '../../core/models/workout.model';
 import { FluidFieldBackgroundComponent } from '../../shared/components/fluid-field-background/fluid-field-background.component';
@@ -18,6 +19,7 @@ import { FluidFieldBackgroundComponent } from '../../shared/components/fluid-fie
 export class ExerciseListComponent {
   readonly exerciseService = inject(ExerciseLibraryService);
   readonly bundleService = inject(ExerciseBundleService);
+  readonly lightbox = inject(ImageLightboxService);
   readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
 

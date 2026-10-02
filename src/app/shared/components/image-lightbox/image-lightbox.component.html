@@ -1,0 +1,10 @@
+@if (lightbox.activeImage(); as img) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" (click)="lightbox.close()">
+    <div class="absolute inset-0 bg-background/90 backdrop-blur-sm"></div>
+    <button type="button" (click)="lightbox.close()" class="absolute top-4 right-4 text-text-muted hover:text-text transition-colors cursor-pointer" aria-label="Close">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+    <img [src]="img.url" [alt]="img.alt" (click)="$event.stopPropagation()"
+         class="relative max-w-full max-h-[85vh] object-contain rounded-2xl bg-white">
+  </div>
+}

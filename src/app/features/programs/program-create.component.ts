@@ -5,6 +5,7 @@ import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-
 import { ProgramService } from '../../core/services/program.service';
 import { ExerciseLibraryService } from '../../core/services/exercise-library.service';
 import { ExerciseBundleService } from '../../core/services/exercise-bundle.service';
+import { ImageLightboxService } from '../../core/services/image-lightbox.service';
 import { ExercisePickerModalComponent } from '../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
 import { BundlePickerModalComponent } from '../../shared/components/bundle-picker-modal/bundle-picker-modal.component';
 import { FieldErrorComponent } from '../../shared/components/field-error/field-error.component';
@@ -25,6 +26,7 @@ export class ProgramCreateComponent implements OnInit {
   private readonly programService = inject(ProgramService);
   readonly exerciseService = inject(ExerciseLibraryService);
   private readonly bundleService = inject(ExerciseBundleService);
+  readonly lightbox = inject(ImageLightboxService);
 
   readonly difficulties = PROGRAM_DIFFICULTIES;
 
@@ -374,11 +376,11 @@ export class ProgramCreateComponent implements OnInit {
     return (group.get('trackingType')?.value as ExerciseTrackingType) ?? 'reps';
   }
 
-  altPickerTargetMuscles(): MuscleGroup[] | null {
+  altPickerTargetMuscles(): MuscleGroup | null {
     if (!this.altPickerTarget) return null;
     const group = this.getDayExercises(this.altPickerTarget.dayIndex).at(this.altPickerTarget.exerciseIndex);
     const mainId = group.get('exerciseId')?.value as string | undefined;
-    return mainId ? this.exerciseService.getById(mainId)?.primaryMuscles ?? null : null;
+    return mainId ? this.exerciseService.getById(mainId)?.primaryMuscles?.[0] ?? null : null;
   }
 
   async onSubmit(): Promise<void> {

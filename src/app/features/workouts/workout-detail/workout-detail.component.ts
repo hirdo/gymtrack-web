@@ -2,6 +2,7 @@ import { Component, inject, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
+import { ImageLightboxService } from '../../../core/services/image-lightbox.service';
 import { ExerciseLog, TimeUnit } from '../../../core/models/workout.model';
 import { formatDisplayDate, parseLocalDate, formatTime, formatDurationValue } from '../../../core/utils/date.util';
 
@@ -17,6 +18,7 @@ export class WorkoutDetailComponent {
   private readonly router = inject(Router);
   private readonly workoutService = inject(WorkoutService);
   private readonly exerciseLogService = inject(ExerciseLogService);
+  readonly lightbox = inject(ImageLightboxService);
 
   readonly workout = computed(() => {
     const id = this.route.snapshot.paramMap.get('id');

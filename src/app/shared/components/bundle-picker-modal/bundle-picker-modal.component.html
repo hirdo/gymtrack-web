@@ -32,7 +32,8 @@
                     class="w-full text-left flex items-center justify-between p-3 rounded-xl transition-colors cursor-pointer hover:bg-surface-light border border-transparent">
               <div class="flex items-center gap-3">
                 @if (getMainExerciseImage(bundle); as img) {
-                  <img [src]="img" alt="{{ bundle.name }}" class="w-12 h-12 rounded-lg object-contain bg-white shrink-0">
+                  <img [src]="img" alt="{{ bundle.name }}" (click)="$event.stopPropagation(); lightbox.open(img, bundle.name)"
+                       class="w-12 h-12 rounded-lg object-contain bg-white shrink-0 cursor-zoom-in">
                 } @else {
                   <div class="w-12 h-12 rounded-lg bg-surface-light flex items-center justify-center shrink-0 text-text-muted">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>

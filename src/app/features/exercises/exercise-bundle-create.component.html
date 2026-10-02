@@ -20,7 +20,8 @@
         <button type="button" (click)="openMainPicker()"
                 class="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-left text-sm hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary/50 focus:outline-none transition-colors flex items-center gap-2 cursor-pointer">
           @if (getExerciseImage(form.value.mainExerciseId); as img) {
-            <img [src]="img" alt="" class="w-8 h-8 rounded object-contain bg-white shrink-0">
+            <img [src]="img" alt="" (click)="$event.stopPropagation(); lightbox.open(img, form.value.mainExerciseName)"
+                 class="w-8 h-8 rounded object-contain bg-white shrink-0 cursor-zoom-in">
           }
           <span class="flex-1" [class]="form.value.mainExerciseName ? '' : 'text-text-muted'">
             {{ form.value.mainExerciseName || 'Choose main exercise…' }}
@@ -36,7 +37,8 @@
           @for (altId of form.value.alternativeExerciseIds; track altId) {
             <span class="inline-flex items-center gap-2 bg-surface border border-border rounded-lg pl-1 pr-2 py-1.5">
               @if (getExerciseImage(altId); as img) {
-                <img [src]="img" alt="" class="w-8 h-8 rounded object-contain bg-white shrink-0">
+                <img [src]="img" alt="" (click)="$event.stopPropagation(); lightbox.open(img, getExerciseName(altId))"
+                     class="w-8 h-8 rounded object-contain bg-white shrink-0 cursor-zoom-in">
               }
               <span class="text-xs text-text truncate max-w-[8rem]">{{ getExerciseName(altId) }}</span>
               <button type="button" (click)="removeAlternative(altId)" class="text-text-muted hover:text-error transition-colors shrink-0" aria-label="Remove alternative">
@@ -98,7 +100,7 @@
     [excludeIds]="altExcludeIds()"
     [preselectedIds]="altPreselectedIds()"
     [requiredTrackingType]="altTrackingType()"
-    [requiredMuscleGroups]="altMuscles()"
+    [defaultMuscle]="altMuscles()"
     (closed)="closeAltPicker()"
     (multipleSelected)="onAlternativesPicked($event)" />
 </div>

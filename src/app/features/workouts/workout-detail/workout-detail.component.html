@@ -111,7 +111,8 @@
         <div class="gym-card ui-slide-up-in" [style.animation-delay.ms]="Math.min(i, 8) * 60">
           <div class="flex items-center gap-4 mb-4">
             @if (exercise.imageUrl) {
-              <img [src]="exercise.imageUrl" alt="{{ exercise.name }}" class="w-20 h-20 rounded-xl object-contain bg-white shrink-0">
+              <img [src]="exercise.imageUrl" alt="{{ exercise.name }}" (click)="lightbox.open(exercise.imageUrl, exercise.name)"
+                   class="w-20 h-20 rounded-xl object-contain bg-white shrink-0 cursor-zoom-in">
             } @else {
               <div class="w-20 h-20 bg-primary/10 rounded-xl flex items-center justify-center shrink-0 text-primary font-heading font-bold text-xl">{{ i + 1 }}</div>
             }

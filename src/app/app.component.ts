@@ -4,11 +4,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
+import { ImageLightboxComponent } from './shared/components/image-lightbox/image-lightbox.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent, FooterComponent],
+  imports: [RouterOutlet, NavbarComponent, FooterComponent, ImageLightboxComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

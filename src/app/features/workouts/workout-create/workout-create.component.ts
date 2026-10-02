@@ -11,6 +11,7 @@ import {
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
 import { ExerciseBundleService } from '../../../core/services/exercise-bundle.service';
+import { ImageLightboxService } from '../../../core/services/image-lightbox.service';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
 import { WorkoutCategory, ExerciseTrackingType, ExerciseTemplate, ExerciseBundle, MuscleGroup, TimeUnit, Workout } from '../../../core/models/workout.model';
 import { ExercisePickerModalComponent } from '../../../shared/components/exercise-picker-modal/exercise-picker-modal.component';
@@ -33,6 +34,7 @@ export class WorkoutCreateComponent implements OnInit {
   private readonly exerciseLogService = inject(ExerciseLogService);
   readonly exerciseService = inject(ExerciseLibraryService);
   private readonly bundleService = inject(ExerciseBundleService);
+  readonly lightbox = inject(ImageLightboxService);
 
   readonly isEditMode = signal(false);
   readonly scheduleOnlyMode = signal(false);
@@ -285,11 +287,11 @@ export class WorkoutCreateComponent implements OnInit {
     return (group.get('trackingType')?.value as ExerciseTrackingType) ?? 'reps';
   }
 
-  altPickerTargetMuscles(): MuscleGroup[] | null {
+  altPickerTargetMuscles(): MuscleGroup | null {
     if (this.altPickerTarget === null) return null;
     const group = this.exercises.at(this.altPickerTarget);
     const mainId = group.get('exerciseId')?.value as string | undefined;
-    return mainId ? this.exerciseService.getById(mainId)?.primaryMuscles ?? null : null;
+    return mainId ? this.exerciseService.getById(mainId)?.primaryMuscles?.[0] ?? null : null;
   }
 
   closeDateConflict(): void {

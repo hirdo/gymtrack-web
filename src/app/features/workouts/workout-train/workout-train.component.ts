@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ExerciseLogService } from '../../../core/services/exercise-log.service';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { ExerciseLibraryService } from '../../../core/services/exercise-library.service';
+import { ImageLightboxService } from '../../../core/services/image-lightbox.service';
 import { ExerciseTemplate, ExerciseTrackingType, SetRecord } from '../../../core/models/workout.model';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { CountdownRingComponent } from '../../../shared/components/countdown-ring/countdown-ring.component';
@@ -22,6 +23,7 @@ export class WorkoutTrainComponent implements OnDestroy {
   private readonly exerciseLogService = inject(ExerciseLogService);
   private readonly workoutService = inject(WorkoutService);
   private readonly exerciseLibraryService = inject(ExerciseLibraryService);
+  readonly lightbox = inject(ImageLightboxService);
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private timerInterval: ReturnType<typeof setInterval> | null = null;
   private durationInterval: ReturnType<typeof setInterval> | null = null;
